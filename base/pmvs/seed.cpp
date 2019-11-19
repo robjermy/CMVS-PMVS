@@ -169,7 +169,7 @@ void PMVS3::CSeed::initialMatch(const int index, const int id) {
         for (int i = 0; i < (int)vcp.size(); ++i) {
           Patch::CPatch patch;
           patch._coord = vcp[i]->_coord;
-          patch._normal = _fm._pss._photos[index].OpticalCenter() - patch._coord;
+          patch._normal = _fm._pss.Photo(index).OpticalCenter() - patch._coord;
 
           unitize(patch._normal);
           patch._normal[3] = 0.0;
@@ -216,7 +216,7 @@ void PMVS3::CSeed::collectCells(const int index0, const int index1, const CPoint
 #endif
 
   Mat3 F;
-  Image::setF(_fm._pss._photos[index0], _fm._pss._photos[index1], F, _fm._level);
+  Image::setF(_fm._pss.Photo(index0), _fm._pss.Photo(index1), F, _fm._level);
   const int gwidth = _fm._pos._gwidths[index1];
   const int gheight = _fm._pos._gheights[index1];
 
@@ -279,7 +279,7 @@ void PMVS3::CSeed::collectCandidates(const int index, const std::vector<int>& in
     std::vector<TVec2<int> > cells;
     collectCells(index, indexid, point, cells);
     Mat3 F;
-    Image::setF(_fm._pss._photos[index], _fm._pss._photos[indexid], F, _fm._level);
+    Image::setF(_fm._pss.Photo(index), _fm._pss.Photo(indexid), F, _fm._level);
 
     for (int i = 0; i < (int)cells.size(); ++i) {
       const int x = cells[i][0];      const int y = cells[i][1];
@@ -313,11 +313,11 @@ void PMVS3::CSeed::collectCandidates(const int index, const std::vector<int>& in
   for (int i = 0; i < (int)vcp.size(); ++i) {
     unproject(index, vcp[i]->_itmp, point, *vcp[i], vcp[i]->_coord);
 
-    if (_fm._pss._photos[index].ProjectionMatrix()[_fm._level][2] * vcp[i]->_coord <= 0.0) continue;
+    if (_fm._pss.Photo(index).ProjectionMatrix()[_fm._level][2] * vcp[i]->_coord <= 0.0) continue;
     if (_fm._pss.getMask(vcp[i]->_coord, _fm._level) == 0 || _fm.insideBimages(vcp[i]->_coord) == 0) continue;
 
     //??? from the closest
-    vcp[i]->_response = fabs(norm(vcp[i]->_coord - _fm._pss._photos[index].OpticalCenter()) - norm(vcp[i]->_coord - _fm._pss._photos[vcp[i]->_itmp].OpticalCenter()));
+    vcp[i]->_response = fabs(norm(vcp[i]->_coord - _fm._pss.Photo(index).OpticalCenter()) - norm(vcp[i]->_coord - _fm._pss.Photo(vcp[i]->_itmp).OpticalCenter()));
 
     vcptmp.push_back(vcp[i]);
   }
@@ -342,24 +342,24 @@ int PMVS3::CSeed::canAdd(const int index, const int x, const int y) {
 
 void PMVS3::CSeed::unproject(const int index0, const int index1, const CPoint& p0, const CPoint& p1, Vec4f& coord) const{
   Mat4 A;
-  A[0][0] = _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][0][0] - p0._icoord[0] * _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][2][0];
-  A[0][1] = _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][0][1] - p0._icoord[0] * _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][2][1];
-  A[0][2] = _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][0][2] - p0._icoord[0] * _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][2][2];
-  A[1][0] = _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][1][0] - p0._icoord[1] * _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][2][0];
-  A[1][1] = _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][1][1] - p0._icoord[1] * _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][2][1];
-  A[1][2] = _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][1][2] - p0._icoord[1] * _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][2][2];
-  A[2][0] = _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][0][0] - p1._icoord[0] * _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][2][0];
-  A[2][1] = _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][0][1] - p1._icoord[0] * _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][2][1];
-  A[2][2] = _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][0][2] - p1._icoord[0] * _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][2][2];
-  A[3][0] = _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][1][0] - p1._icoord[1] * _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][2][0];
-  A[3][1] = _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][1][1] - p1._icoord[1] * _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][2][1];
-  A[3][2] = _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][1][2] - p1._icoord[1] * _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][2][2];
+  A[0][0] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][0][0] - p0._icoord[0] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][0];
+  A[0][1] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][0][1] - p0._icoord[0] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][1];
+  A[0][2] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][0][2] - p0._icoord[0] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][2];
+  A[1][0] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][1][0] - p0._icoord[1] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][0];
+  A[1][1] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][1][1] - p0._icoord[1] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][1];
+  A[1][2] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][1][2] - p0._icoord[1] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][2];
+  A[2][0] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][0][0] - p1._icoord[0] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][0];
+  A[2][1] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][0][1] - p1._icoord[0] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][1];
+  A[2][2] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][0][2] - p1._icoord[0] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][2];
+  A[3][0] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][1][0] - p1._icoord[1] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][0];
+  A[3][1] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][1][1] - p1._icoord[1] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][1];
+  A[3][2] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][1][2] - p1._icoord[1] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][2];
 
   Vec4 b;
-  b[0] = p0._icoord[0] * _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][2][3] - _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][0][3];
-  b[1] = p0._icoord[1] * _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][2][3] - _fm._pss._photos[index0].ProjectionMatrix()[_fm._level][1][3];
-  b[2] = p1._icoord[0] * _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][2][3] - _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][0][3];
-  b[3] = p1._icoord[1] * _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][2][3] - _fm._pss._photos[index1].ProjectionMatrix()[_fm._level][1][3];
+  b[0] = p0._icoord[0] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][3] - _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][0][3];
+  b[1] = p0._icoord[1] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][3] - _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][1][3];
+  b[2] = p1._icoord[0] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][3] - _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][0][3];
+  b[3] = p1._icoord[1] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][3] - _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][1][3];
 
   Mat4 AT = transpose(A);
   Mat4 ATA = AT * A;

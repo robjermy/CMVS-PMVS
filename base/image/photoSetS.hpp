@@ -55,6 +55,9 @@ namespace Image {
     std::vector<int> _images;
     std::vector<CPhoto> _photos;
 
+    const CPhoto& Photo(const int index) const { return _photos[index]; }
+    // CPhoto& Photo(const int index) { return _photos[index]; }
+
     int image2index(const int image) const;
     std::map<int, int> _dict;
 

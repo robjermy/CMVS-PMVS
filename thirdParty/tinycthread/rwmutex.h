@@ -34,8 +34,7 @@ extern "C"
  * Based on pthread_rwlock from POSIX Threads for Windows
  * (see http://sourceforge.net/projects/pthreads4w/)
  */
-class RWMutex
-{
+class RWMutex {
 public:
 	RWMutex();
 	RWMutex(const RWMutex &o);

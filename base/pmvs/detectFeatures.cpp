@@ -93,11 +93,11 @@ void PMVS3::CDetectFeatures::runThread(void) {
       CHarris harris;
       std::multiset<CPoint> result;
       harris.run(
-        _ppss->_photos[index].getImage(_level),
-        _ppss->_photos[index].CImage::getMask(_level),
-        _ppss->_photos[index].CImage::getEdge(_level),
-        _ppss->_photos[index].getWidth(_level),
-        _ppss->_photos[index].getHeight(_level), _csize, sigma, result
+        _ppss->Photo(index).getImage(_level),
+        _ppss->Photo(index).CImage::getMask(_level),
+        _ppss->Photo(index).CImage::getEdge(_level),
+        _ppss->Photo(index).getWidth(_level),
+        _ppss->Photo(index).getHeight(_level), _csize, sigma, result
       );
 
       std::multiset<CPoint>::reverse_iterator rbegin = result.rbegin();
@@ -113,11 +113,11 @@ void PMVS3::CDetectFeatures::runThread(void) {
       CDifferenceOfGaussians dog;
       std::multiset<CPoint> result;
       dog.run(
-        _ppss->_photos[index].getImage(_level),
-        _ppss->_photos[index].CImage::getMask(_level),
-        _ppss->_photos[index].CImage::getEdge(_level),
-        _ppss->_photos[index].getWidth(_level),
-        _ppss->_photos[index].getHeight(_level),
+        _ppss->Photo(index).getImage(_level),
+        _ppss->Photo(index).CImage::getMask(_level),
+        _ppss->Photo(index).CImage::getEdge(_level),
+        _ppss->Photo(index).getWidth(_level),
+        _ppss->Photo(index).getHeight(_level),
         _csize, firstScale, lastScale, result
       );
 

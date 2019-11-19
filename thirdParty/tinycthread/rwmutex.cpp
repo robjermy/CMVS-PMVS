@@ -25,27 +25,22 @@ RWMutex::RWMutex()
 	nSharedAccessCount(0),
 	nExclusiveAccessCount(0),
 	nCompletedSharedAccessCount(0)
-{
-}
+{}
 
-RWMutex::RWMutex(const RWMutex &o)
-{
+RWMutex::RWMutex(const RWMutex& o) {
 	copy(o);
 }
 
-RWMutex::~RWMutex()
-{
+RWMutex::~RWMutex() {
 	destroy();
 }
 
-RWMutex &RWMutex::copy(const RWMutex &o)
-{
+RWMutex& RWMutex::copy(const RWMutex& o) {
 	initialized = o.initialized;
 	nSharedAccessCount = o.nSharedAccessCount;
 	nExclusiveAccessCount = o.nExclusiveAccessCount;
 	nCompletedSharedAccessCount = o.nCompletedSharedAccessCount;
-	if(initialized)
-	{
+	if(initialized) {
 		mtxExclusiveAccess = o.mtxExclusiveAccess;
 		mtxSharedAccessCompleted = o.mtxSharedAccessCompleted;
 		cndSharedAccessCompleted = o.cndSharedAccessCompleted;
@@ -53,15 +48,12 @@ RWMutex &RWMutex::copy(const RWMutex &o)
 	return *this;
 }
 
-RWMutex & RWMutex::operator=(const RWMutex & o)
-{
+RWMutex& RWMutex::operator=(const RWMutex& o) {
 	return copy(o);
 }
 
-bool RWMutex::init()
-{
-	if(!initialized)
-	{
+bool RWMutex::init() {
+	if(!initialized) {
 		mtx_init(&mtxExclusiveAccess, mtx_plain | mtx_recursive);
 		mtx_init(&mtxSharedAccessCompleted, mtx_plain | mtx_recursive);
 		cnd_init(&cndSharedAccessCompleted);
@@ -70,21 +62,16 @@ bool RWMutex::init()
 	return true;
 }
 
-bool RWMutex::destroy()
-{
-	if(initialized)
-	{
+bool RWMutex::destroy() {
+	if(initialized) {
 		if(mtx_lock(&mtxExclusiveAccess) != thrd_success)
 			return false;
 
-		if(mtx_lock(&mtxSharedAccessCompleted) != thrd_success)
-		{
+		if(mtx_lock(&mtxSharedAccessCompleted) != thrd_success) {
 			mtx_unlock(&mtxExclusiveAccess);
 			return false;
 		}
-		if(nExclusiveAccessCount > 0
-			|| nSharedAccessCount > nCompletedSharedAccessCount)
-		{
+		if(nExclusiveAccessCount > 0 || nSharedAccessCount > nCompletedSharedAccessCount) {
 			// Busy
 			int j = 27;
 		}
@@ -101,23 +88,20 @@ bool RWMutex::destroy()
 	return true;
 }
 
-bool RWMutex::rdlock()
-{
+bool RWMutex::rdlock() {
 	if(mtx_lock(&mtxExclusiveAccess) != thrd_success)
 		return false;
 
 //	nSharedAccessCount++;
-	if(++nSharedAccessCount == INT_MAX)
-	{
-		if(mtx_lock(&mtxSharedAccessCompleted) != thrd_success)
-		{
+	if(++nSharedAccessCount == INT_MAX) {
+		if(mtx_lock(&mtxSharedAccessCompleted) != thrd_success) {
 			mtx_unlock(&mtxExclusiveAccess);
 			return false;
 		}
+
 		nSharedAccessCount -= nCompletedSharedAccessCount;
 		nCompletedSharedAccessCount = 0;
-		if(mtx_unlock(&mtxSharedAccessCompleted) != thrd_success)
-		{
+		if(mtx_unlock(&mtxSharedAccessCompleted) != thrd_success) {
 			mtx_unlock(&mtxExclusiveAccess);
 			return false;
 		}
@@ -126,71 +110,55 @@ bool RWMutex::rdlock()
 	return (mtx_unlock(&mtxExclusiveAccess) == thrd_success);
 }
 
-bool RWMutex::wrlock()
-{
+bool RWMutex::wrlock() {
 	bool result = true;
 	if(mtx_lock(&mtxExclusiveAccess) != thrd_success)
 		return false;
 
-	if(mtx_lock(&mtxSharedAccessCompleted) != thrd_success)
-	{
+	if(mtx_lock(&mtxSharedAccessCompleted) != thrd_success) {
 		mtx_unlock(&mtxExclusiveAccess);
 		return false;
 	}
 
-	if(nExclusiveAccessCount == 0)
-	{
-		if(nCompletedSharedAccessCount > 0)
-		{
+	if(nExclusiveAccessCount == 0) {
+		if(nCompletedSharedAccessCount > 0) {
 			nSharedAccessCount -= nCompletedSharedAccessCount;
 			nCompletedSharedAccessCount = 0;
 		}
-		if(nSharedAccessCount > 0)
-		{
+		if(nSharedAccessCount > 0) {
 			nCompletedSharedAccessCount = -nSharedAccessCount;
-
 			// pthread_cleanup_push (ptw32_rwlock_cancelwrwait, (void *) rwl);
-
-			do
-			{
+			do {
 				result = (cnd_wait(&cndSharedAccessCompleted, &mtxSharedAccessCompleted) == thrd_success);
 			}
 			while(result && (nCompletedSharedAccessCount < 0));
 
 			// pthread_cleanup_pop ((result != 0) ? 1 : 0);
 
-			if(result)
-			{
+			if(result) {
 				nSharedAccessCount = 0;
 			}
-
 		}
 	}
 
-	if(result)
-	{
+	if(result) {
 		nExclusiveAccessCount++;
 	}
 	return result;
 }
 
-bool RWMutex::unlock()
-{
+bool RWMutex::unlock() {
 	bool result1 = true, result2 = true;
-	if(nExclusiveAccessCount == 0)
-	{
+	if(nExclusiveAccessCount == 0) {
 		if(mtx_lock(&mtxSharedAccessCompleted) != thrd_success)
 			return false;
 
-//		nCompletedSharedAccessCount++;
-		if(++nCompletedSharedAccessCount == 0)
-		{
+		if(++nCompletedSharedAccessCount == 0) {
 			result1 = (cnd_signal(&cndSharedAccessCompleted) == thrd_success);
 		}
 		result2 = (mtx_unlock(&mtxSharedAccessCompleted) == thrd_success);
 	}
-	else
-	{
+	else {
 		nExclusiveAccessCount--;
 		result1 = (mtx_unlock(&mtxSharedAccessCompleted) == thrd_success);
 		result2 = (mtx_unlock(&mtxExclusiveAccess) == thrd_success);
