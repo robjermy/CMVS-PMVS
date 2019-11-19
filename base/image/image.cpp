@@ -31,7 +31,6 @@
 #define max3(a, b, c) ((a)>(b) ? ((a)>(c) ? (a) : (c)) : ((b)>(c) ? (b) : (c)))
 
 Image::CImage::CImage() : _alloc(0) {}
-
 Image::CImage::~CImage() {}
 
 void Image::CImage::completeName(const std::string& lhs, std::string& rhs, const int color) {
