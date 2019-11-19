@@ -1,10 +1,10 @@
 ADD_LIBRARY(image_lib
-camera.hpp
-camera.cpp
-image.hpp
-image.cpp
-photo.hpp
-photo.cpp
-photoSetS.hpp
-photoSetS.cpp
+  camera.hpp
+  camera.cpp
+  image.hpp
+  image.cpp
+  photo.hpp
+  photo.cpp
+  photoSetS.hpp
+  photoSetS.cpp
 )

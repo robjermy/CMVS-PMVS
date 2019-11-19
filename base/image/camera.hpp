@@ -14,7 +14,7 @@ namespace Image {
   public:
     CCamera();
     virtual ~CCamera();
-    
+
     // Update projection matrices from intrinsics and extrinsics
     void updateProjection(void);
 
@@ -23,23 +23,23 @@ namespace Image {
 
     virtual void init(const std::string& cname, const int maxLevel);
     void write(const std::string file);
-    
+
     inline Vec3f project(const Vec4f& coord, const int level) const;
     inline Vec3f mult(const Vec4f& coord, const int level) const;
-    
+
     static void setProjection(const std::vector<float>& intrinsics, const std::vector<float>& extrinsics, std::vector<Vec4f>& projection, const int txtType);
-    
+
     float getScale(const Vec4f& coord, const int level) const;
     void getPAxes(const Vec4f& coord, const Vec4f& normal, Vec4f& pxaxis, Vec4f& pyaxis, const int level = 0) const;
 
     void setAxesScale(const float axesScale);
-    
+
     static void proj2q(Mat4& mat, double q[6]);
-    static void q2proj(const double q[6], Mat4& mat);  
+    static void q2proj(const double q[6], Mat4& mat);
     static void setProjectionSub(double params[], std::vector<Vec4f>& projection, const int level);
 
     float computeDistance(const Vec4f& point) const;
-    float computeDepth(const Vec4f& point) const;  
+    float computeDepth(const Vec4f& point) const;
     float computeDepthDif(const Vec4f& rhs, const Vec4f& lhs) const;
 
     // Compute where the viewing ray passing through coord intersects
@@ -50,7 +50,7 @@ namespace Image {
     // coordinate. You can specify a different depth by the third
     // component of icoord.
     Vec4f unproject(const Vec3f& icoord, const int _level) const;
-    
+
     void setK(Mat3f& K) const;
     void setRT(Mat4f& RT) const;
 
@@ -60,9 +60,9 @@ namespace Image {
     const Vec4f OpticalCenter() const { return _center; }
     const Vec4f OpticalAxis() const { return _oaxis; }
     const std::vector<std::vector<Vec4f>> ProjectionMatrix() const { return _projection; }
-    
-    //---------------------------------------------------------------------- 
-    
+
+    //----------------------------------------------------------------------
+
 
   protected: // variables
     std::string _cname; // txt file name
@@ -79,7 +79,7 @@ namespace Image {
     // intrinsic and extrinsic camera parameters. Compact form.
     std::vector<float> _intrinsics;
     std::vector<float> _extrinsics;
-    
+
     int _txtType; // camera parameter type
     int _maxLevel;
 
@@ -90,7 +90,7 @@ namespace Image {
   };
 
   inline Vec3f CCamera::project(const Vec4f& coord, const int level) const {
-    Vec3f vtmp;    
+    Vec3f vtmp;
     for (int i = 0; i < 3; ++i) {
       vtmp[i] = _projection[level][i] * coord;
     }
@@ -103,22 +103,22 @@ namespace Image {
     } else {
       vtmp /= vtmp[2];
     }
-    
+
     vtmp[0] = std::max((float)(INT_MIN + 3.0f), std::min((float)(INT_MAX - 3.0f), vtmp[0]));
     vtmp[1] = std::max((float)(INT_MIN + 3.0f), std::min((float)(INT_MAX - 3.0f), vtmp[1]));
-    
+
     return vtmp;
   };
 
   inline Vec3f CCamera::mult(const Vec4f& coord, const int level) const {
-    Vec3f vtmp;    
+    Vec3f vtmp;
     for (int i = 0; i < 3; ++i) {
       vtmp[i] = _projection[level][i] * coord;
     }
-    
+
     return vtmp;
   };
-  
+
   template<class T>
   float computeEPD(const TMat3<T>& F, const TVec3<T>& p0, const TVec3<T>& p1) {
     TVec3<T> line = F * p1;

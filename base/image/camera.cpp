@@ -35,13 +35,13 @@ void Image::CCamera::init(const std::string& cname, const int maxLevel) {
   for (int i = 0; i < 6; ++i) {
     ifstr >> _intrinsics[i];
   }
-  
+
   for (int i = 0; i < 6; ++i) {
     ifstr >> _extrinsics[i];
   }
 
   ifstr.close();
-  
+
   //----------------------------------------------------------------------
   _projection.resize(maxLevel);
   for (int level = 0; level < maxLevel; ++level) {
@@ -106,12 +106,12 @@ void Image::CCamera::write(const std::string file) {
 
 void Image::CCamera::updateCamera() {
   updateProjection();
-  
+
   _oaxis = _projection[0][2];
   _oaxis[3] = 0.0;
 
   const float ftmp = norm(_oaxis);
-  
+
   _oaxis[3] = _projection[0][2][3];
   _oaxis /= ftmp;
 
@@ -122,8 +122,8 @@ void Image::CCamera::updateCamera() {
   _yaxis = cross(_zaxis, _xaxis);
   unitize(_yaxis);
   _xaxis = cross(_yaxis, _zaxis);
-  
-  Vec4f xaxis = _projection[0][0];  xaxis[3] = 0.0f;    
+
+  Vec4f xaxis = _projection[0][0];  xaxis[3] = 0.0f;
   Vec4f yaxis = _projection[0][1];  yaxis[3] = 0.0f;
   float ftmp2 = (norm(xaxis) + norm(yaxis)) / 2.0f;
   if (ftmp2 == 0.0f) {
@@ -143,7 +143,7 @@ Vec4f Image::CCamera::getOpticalCenter() const {
 	      vtmp[i][y] = _projection[0][i][y];
       }
     }
-	
+
     Vec3f vtmp2 = cross(vtmp[0], vtmp[1]);
     unitize(vtmp2);
     for (int y = 0; y < 3; ++y) {
@@ -221,7 +221,7 @@ void Image::CCamera::setRT(Mat4f& RT) const {
   for (int i = 0; i < 6; ++i) {
     params[i] = _extrinsics[i];
   }
-    
+
   Mat4 RTd;
   q2proj(params, RTd);
 
@@ -259,7 +259,7 @@ void Image::CCamera::setProjection(const std::vector<float>& intrinsics, const s
     params[i] = intrinsics[i];
     params[6 + i] = extrinsics[i];
   }
-  
+
   if (txtType == 0) {
     for (int y = 0; y < 3; ++y) {
       for (int x = 0; x < 4; ++x ) {
@@ -279,7 +279,7 @@ void Image::CCamera::setProjection(const std::vector<float>& intrinsics, const s
     K[0][1] = params[2]; K[0][2] = params[3];
     K[1][2] = params[4]; K[2][2] = 1.0;
     K[3][3] = 1.0;
-    
+
     Mat4 mtmp;
     q2proj(&params[6], mtmp);
     mtmp = K * mtmp;
@@ -301,7 +301,7 @@ void Image::CCamera::setProjection(const std::vector<float>& intrinsics, const s
       params[6], params[7], params[8],
       params[9], params[10], params[11]
     };
-    
+
     setProjectionSub(params2, projection, 0);
   } else {
     std::cerr << "Impossible setProjection" << std::endl;
@@ -313,20 +313,20 @@ void Image::CCamera::setProjectionSub(double params[], std::vector<Vec4f>& proje
   const double rx = params[6] * M_PI / 180.0;
   const double ry = params[7] * M_PI / 180.0;
   const double rz = params[8] * M_PI / 180.0;
-  
+
   const double fovx = params[0] * M_PI / 180.0;
-  
+
   const double f = params[1] / 2.0 / tan(fovx / 2.0);
   Mat3 K;
   K[0] = Vec3(f, 0.0, 0.0);
   K[1] = Vec3(0.0, f, 0.0);
   K[2] = Vec3(0.0, 0.0, -1.0);
-  
+
   Mat3 trans;
   trans[0] = Vec3(1.0, 0.0, params[1] / 2.0);
   trans[1] = Vec3(0.0, -1.0, params[2] / 2.0);
   trans[2] = Vec3(0.0, 0.0, 1.0);
-  
+
   K = trans * K;
 
   Mat3 Rx;
@@ -345,7 +345,7 @@ void Image::CCamera::setProjectionSub(double params[], std::vector<Vec4f>& proje
   Rz[2] = Vec3(0.0, 0.0, 1.0);
 
   Mat3 R = transpose(Rx) * transpose(Ry) * transpose(Rz);
-  
+
   Vec3 t(params[3], params[4], params[5]);
 
   Mat3 left = K * R;
@@ -379,15 +379,15 @@ void Image::CCamera::proj2q(Mat4& mat, double q[6]) {
     q[2] = 0;
     q[0]=atan2(-mat[0][1],mat[1][1]);
   } else {
-    if (mat[2][0] == -1.0) { 
+    if (mat[2][0] == -1.0) {
       q[1] = M_PI/2.0;
       q[2] = 0;
-      q[0]=atan2(mat[0][1],mat[1][1]);    
+      q[0]=atan2(mat[0][1],mat[1][1]);
     } else {
       q[1] = (double)  asin(-mat[2][0]);
       if (cos(q[1]) > 0.0) { s = 1.0;} else { s =-1.0;};
-      q[0] =atan2(mat[2][1]*s, mat[2][2]*s); 
-      q[2] =atan2(mat[1][0]*s, mat[0][0]*s); 
+      q[0] =atan2(mat[2][1]*s, mat[2][2]*s);
+      q[2] =atan2(mat[1][0]*s, mat[0][0]*s);
     }
   }
 
@@ -405,18 +405,18 @@ void Image::CCamera::q2proj(const double q[6], Mat4& mat) {
   const double a = q[0] * M_PI / 180.0;
   const double b = q[1] * M_PI / 180.0;
   const double g = q[2] * M_PI / 180.0;
-  
+
   const double s1=sin(a), s2=sin(b), s3=sin(g);
   const double c1=cos(a), c2=cos(b), c3=cos(g);
-             		
+
   /*   Premiere colonne*/	/*   Seconde colonne	*/
-  mat[0][0]=c2*c3; mat[0][1]=c3*s2*s1-s3*c1;  
-  mat[1][0]=s3*c2; mat[1][1]=s3*s2*s1+c3*c1; 
+  mat[0][0]=c2*c3; mat[0][1]=c3*s2*s1-s3*c1;
+  mat[1][0]=s3*c2; mat[1][1]=s3*s2*s1+c3*c1;
   mat[2][0]=-s2;   mat[2][1]=c2*s1;
 
   /*   Troisieme colonne*/	/*  Quatrieme colonne	*/
-  mat[0][2]=c3*s2*c1+s3*s1; mat[0][3]=q[3]; 
-  mat[1][2]=s3*s2*c1-c3*s1; mat[1][3]=q[4]; 
+  mat[0][2]=c3*s2*c1+s3*s1; mat[0][3]=q[3];
+  mat[1][2]=s3*s2*c1-c3*s1; mat[1][3]=q[4];
   mat[2][2]=c2*c1; 		      mat[2][3]=q[5];
 
   mat[3][0] = mat[3][1] = mat[3][2] = 0.0;
@@ -436,7 +436,7 @@ float Image::CCamera::computeDistance(const Vec4f& point) const {
   const float fx = point[0] - _center[0];
   const float fy = point[1] - _center[1];
   const float fz = point[2] - _center[2];
-  
+
   return sqrt(fx * fx + fy * fy + fz * fz);
 }
 
@@ -470,7 +470,7 @@ void Image::CCamera::getPAxes(const Vec4f& coord, const Vec4f& normal, Vec4f& px
 
 void Image::CCamera::setAxesScale(const float axesScale) {
   _axesScale = axesScale;
-}  
+}
 
 void Image::CCamera::intersect(const Vec4f& coord, const Vec4f& abcd, Vec4f& cross, float& distance) const {
   Vec4f ray = coord - _center;
@@ -484,7 +484,7 @@ void Image::CCamera::intersect(const Vec4f& coord, const Vec4f& abcd, Vec4f& cro
   } else {
     distance = - A / B;
     cross = coord + distance * ray;
-  }  
+  }
 }
 
 Vec4f Image::CCamera::intersect(const Vec4f& coord, const Vec4f& abcd) const {
@@ -507,7 +507,7 @@ Vec4f Image::CCamera::unproject(const Vec3f& icoord, const int _level) const {
     for (int x = 0; x < 3; ++x) {
       A[y][x] = _projection[_level][y][x];
     }
-    b[y] -= _projection[_level][y][3];    
+    b[y] -= _projection[_level][y][3];
   }
   invert(IA, A);
   Vec3 x = IA * b;
