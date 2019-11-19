@@ -6,21 +6,21 @@
 #include "dog.hpp"
 #include "point.hpp"
 
-using namespace PMVS3;
-using namespace std;
-using namespace Image;
-
-CDetectFeatures::CDetectFeatures(void) {
+PMVS3::CDetectFeatures::CDetectFeatures(void) {
   mtx_init(&_rwlock, mtx_plain | mtx_recursive);
 }
 
-CDetectFeatures::~CDetectFeatures() {
+PMVS3::CDetectFeatures::~CDetectFeatures() {
   mtx_destroy(&_rwlock);
 }
 
-void CDetectFeatures::run(const CPhotoSetS& pss, const int num,
-                          const int csize, const int level,
-                          const int CPU) {
+void PMVS3::CDetectFeatures::run(
+  const Image::CPhotoSetS& pss,
+  const int num,
+  const int csize,
+  const int level,
+  const int CPU
+) {
   _ppss = &pss;
   _csize = csize;
   _level = level;
@@ -28,72 +28,79 @@ void CDetectFeatures::run(const CPhotoSetS& pss, const int num,
 
   _points.clear();
   _points.resize(num);
-  
-  //----------------------------------------------------------------------
-  for (int index = 0; index < num; ++index)
+
+  for (int index = 0; index < num; ++index) {
     _jobs.push_back(index);
-  
-  vector<thrd_t> threads(_CPU);
-  for (int i = 0; i < _CPU; ++i)
+  }
+
+  std::vector<thrd_t> threads(_CPU);
+  for (int i = 0; i < _CPU; ++i) {
     thrd_create(&threads[i], &runThreadTmp, (void*)this);
-  for (int i = 0; i < _CPU; ++i)
+  }
+
+  for (int i = 0; i < _CPU; ++i) {
     thrd_join(threads[i], NULL);
-  //----------------------------------------------------------------------
-  cerr << "done" << endl;
+  }
+
+  std::cerr << "done" << std::endl;
 }
 
-int CDetectFeatures::runThreadTmp(void* arg) {
-  CDetectFeatures* detectFeatures = (CDetectFeatures*)arg;  
+int PMVS3::CDetectFeatures::runThreadTmp(void* arg) {
+  CDetectFeatures* detectFeatures = (CDetectFeatures*)arg;
   detectFeatures->runThread();
   return 0;
 }
 
-void CDetectFeatures::runThread(void) {
+void PMVS3::CDetectFeatures::runThread(void) {
   while (1) {
     int index = -1;
     mtx_lock(&_rwlock);
-    if (!_jobs.empty()) {
-      index = _jobs.front();
-      _jobs.pop_front();
+    {
+      if (!_jobs.empty()) {
+        index = _jobs.front();
+        _jobs.pop_front();
+      }
     }
     mtx_unlock(&_rwlock);
-    if (index == -1)
-      break;
-    
+    if (index == -1) break;
+
     const int image = _ppss->_images[index];
-    cerr << image << ' ' << flush;
+    std::cerr << image << ' ' << std::flush;
 
     //?????????????  May need file lock, because targetting images
-    //should not overlap among multiple processors.    
+    //should not overlap among multiple processors.
     char buffer[1024];
     sprintf(buffer, "%smodels/%08d.affin%d", _ppss->_prefix.c_str(), image, _level);
-    ifstream ifstr;
+    std::ifstream ifstr;
     ifstr.open(buffer);
     if (ifstr.is_open()) {
       ifstr.close();
       continue;
     }
     ifstr.close();
-    
+
     //----------------------------------------------------------------------
     // parameters
     // for harris
     const float sigma = 4.0f;
     // for DoG
-    const float firstScale = 1.0f;    const float lastScale = 3.0f;
+    const float firstScale = 1.0f;
+    const float lastScale = 3.0f;
 
     //----------------------------------------------------------------------
     // Harris
     {
       CHarris harris;
-      multiset<CPoint> result;
-      harris.run(_ppss->_photos[index].getImage(_level),
-                 _ppss->_photos[index].CImage::getMask(_level),
-                 _ppss->_photos[index].CImage::getEdge(_level),
-                 _ppss->_photos[index].getWidth(_level),
-                 _ppss->_photos[index].getHeight(_level), _csize, sigma, result);
-      
-      multiset<CPoint>::reverse_iterator rbegin = result.rbegin();
+      std::multiset<CPoint> result;
+      harris.run(
+        _ppss->_photos[index].getImage(_level),
+        _ppss->_photos[index].CImage::getMask(_level),
+        _ppss->_photos[index].CImage::getEdge(_level),
+        _ppss->_photos[index].getWidth(_level),
+        _ppss->_photos[index].getHeight(_level), _csize, sigma, result
+      );
+
+      std::multiset<CPoint>::reverse_iterator rbegin = result.rbegin();
       while (rbegin != result.rend()) {
         _points[index].push_back(*rbegin);
         rbegin++;
@@ -104,15 +111,17 @@ void CDetectFeatures::runThread(void) {
     // DoG
     {
       CDifferenceOfGaussians dog;
-      multiset<CPoint> result;
-      dog.run(_ppss->_photos[index].getImage(_level),
-              _ppss->_photos[index].CImage::getMask(_level),
-              _ppss->_photos[index].CImage::getEdge(_level),
-              _ppss->_photos[index].getWidth(_level),
-              _ppss->_photos[index].getHeight(_level),
-              _csize, firstScale, lastScale, result);
-      
-      multiset<CPoint>::reverse_iterator rbegin = result.rbegin();      
+      std::multiset<CPoint> result;
+      dog.run(
+        _ppss->_photos[index].getImage(_level),
+        _ppss->_photos[index].CImage::getMask(_level),
+        _ppss->_photos[index].CImage::getEdge(_level),
+        _ppss->_photos[index].getWidth(_level),
+        _ppss->_photos[index].getHeight(_level),
+        _csize, firstScale, lastScale, result
+      );
+
+      std::multiset<CPoint>::reverse_iterator rbegin = result.rbegin();
       while (rbegin != result.rend()) {
         _points[index].push_back(*rbegin);
         rbegin++;

@@ -1,5 +1,4 @@
-#ifndef PMVS3_DETECTFEATURES_H
-#define PMVS3_DETECTFEATURES_H
+#pragma once
 
 /*
  * A main class to detect features
@@ -16,34 +15,35 @@ namespace Image {
 };
 
 namespace PMVS3 {
+  class CDetectFeatures {
+  public:
+    CDetectFeatures(void);
+    virtual ~CDetectFeatures();
 
-class CDetectFeatures {
- public:
-  CDetectFeatures(void);
-  virtual ~CDetectFeatures();
+    void run(
+      const Image::CPhotoSetS& pss,
+      const int num,
+      const int csize,
+      const int level,
+      const int CPU = 1
+    );
 
-  void run(const Image::CPhotoSetS& pss,
-           const int num, const int csize, const int level,
-           const int CPU = 1);
+    std::vector<std::vector<CPoint>> _points;
 
-  std::vector<std::vector<CPoint> > _points;
-  
- protected:
-  const Image::CPhotoSetS* _ppss;
-  int _csize;
-  int _level;
-  
-  //----------------------------------------------------------------------
-  // thread related
-  //----------------------------------------------------------------------  
-  mtx_t _rwlock;
-  int _CPU;
+  protected:
+    const Image::CPhotoSetS* _ppss;
+    int _csize;
+    int _level;
 
-  std::list<int> _jobs;
-  
-  void runThread(void);
-  static int runThreadTmp(void*arg);
-};
-};
+    //----------------------------------------------------------------------
+    // thread related
+    //----------------------------------------------------------------------
+    mtx_t _rwlock;
+    int _CPU;
 
-#endif // PMVS3_DETECTFEATURES_H
+    std::list<int> _jobs;
+
+    void runThread(void);
+    static int runThreadTmp(void*arg);
+  };
+}

@@ -61,9 +61,6 @@ namespace Image {
     const Vec4f OpticalAxis() const { return _oaxis; }
     const std::vector<std::vector<Vec4f>> ProjectionMatrix() const { return _projection; }
 
-    //----------------------------------------------------------------------
-
-
   protected: // variables
     std::string _cname; // txt file name
 
