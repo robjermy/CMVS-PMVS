@@ -1,10 +1,6 @@
-ADD_LIBRARY(image_lib
-  camera.hpp
+add_library(image_lib
   camera.cpp
-  image.hpp
   image.cpp
-  photo.hpp
   photo.cpp
-  photoSetS.hpp
   photoSetS.cpp
 )

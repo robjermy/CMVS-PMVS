@@ -1,5 +1,8 @@
-IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
-	ADD_DEFINITIONS(-DNUMBITS=64)
-ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	add_definitions(-DNUMBITS=64)
+endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 
-ADD_LIBRARY(cmvs_lib bundle.hpp bundle.cpp graclus.hpp graclus.cpp)
+add_library(cmvs_lib
+  bundle.cpp
+  graclus.cpp
+)
