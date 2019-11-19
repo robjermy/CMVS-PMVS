@@ -119,7 +119,7 @@ namespace PMVS3 {
       buffer.swap(image);
     }
 
-    template <class T>
+    template<typename T>
     void convolveY(
       std::vector<std::vector<T> >& image,
       const std::vector<float>& filter,
