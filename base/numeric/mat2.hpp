@@ -1,7 +1,7 @@
 #ifndef NUMERIC_MAT2_H
 #define NUMERIC_MAT2_H
 
-#include "vec2.h"
+#include "vec2.hpp"
 
 template <class T>
 class TMat2

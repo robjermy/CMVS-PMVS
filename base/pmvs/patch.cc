@@ -1,5 +1,5 @@
 #include <string>
-#include "../numeric/vec4.h"
+#include "../numeric/vec4.hpp"
 #include "patch.h"
 
 using namespace std;

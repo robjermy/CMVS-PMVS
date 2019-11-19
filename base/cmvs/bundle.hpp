@@ -13,7 +13,7 @@
 #include <boost/pending/disjoint_sets.hpp>
 
 #include "../stann/sfcnn.hpp"
-#include "../numeric/mat3.h"
+#include "../numeric/mat3.hpp"
 #include "../image/photoSetS.hpp"
 #include "tinycthread.h"
 

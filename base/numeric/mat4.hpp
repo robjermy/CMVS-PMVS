@@ -2,8 +2,8 @@
 #define NUMERIC_MAT4_H
 
 #include <cmath>
-#include "vec4.h"
-#include "mat3.h"
+#include "vec4.hpp"
+#include "mat3.hpp"
 
 template <class T>
 class TMat4

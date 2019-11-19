@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <boost/shared_ptr.hpp>
-#include "../numeric/vec4.h"
+#include "../numeric/vec4.hpp"
 
 namespace Patch {
 

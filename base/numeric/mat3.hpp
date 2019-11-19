@@ -1,7 +1,7 @@
 #ifndef NUMERIC_MAT3_H
 #define NUMERIC_MAT3_H
 
-#include "vec3.h"
+#include "vec3.hpp"
 
 template <class T>
 class TMat3

@@ -5,9 +5,9 @@
 #include <string>
 #include <climits>
 #include <algorithm>
-#include "../numeric/vec4.h"
-#include "../numeric/mat4.h"
-#include "../numeric/mat3.h"
+#include "../numeric/vec4.hpp"
+#include "../numeric/mat4.hpp"
+#include "../numeric/mat3.hpp"
 
 namespace Image {
 

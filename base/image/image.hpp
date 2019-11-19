@@ -5,7 +5,7 @@
 #include <string>
 #include <cstdlib>
 #include <cmath>
-#include "../numeric/vec3.h"
+#include "../numeric/vec3.hpp"
 
 namespace Image {
 

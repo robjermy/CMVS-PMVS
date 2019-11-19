@@ -3,7 +3,7 @@
 
 #include "patch.h"
 #include <list>
-#include "../numeric/vec2.h"
+#include "../numeric/vec2.hpp"
 
 namespace PMVS3 {
   

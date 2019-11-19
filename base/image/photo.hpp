@@ -1,7 +1,7 @@
 #ifndef IMAGE_PHOTO_H
 #define IMAGE_PHOTO_H
 
-#include "../numeric/vec4.h"
+#include "../numeric/vec4.hpp"
 #include "image.hpp"
 #include "camera.hpp"
 

@@ -2,7 +2,7 @@
 #include <numeric>
 #include <ctime>
 #include <time.h>
-#include "../numeric/mylapack.h"
+#include "../numeric/mylapack.hpp"
 #include "findMatch.h"
 #include "filter.h"
 

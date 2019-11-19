@@ -1,8 +1,8 @@
 #ifndef PMVS3_POINT_H
 #define PMVS3_POINT_H
 
-#include "../numeric/vec4.h"
-#include "../numeric/mat3.h"
+#include "../numeric/vec4.hpp"
+#include "../numeric/mat3.hpp"
 
 namespace PMVS3 {
 class Cpoint {

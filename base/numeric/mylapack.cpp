@@ -1,5 +1,5 @@
 
-#include "mylapack.h"
+#include "mylapack.hpp"
 #include <cstdlib>
 #include <iostream>
 

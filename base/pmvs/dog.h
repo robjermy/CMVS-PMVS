@@ -3,7 +3,7 @@
 
 #include <set>
 #include <vector>
-#include "../numeric/vec3.h"
+#include "../numeric/vec3.hpp"
 #include "detector.h"
 #include "point.h"
 

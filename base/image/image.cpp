@@ -1,7 +1,7 @@
 #include <list>
 #include <fstream>
 #include <algorithm>
-#include "../numeric/mat4.h"
+#include "../numeric/mat4.hpp"
 #include "image.hpp"
 #include <setjmp.h>
 #define _USE_MATH_DEFINES
@@ -508,12 +508,12 @@ int Cimage::readAnyImage(const std::string file,
         return 1;
       }
       width = cimage.width();
-      height = cimage.hppeight();
+      height = cimage.height();
       image.resize( cimage.size() );
 
       // CImg holds the image internally in a different order, so we need to reorder it here
       int i = 0;
-      for(int y = 0; y < cimage.hppeight(); y++)
+      for(int y = 0; y < cimage.height(); y++)
       {
         for(int x = 0; x < cimage.width(); x++)
         {
@@ -725,12 +725,12 @@ int Cimage::readPPMImage(const std::string file,
         return 1;
       }
       width = cimage.width();
-      height = cimage.hppeight();
+      height = cimage.height();
       image.resize( cimage.size() );
 
       // CImg holds the image internally in a different order, so we need to reorder it here
       int i = 0;
-      for(int y = 0; y < cimage.hppeight(); y++)
+      for(int y = 0; y < cimage.height(); y++)
       {
         for(int x = 0; x < cimage.width(); x++)
         {
@@ -818,12 +818,12 @@ int Cimage::readJpegImage(const std::string file,
         return 1;
       }
       width = cimage.width();
-      height = cimage.hppeight();
+      height = cimage.height();
       image.resize( cimage.size() );
 
       // CImg holds the image internally in a different order, so we need to reorder it here
       int i = 0;
-      for(int y = 0; y < cimage.hppeight(); y++)
+      for(int y = 0; y < cimage.height(); y++)
       {
         for(int x = 0; x < cimage.width(); x++)
         {

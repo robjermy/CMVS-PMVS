@@ -2,7 +2,7 @@
 #define NUMERIC_VEC4_H
 
 #include <cmath>
-#include "vec3.h"
+#include "vec3.hpp"
 
 template<class T>
 class TVec4 {
