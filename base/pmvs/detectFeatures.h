@@ -8,7 +8,7 @@
 #include <string>
 #include <list>
 #include "tinycthread.h"
-#include "../image/photoSetS.h"
+#include "../image/photoSetS.hpp"
 #include "point.h"
 
 namespace Image {

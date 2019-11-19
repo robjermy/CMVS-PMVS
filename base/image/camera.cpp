@@ -1,6 +1,6 @@
 #include <fstream>
 #include <cstdlib>
-#include "camera.h"
+#include "camera.hpp"
 #define _USE_MATH_DEFINES
 #include <math.h>
 

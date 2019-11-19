@@ -1,5 +1,5 @@
 #include <fstream>
-#include "photo.h"
+#include "photo.hpp"
 
 using namespace std;
 using namespace Image;

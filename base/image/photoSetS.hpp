@@ -2,7 +2,7 @@
 #define IMAGE_PHOTOSETS_H
 
 #include <map>
-#include "photo.h"
+#include "photo.hpp"
 
 namespace Image {
 

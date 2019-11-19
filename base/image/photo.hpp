@@ -2,8 +2,8 @@
 #define IMAGE_PHOTO_H
 
 #include "../numeric/vec4.h"
-#include "image.h"
-#include "camera.h"
+#include "image.hpp"
+#include "camera.hpp"
 
 namespace Image {
 

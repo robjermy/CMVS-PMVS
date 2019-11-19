@@ -12,7 +12,7 @@
 #include "tinycthread.h"
 #include "rwmutex.h"
 
-#include "../image/photoSetS.h"
+#include "../image/photoSetS.hpp"
 #include "patchOrganizerS.h"
 #include "seed.h"
 #include "expand.h"

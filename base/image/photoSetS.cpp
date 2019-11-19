@@ -1,6 +1,6 @@
 #include <fstream>
 #include <algorithm>
-#include "photoSetS.h"
+#include "photoSetS.hpp"
 #define _USE_MATH_DEFINES
 #include <math.h>
 

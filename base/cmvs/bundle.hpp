@@ -14,7 +14,7 @@
 
 #include "../stann/sfcnn.hpp"
 #include "../numeric/mat3.h"
-#include "../image/photoSetS.h"
+#include "../image/photoSetS.hpp"
 #include "tinycthread.h"
 
 namespace CMVS {

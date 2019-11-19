@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "../image/image.h"
+#include "../image/image.hpp"
 #include "detectFeatures.h"
 #include "harris.h"
 #include "dog.h"
