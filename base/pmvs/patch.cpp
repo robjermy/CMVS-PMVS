@@ -2,10 +2,8 @@
 #include "../numeric/vec4.hpp"
 #include "patch.hpp"
 
-using namespace std;
-
-std::istream& Patch::operator >>(std::istream& istr, CPatch& rhs) {
-  string header;
+std::istream& Patch::operator>>(std::istream& istr, CPatch& rhs) {
+  std::string header;
   int itmp;
   istr >> header >> rhs._coord >> rhs._normal >> rhs._ncc
        >> rhs._dscale >> rhs._ascale;
@@ -14,7 +12,7 @@ std::istream& Patch::operator >>(std::istream& istr, CPatch& rhs) {
     int type;    Vec4f dir;
     istr >> type >> dir;
   }
-  
+
   istr >> itmp;
   rhs._images.resize(itmp);
   for (int i = 0; i < itmp; ++i)
@@ -28,22 +26,22 @@ std::istream& Patch::operator >>(std::istream& istr, CPatch& rhs) {
   return istr;
 }
 
-std::ostream& Patch::operator <<(std::ostream& ostr, const CPatch& rhs) {
-  ostr << "PATCHS" << endl
-       << rhs._coord << endl
-       << rhs._normal << endl
+std::ostream& Patch::operator<<(std::ostream& ostr, const CPatch& rhs) {
+  ostr << "PATCHS" << std::endl
+       << rhs._coord << std::endl
+       << rhs._normal << std::endl
        << rhs._ncc << ' '
        << rhs._dscale << ' '
-       << rhs._ascale << endl
-       << (int)rhs._images.size() << endl;
+       << rhs._ascale << std::endl
+       << (int)rhs._images.size() << std::endl;
   for (int i = 0; i < (int)rhs._images.size(); ++i)
     ostr << rhs._images[i] << ' ';
-  ostr << endl;
-  
-  ostr << (int)rhs._vimages.size() << endl;
+  ostr << std::endl;
+
+  ostr << (int)rhs._vimages.size() << std::endl;
   for (int i = 0; i < (int)rhs._vimages.size(); ++i)
     ostr << rhs._vimages[i] << ' ';
-  ostr << endl;
+  ostr << std::endl;
 
   return ostr;
 }

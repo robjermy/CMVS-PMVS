@@ -7,7 +7,6 @@
 #include <fstream>
 #include <queue>
 #include "patch.hpp"
-#include <boost/shared_ptr.hpp>
 #include "tinycthread.h"
 #include "rwmutex.h"
 
