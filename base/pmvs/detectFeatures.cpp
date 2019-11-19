@@ -10,15 +10,15 @@ using namespace PMVS3;
 using namespace std;
 using namespace Image;
 
-CdetectFeatures::CdetectFeatures(void) {
+CDetectFeatures::CDetectFeatures(void) {
   mtx_init(&m_rwlock, mtx_plain | mtx_recursive);
 }
 
-CdetectFeatures::~CdetectFeatures() {
+CDetectFeatures::~CDetectFeatures() {
   mtx_destroy(&m_rwlock);
 }
 
-void CdetectFeatures::run(const CphotoSetS& pss, const int num,
+void CDetectFeatures::run(const CPhotoSetS& pss, const int num,
                           const int csize, const int level,
                           const int CPU) {
   m_ppss = &pss;
@@ -42,13 +42,13 @@ void CdetectFeatures::run(const CphotoSetS& pss, const int num,
   cerr << "done" << endl;
 }
 
-int CdetectFeatures::runThreadTmp(void* arg) {
-  CdetectFeatures* detectFeatures = (CdetectFeatures*)arg;  
+int CDetectFeatures::runThreadTmp(void* arg) {
+  CDetectFeatures* detectFeatures = (CDetectFeatures*)arg;  
   detectFeatures->runThread();
   return 0;
 }
 
-void CdetectFeatures::runThread(void) {
+void CDetectFeatures::runThread(void) {
   while (1) {
     int index = -1;
     mtx_lock(&m_rwlock);
@@ -85,15 +85,15 @@ void CdetectFeatures::runThread(void) {
     //----------------------------------------------------------------------
     // Harris
     {
-      Charris harris;
-      multiset<Cpoint> result;
+      CHarris harris;
+      multiset<CPoint> result;
       harris.run(m_ppss->m_photos[index].getImage(m_level),
-                 m_ppss->m_photos[index].Cimage::getMask(m_level),
-                 m_ppss->m_photos[index].Cimage::getEdge(m_level),
+                 m_ppss->m_photos[index].CImage::getMask(m_level),
+                 m_ppss->m_photos[index].CImage::getEdge(m_level),
                  m_ppss->m_photos[index].getWidth(m_level),
                  m_ppss->m_photos[index].getHeight(m_level), m_csize, sigma, result);
       
-      multiset<Cpoint>::reverse_iterator rbegin = result.rbegin();
+      multiset<CPoint>::reverse_iterator rbegin = result.rbegin();
       while (rbegin != result.rend()) {
         m_points[index].push_back(*rbegin);
         rbegin++;
@@ -103,16 +103,16 @@ void CdetectFeatures::runThread(void) {
     //----------------------------------------------------------------------
     // DoG
     {
-      Cdog dog;
-      multiset<Cpoint> result;
+      CDifferenceOfGaussians dog;
+      multiset<CPoint> result;
       dog.run(m_ppss->m_photos[index].getImage(m_level),
-              m_ppss->m_photos[index].Cimage::getMask(m_level),
-              m_ppss->m_photos[index].Cimage::getEdge(m_level),
+              m_ppss->m_photos[index].CImage::getMask(m_level),
+              m_ppss->m_photos[index].CImage::getEdge(m_level),
               m_ppss->m_photos[index].getWidth(m_level),
               m_ppss->m_photos[index].getHeight(m_level),
               m_csize, firstScale, lastScale, result);
       
-      multiset<Cpoint>::reverse_iterator rbegin = result.rbegin();      
+      multiset<CPoint>::reverse_iterator rbegin = result.rbegin();      
       while (rbegin != result.rend()) {
         m_points[index].push_back(*rbegin);
         rbegin++;

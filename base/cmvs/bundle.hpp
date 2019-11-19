@@ -57,10 +57,10 @@ struct Ssfm2 {
   
 };
 
-class Cbundle {
+class CBundle {
  public:
-  Cbundle(void);
-  virtual ~Cbundle();
+  CBundle(void);
+  virtual ~CBundle();
   
   void run(const std::string prefix, const int imageThreshold,
            const int tau, const float scoreRatioThreshold,
@@ -230,7 +230,7 @@ class Cbundle {
   float m_dscale2;
 
   //----------------------------------------------------------------------
-  Image::CphotoSetS m_pss;
+  Image::CPhotoSetS m_pss;
 
   // depth level
   int m_dlevel;

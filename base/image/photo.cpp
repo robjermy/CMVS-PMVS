@@ -4,26 +4,26 @@
 using namespace std;
 using namespace Image;
 
-Cphoto::Cphoto(void) {
+CPhoto::CPhoto(void) {
 }
 
-Cphoto::~Cphoto() {
+CPhoto::~CPhoto() {
 }
 
-void Cphoto::init(const std::string name, const std::string mname,
+void CPhoto::init(const std::string name, const std::string mname,
 		  const std::string cname, const int maxLevel) {
-  Cimage::init(name, mname, maxLevel);
-  Ccamera::init(cname, maxLevel);
+  CImage::init(name, mname, maxLevel);
+  CCamera::init(cname, maxLevel);
 }
 
-void Cphoto::init(const std::string name, const std::string mname,
+void CPhoto::init(const std::string name, const std::string mname,
                   const std::string ename,
 		  const std::string cname, const int maxLevel) {
-  Cimage::init(name, mname, ename, maxLevel);
-  Ccamera::init(cname, maxLevel);
+  CImage::init(name, mname, ename, maxLevel);
+  CCamera::init(cname, maxLevel);
 }
 
-float Cphoto::ssd(const std::vector<Vec3f>& tex0,
+float CPhoto::ssd(const std::vector<Vec3f>& tex0,
 		  const std::vector<Vec3f>& tex1) {
   float ans = 0.0f;
   for (int i = 0; i < (int)tex0.size(); ++i)
@@ -35,7 +35,7 @@ float Cphoto::ssd(const std::vector<Vec3f>& tex0,
   return ans;
 }
 
-float Cphoto::idot(const std::vector<Vec3f>& tex0,
+float CPhoto::idot(const std::vector<Vec3f>& tex0,
 		   const std::vector<Vec3f>& tex1) {
   if (tex0.empty() || tex1.empty()) {
     cerr << "Error in idot. Empty textures" << endl;
@@ -49,7 +49,7 @@ float Cphoto::idot(const std::vector<Vec3f>& tex0,
   return 1.0f - ans / (3 * (int)tex0.size());
 }
 
-void Cphoto::idotC(const std::vector<Vec3f>& tex0,
+void CPhoto::idotC(const std::vector<Vec3f>& tex0,
 		   const std::vector<Vec3f>& tex1, double* idc) {
   if (tex0.empty() || tex1.empty()) {
     cerr << "Error in idotC. Empty textures" << endl;
@@ -64,7 +64,7 @@ void Cphoto::idotC(const std::vector<Vec3f>& tex0,
     idc[j] = 1.0 - idc[j] / (int)tex0.size();
 }
 
-void Cphoto::normalize(std::vector<Vec3f>& tex) {
+void CPhoto::normalize(std::vector<Vec3f>& tex) {
   //----------------------------------------------------------------------
   // normalize average
   Vec3f ave;
@@ -88,7 +88,7 @@ void Cphoto::normalize(std::vector<Vec3f>& tex) {
     tex[i] /= ave2;
 }
 
-void Cphoto::grabTex(const int level, const Vec2f& icoord,
+void CPhoto::grabTex(const int level, const Vec2f& icoord,
 		     const Vec2f& xaxis, const Vec2f& yaxis,
 		     const int size, std::vector<Vec3f>& tex,
                      const int normalizef) const{
@@ -109,7 +109,7 @@ void Cphoto::grabTex(const int level, const Vec2f& icoord,
   for (int y = -margin; y <= margin; ++y) {
     Vec2f v2ftmp = icoord - margin * xaxis + y * yaxis;
     for (int x = -margin; x <= margin; ++x) {
-      tex.push_back(Cimage::getColor(v2ftmp[0], v2ftmp[1], level));
+      tex.push_back(CImage::getColor(v2ftmp[0], v2ftmp[1], level));
       v2ftmp += xaxis;
     }
   }
@@ -118,7 +118,7 @@ void Cphoto::grabTex(const int level, const Vec2f& icoord,
     normalize(tex);
 }
 
-void Cphoto::grabTex(const int level, const Vec4f& coord,
+void CPhoto::grabTex(const int level, const Vec4f& coord,
 		     const Vec4f& pxaxis, const Vec4f& pyaxis, const Vec4f& pzaxis,
 		     const int size,
 		     std::vector<Vec3f>& tex, float& weight,

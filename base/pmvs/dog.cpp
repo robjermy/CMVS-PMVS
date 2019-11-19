@@ -5,7 +5,7 @@
 using namespace PMVS3;
 using namespace std;
 
-int Cdog::notOnEdge(const std::vector<std::vector<float> >& dog, int x, int y) {
+int CDifferenceOfGaussians::notOnEdge(const std::vector<std::vector<float> >& dog, int x, int y) {
   return 1;
   //const float thresholdEdge = 0.06f;
   const float thresholdEdge = 0.06f;
@@ -18,7 +18,7 @@ int Cdog::notOnEdge(const std::vector<std::vector<float> >& dog, int x, int y) {
   return det > thresholdEdge * trace * trace;
 }
 
-float Cdog::getResponse(const std::vector<std::vector<float> >& pdog,
+float CDifferenceOfGaussians::getResponse(const std::vector<std::vector<float> >& pdog,
 		  const std::vector<std::vector<float> >& cdog,
 		  const std::vector<std::vector<float> >& ndog,
 		  const int x, const int y) {
@@ -26,7 +26,7 @@ float Cdog::getResponse(const std::vector<std::vector<float> >& pdog,
 	      (cdog[y][x] - pdog[y][x]) + (cdog[y][x] - ndog[y][x]));
 }
 
-float Cdog::getResponse(const std::vector<std::vector<float> >& dog,
+float CDifferenceOfGaussians::getResponse(const std::vector<std::vector<float> >& dog,
 		  const int x, const int y) {
   const float sum =
     dog[y-1][x-1] + dog[y  ][x-1] +
@@ -37,7 +37,7 @@ float Cdog::getResponse(const std::vector<std::vector<float> >& dog,
   return 8 * dog[y][x] - sum;
 }  
 
-int Cdog::isLocalMax(const std::vector<std::vector<float> >& dog,
+int CDifferenceOfGaussians::isLocalMax(const std::vector<std::vector<float> >& dog,
 		     const int x, const int y) {
   const float value = dog[y][x];
 
@@ -58,7 +58,7 @@ int Cdog::isLocalMax(const std::vector<std::vector<float> >& dog,
   return 0;
 }
 
-int Cdog::isLocalMax(const std::vector<std::vector<float> >& pdog,
+int CDifferenceOfGaussians::isLocalMax(const std::vector<std::vector<float> >& pdog,
 		     const std::vector<std::vector<float> >& cdog,
 		     const std::vector<std::vector<float> >& ndog,
 		     const int x, const int y) {
@@ -99,7 +99,7 @@ int Cdog::isLocalMax(const std::vector<std::vector<float> >& pdog,
   return 0;
 }
 
-void Cdog::setDOG(const std::vector<std::vector<float> >& cres,
+void CDifferenceOfGaussians::setDOG(const std::vector<std::vector<float> >& cres,
 		  const std::vector<std::vector<float> >& nres,
 		  std::vector<std::vector<float> >& dog) {
   const int height = (int)cres.size();
@@ -111,14 +111,14 @@ void Cdog::setDOG(const std::vector<std::vector<float> >& cres,
       dog[y][x] -= cres[y][x];
 }
 
-void Cdog::run(const std::vector<unsigned char>& image,
+void CDifferenceOfGaussians::run(const std::vector<unsigned char>& image,
                const std::vector<unsigned char>& mask,
                const std::vector<unsigned char>& edge,
 	       const int width, const int height,
 	       const int gspeedup,
 	       const float firstScale,   // 1.4f
 	       const float lastScale,    // 4.0f
-	       std::multiset<Cpoint> & result) {
+	       std::multiset<CPoint> & result) {
   cerr << "DoG running..." << flush;
   m_width = width;
   m_height = height;
@@ -142,7 +142,7 @@ void Cdog::run(const std::vector<unsigned char>& image,
   const int maxPointsGrid = (int)(m_width * m_height * 0.0025 / (w * h));
   */
   
-  vector<vector<multiset<Cpoint> > > resultgrids;
+  vector<vector<multiset<CPoint> > > resultgrids;
   resultgrids.resize(h);
   for (int y = 0; y < h; ++y)
     resultgrids[y].resize(w);
@@ -195,7 +195,7 @@ void Cdog::run(const std::vector<unsigned char>& image,
 	  const int y0 = min(y / gridsize, h - 1);
 
 	  alreadydetected[y][x] = 1;
-	  Cpoint p;
+	  CPoint p;
 	  p.m_icoord = Vec3f(x, y, 1.0f);
 	  p.m_response = fabs(cdog[y][x]);
 	  p.m_type = 1;
@@ -212,8 +212,8 @@ void Cdog::run(const std::vector<unsigned char>& image,
   for (int y = 0; y < h; ++y)
     for (int x = 0; x < w; ++x) {
       //const float threshold = setThreshold(resultgrids[y][x]);
-      multiset<Cpoint>::iterator begin = resultgrids[y][x].begin();
-      multiset<Cpoint>::iterator end = resultgrids[y][x].end();
+      multiset<CPoint>::iterator begin = resultgrids[y][x].begin();
+      multiset<CPoint>::iterator end = resultgrids[y][x].end();
       while (begin != end) {
 	//if (threshold <= begin->m_response)
 	  result.insert(*begin);
@@ -224,7 +224,7 @@ void Cdog::run(const std::vector<unsigned char>& image,
   cerr << (int)result.size() << " dog done" << endl;  
 }
 
-void Cdog::setRes(const float sigma,
+void CDifferenceOfGaussians::setRes(const float sigma,
 		  std::vector<std::vector<float> >& res) {
   vector<float> gauss;
   setGaussI(sigma, gauss);
@@ -246,7 +246,7 @@ void Cdog::setRes(const float sigma,
   }
 }		  
 
-void Cdog::init(const std::vector<unsigned char>& image,
+void CDifferenceOfGaussians::init(const std::vector<unsigned char>& image,
 		const std::vector<unsigned char>& mask,
                 const std::vector<unsigned char>& edge) {
   m_image.clear();

@@ -13,16 +13,16 @@ using namespace Patch;
 using namespace PMVS3;
 using namespace std;
 
-Coptim* Coptim::m_one = NULL;
+COptim* COptim::m_one = NULL;
 
-Coptim::Coptim(CfindMatch& findMatch) : m_fm(findMatch) {
+COptim::COptim(CFindMatch& findMatch) : m_fm(findMatch) {
   m_one = this;
   
   m_status.resize(35);
   fill(m_status.begin(), m_status.end(), 0);  
 }
 
-void Coptim::init(void) {
+void COptim::init(void) {
   m_vect0T.resize(m_fm.m_CPU);
   m_centersT.resize(m_fm.m_CPU);
   m_raysT.resize(m_fm.m_CPU);
@@ -44,7 +44,7 @@ void Coptim::init(void) {
   setAxesScales();
 }
 
-void Coptim::setAxesScales(void) {
+void COptim::setAxesScales(void) {
   m_xaxes.resize(m_fm.m_num);
   m_yaxes.resize(m_fm.m_num);
   m_zaxes.resize(m_fm.m_num);
@@ -71,7 +71,7 @@ void Coptim::setAxesScales(void) {
   }  
 }
 
-void Coptim::collectImages(const int index, std::vector<int>& indexes) const{
+void COptim::collectImages(const int index, std::vector<int>& indexes) const{
   // Find images with constraints m_angleThreshold, m_visdata,
   // m_sequenceThreshold, m_targets. Results are sorted by
   // CphotoSet::m_distances.
@@ -104,7 +104,7 @@ void Coptim::collectImages(const int index, std::vector<int>& indexes) const{
     indexes.push_back((int)candidates[i][1]);
 }
 
-int Coptim::preProcess(Cpatch& patch, const int id, const int seed) {
+int COptim::preProcess(CPatch& patch, const int id, const int seed) {
   addImages(patch);
 
   // Here define reference images, and sort images.
@@ -139,7 +139,7 @@ int Coptim::preProcess(Cpatch& patch, const int id, const int seed) {
   return 0;
 }
 
-void Coptim::filterImagesByAngle(Cpatch& patch) {
+void COptim::filterImagesByAngle(CPatch& patch) {
   vector<int> newindexes;
 
   vector<int>::iterator bimage = patch.m_images.begin();
@@ -164,7 +164,7 @@ void Coptim::filterImagesByAngle(Cpatch& patch) {
   patch.m_images.swap(newindexes);
 }
 
-int Coptim::postProcess(Cpatch& patch, const int id, const int seed) {
+int COptim::postProcess(CPatch& patch, const int id, const int seed) {
   if ((int)patch.m_images.size() < m_fm.m_minImageNumThreshold)
     return 1;
 
@@ -211,7 +211,7 @@ int Coptim::postProcess(Cpatch& patch, const int id, const int seed) {
   return 0;
 }
 
-void Coptim::constraintImages(Cpatch& patch, const float nccThreshold,
+void COptim::constraintImages(CPatch& patch, const float nccThreshold,
                               const int id) {
   vector<float> inccs;
   setINCCs(patch, inccs, patch.m_images, id, 0);
@@ -227,7 +227,7 @@ void Coptim::constraintImages(Cpatch& patch, const float nccThreshold,
   patch.m_images.swap(newimages);
 }
 
-void Coptim::setRefImage(Cpatch& patch, const int id) {
+void COptim::setRefImage(CPatch& patch, const int id) {
 #ifdef DEBUG
   if (patch.m_images.empty()) {
     cerr << "empty images" << endl;    exit (1);
@@ -274,7 +274,7 @@ void Coptim::setRefImage(Cpatch& patch, const int id) {
 }
 
 // When no sampling was done, this is used
-void Coptim::setRefConstraintImages(Cpatch& patch, const float nccThreshold,
+void COptim::setRefConstraintImages(CPatch& patch, const float nccThreshold,
                                     const int id) {
   //----------------------------------------------------------------------
   // Set the reference image
@@ -302,7 +302,7 @@ void Coptim::setRefConstraintImages(Cpatch& patch, const float nccThreshold,
   patch.m_images.swap(newimages);
 }
 
-void Coptim::sortImages(Cpatch& patch) const{
+void COptim::sortImages(CPatch& patch) const{
   const int newm = 1;
   if (newm == 1) {
     const float threshold = 1.0f - cos(10.0 * M_PI / 180.0);
@@ -385,7 +385,7 @@ void Coptim::sortImages(Cpatch& patch) const{
   }
 }
                           
-int Coptim::check(Cpatch& patch) {
+int COptim::check(CPatch& patch) {
   const float gain = m_fm.m_filter.computeGain(patch, 1);
   patch.m_tmp = gain;
   
@@ -395,7 +395,7 @@ int Coptim::check(Cpatch& patch) {
   }
 
   {
-    vector<Ppatch> neighbors;
+    vector<PPatch> neighbors;
     m_fm.m_pos.findNeighbors(patch, neighbors, 1, 4, 2);
     // Only check when enough number of neighbors
     if (6 < (int)neighbors.size() &&
@@ -409,7 +409,7 @@ int Coptim::check(Cpatch& patch) {
   return 0;
 }
 
-void Coptim::removeImagesEdge(Patch::Cpatch& patch) const{
+void COptim::removeImagesEdge(Patch::CPatch& patch) const{
   vector<int> newindexes;
   vector<int>::const_iterator bimage = patch.m_images.begin();
   vector<int>::const_iterator eimage = patch.m_images.end();
@@ -421,7 +421,7 @@ void Coptim::removeImagesEdge(Patch::Cpatch& patch) const{
   patch.m_images.swap(newindexes);
 }
 
-void Coptim::addImages(Patch::Cpatch& patch) const{
+void COptim::addImages(Patch::CPatch& patch) const{
   // take into account m_edge
   vector<int> used;
   used.resize(m_fm.m_num);
@@ -468,7 +468,7 @@ void Coptim::addImages(Patch::Cpatch& patch) const{
   }
 }
 
-void Coptim::computeUnits(const Patch::Cpatch& patch,
+void COptim::computeUnits(const Patch::CPatch& patch,
                           std::vector<float>& units) const{
   const int size = (int)patch.m_images.size();
   units.resize(size);
@@ -495,7 +495,7 @@ void Coptim::computeUnits(const Patch::Cpatch& patch,
   }
 }
 
-void Coptim::computeUnits(const Patch::Cpatch& patch,
+void COptim::computeUnits(const Patch::CPatch& patch,
                           std::vector<int>& indexes,
                           std::vector<float>& units,
                           std::vector<Vec4f>& rays) const{
@@ -521,7 +521,7 @@ void Coptim::computeUnits(const Patch::Cpatch& patch,
   }
 }
 
-void Coptim::refinePatch(Cpatch& patch, const int id, const int time) {
+void COptim::refinePatch(CPatch& patch, const int id, const int time) {
   if(!refinePatchBFGS(patch, id, 1000, 1))
 	  std::cout << "refinePatchBFGS failed!" << std::endl;
 
@@ -533,7 +533,7 @@ void Coptim::refinePatch(Cpatch& patch, const int id, const int time) {
 // BFGS functions
 //----------------------------------------------------------------------
 
-double Coptim::my_f(unsigned n, const double *x, double *grad, void *my_func_data)
+double COptim::my_f(unsigned n, const double *x, double *grad, void *my_func_data)
 {
   double xs[3] = {x[0], x[1], x[2]};
   const int id = *((int*)my_func_data);
@@ -609,7 +609,7 @@ double Coptim::my_f(unsigned n, const double *x, double *grad, void *my_func_dat
   return ret;
 }
 
-bool Coptim::refinePatchBFGS(Cpatch& patch, const int id,
+bool COptim::refinePatchBFGS(CPatch& patch, const int id,
                              const int time, const int ncc)
 {
   int idtmp = id;
@@ -699,12 +699,12 @@ bool Coptim::refinePatchBFGS(Cpatch& patch, const int id,
   return true;
 }
 
-void Coptim::encode(const Vec4f& coord,
+void COptim::encode(const Vec4f& coord,
 		    double* const vect, const int id) const {
   vect[0] = (coord - m_centersT[id]) * m_raysT[id] / m_dscalesT[id];
 }
 
-void Coptim::encode(const Vec4f& coord, const Vec4f& normal,
+void COptim::encode(const Vec4f& coord, const Vec4f& normal,
 		    double* const vect, const int id) const {
   encode(coord, vect, id);
   
@@ -730,7 +730,7 @@ void Coptim::encode(const Vec4f& coord, const Vec4f& normal,
   vect[2] = vect[2] / m_ascalesT[id];  
 }
 
-void Coptim::decode(Vec4f& coord, Vec4f& normal,
+void COptim::decode(Vec4f& coord, Vec4f& normal,
 		    const double* const vect, const int id) const {
   decode(coord, vect, id);
   const int image = m_indexesT[id][0];
@@ -746,11 +746,11 @@ void Coptim::decode(Vec4f& coord, Vec4f& normal,
   normal = Vec4f(ftmp[0], ftmp[1], ftmp[2], 0.0f);
 }
 
-void Coptim::decode(Vec4f& coord, const double* const vect, const int id) const {
+void COptim::decode(Vec4f& coord, const double* const vect, const int id) const {
   coord = m_centersT[id] + m_dscalesT[id] * vect[0] * m_raysT[id];
 }
 
-void Coptim::setINCCs(const Patch::Cpatch& patch,
+void COptim::setINCCs(const Patch::CPatch& patch,
                       std::vector<float> & inccs,
                       const std::vector<int>& indexes,
                       const int id, const int robust) {
@@ -789,7 +789,7 @@ void Coptim::setINCCs(const Patch::Cpatch& patch,
   }
 }
 
-void Coptim::setINCCs(const Patch::Cpatch& patch,
+void COptim::setINCCs(const Patch::CPatch& patch,
                       std::vector<std::vector<float> >& inccs,
                       const std::vector<int>& indexes,
                       const int id, const int robust) {
@@ -827,7 +827,7 @@ void Coptim::setINCCs(const Patch::Cpatch& patch,
   }
 }
 
-int Coptim::grabSafe(const int index, const int size, const Vec3f& center,
+int COptim::grabSafe(const int index, const int size, const Vec3f& center,
                      const Vec3f& dx, const Vec3f& dy, const int level) const {
   const int margin = size / 2;
 
@@ -863,7 +863,7 @@ float MyPow2(int x)
 
 static float Log2 = log(2.0f);
 
-int Coptim::grabTex(const Vec4f& coord, const Vec4f& pxaxis, const Vec4f& pyaxis,
+int COptim::grabTex(const Vec4f& coord, const Vec4f& pxaxis, const Vec4f& pyaxis,
 		    const Vec4f& pzaxis, const int index, const int size,
                     std::vector<float>& tex) const {
   tex.clear();
@@ -919,7 +919,7 @@ int Coptim::grabTex(const Vec4f& coord, const Vec4f& pxaxis, const Vec4f& pyaxis
   return 0;
 }
 
-double Coptim::computeINCC(const Vec4f& coord, const Vec4f& normal,
+double COptim::computeINCC(const Vec4f& coord, const Vec4f& normal,
 			   const std::vector<int>& indexes, const int id,
                            const int robust) {
   if ((int)indexes.size() < 2)
@@ -932,7 +932,7 @@ double Coptim::computeINCC(const Vec4f& coord, const Vec4f& normal,
   return computeINCC(coord, normal, indexes, pxaxis, pyaxis, id, robust);
 }
 
-double Coptim::computeINCC(const Vec4f& coord, const Vec4f& normal,
+double COptim::computeINCC(const Vec4f& coord, const Vec4f& normal,
 			   const std::vector<int>& indexes, const Vec4f& pxaxis,
 			   const Vec4f& pyaxis, const int id,
                            const int robust) {
@@ -996,12 +996,12 @@ double Coptim::computeINCC(const Vec4f& coord, const Vec4f& normal,
   return score;
 }
 
-void Coptim::lfunc(double* p, double* hx, int m, int n, void* adata) {
+void COptim::lfunc(double* p, double* hx, int m, int n, void* adata) {
   int iflag;
   m_one->func(n, m, p, hx, &iflag, adata);
 }
 
-void Coptim::func(int m, int n, double* x, double* fvec, int* iflag, void* arg) {
+void COptim::func(int m, int n, double* x, double* fvec, int* iflag, void* arg) {
   const int id = *((int*)arg);
   double xs[3] = {x[0], x[1], x[2]};
   
@@ -1039,7 +1039,7 @@ void Coptim::func(int m, int n, double* x, double* fvec, int* iflag, void* arg) 
 }
 
 // Normalize only scale for each image
-void Coptim::normalize(std::vector<std::vector<float> >& texs,
+void COptim::normalize(std::vector<std::vector<float> >& texs,
                        const int size) {
   // compute average rgb
   Vec3f ave;
@@ -1088,7 +1088,7 @@ void Coptim::normalize(std::vector<std::vector<float> >& texs,
   }
 }
 
-void Coptim::normalize(std::vector<float>& tex) {
+void COptim::normalize(std::vector<float>& tex) {
   const int size = (int)tex.size();
   const int size3 = size / 3;
   Vec3f ave;
@@ -1125,7 +1125,7 @@ void Coptim::normalize(std::vector<float>& tex) {
   }
 }
 
-float Coptim::dot(const std::vector<float>& tex0,
+float COptim::dot(const std::vector<float>& tex0,
 		  const std::vector<float>& tex1) const{
 #ifndef PMVS_WNCC
   // Pierre Moulon (use classic access to array, windows STL do not like begin()-1)
@@ -1147,7 +1147,7 @@ float Coptim::dot(const std::vector<float>& tex0,
 #endif
 }
 
-float Coptim::ssd(const std::vector<float>& tex0,
+float COptim::ssd(const std::vector<float>& tex0,
 		  const std::vector<float>& tex1) const{
   const float scale = 0.01;
 
@@ -1174,7 +1174,7 @@ float Coptim::ssd(const std::vector<float>& tex0,
 #endif
 }
 
-float Coptim::getUnit(const int index, const Vec4f& coord) const {
+float COptim::getUnit(const int index, const Vec4f& coord) const {
   const float fz = norm(coord - m_fm.m_pss.m_photos[index].m_center);
   const float ftmp = m_ipscales[index];
   if (ftmp == 0.0)
@@ -1184,7 +1184,7 @@ float Coptim::getUnit(const int index, const Vec4f& coord) const {
 }
 
 // get x and y axis to collect textures given reference image and normal
-void Coptim::getPAxes(const int index, const Vec4f& coord, const Vec4f& normal,
+void COptim::getPAxes(const int index, const Vec4f& coord, const Vec4f& normal,
 		      Vec4f& pxaxis, Vec4f& pyaxis) const{  
   // yasu changed here for fpmvs
   const float pscale = getUnit(index, coord);
@@ -1206,7 +1206,7 @@ void Coptim::getPAxes(const int index, const Vec4f& coord, const Vec4f& normal,
   pyaxis /= ydis;
 }
 
-void Coptim::setWeightsT(const Patch::Cpatch& patch, const int id) {
+void COptim::setWeightsT(const Patch::CPatch& patch, const int id) {
   computeUnits(patch, m_weightsT[id]);
   for (int i = 1; i < (int)m_weightsT[id].size(); ++i)
     m_weightsT[id][i] = min(1.0f, m_weightsT[id][0] / m_weightsT[id][i]);  

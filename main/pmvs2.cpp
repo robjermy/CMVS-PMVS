@@ -37,10 +37,10 @@ int main(int argc, char* argv[]) {
   }
   cout << std::endl;
   
-  PMVS3::Soption option;
+  PMVS3::SOption option;
   option.init(argv[1], argv[2]);
 
-  PMVS3::CfindMatch findMatch;
+  PMVS3::CFindMatch findMatch;
   findMatch.init(option);
   findMatch.run();
 

@@ -8,9 +8,9 @@
 
 namespace Patch {
 
-class Cpatch {
+class CPatch {
  public:
-  Cpatch(void) {
+  CPatch(void) {
     m_ncc = -1.0;
     m_timages = 0;
     m_fix = 0;
@@ -77,10 +77,10 @@ class Cpatch {
   float m_tmp;
 };
 
-typedef boost::shared_ptr<Cpatch> Ppatch;
+typedef boost::shared_ptr<CPatch> PPatch;
 
 struct Spatchcmp {
-  bool operator()(const Ppatch& lhs, const Ppatch& rhs) {
+  bool operator()(const PPatch& lhs, const PPatch& rhs) {
     if (lhs.get() < rhs.get())
       return true;
     else
@@ -88,8 +88,8 @@ struct Spatchcmp {
   }
 };
  
-std::istream& operator >>(std::istream& istr, Patch::Cpatch& rhs);
-std::ostream& operator <<(std::ostream& ostr, const Patch::Cpatch& rhs);
+std::istream& operator >>(std::istream& istr, Patch::CPatch& rhs);
+std::ostream& operator <<(std::ostream& ostr, const Patch::CPatch& rhs);
  
 };
 

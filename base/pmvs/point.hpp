@@ -5,10 +5,10 @@
 #include "../numeric/mat3.hpp"
 
 namespace PMVS3 {
-class Cpoint {
+class CPoint {
  public:
-  Cpoint(void);
-  virtual ~Cpoint();
+  CPoint(void);
+  virtual ~CPoint();
   
   Vec3f m_icoord;
   float m_response;
@@ -23,18 +23,18 @@ class Cpoint {
   // 3D coordinate
   Vec4f m_coord;
   
-  bool operator < (const Cpoint& rhs) const {
+  bool operator < (const CPoint& rhs) const {
     return m_response < rhs.m_response;
   }
 
-  friend std::istream& operator >>(std::istream& istr, Cpoint& rhs);
-  friend std::ostream& operator <<(std::ostream& ostr, const Cpoint& rhs);
+  friend std::istream& operator >>(std::istream& istr, CPoint& rhs);
+  friend std::ostream& operator <<(std::ostream& ostr, const CPoint& rhs);
 };
 
-bool SortCpoint(const Cpoint& a, const Cpoint& b);
+bool SortCpoint(const CPoint& a, const CPoint& b);
 
-std::istream& operator >>(std::istream& istr, Cpoint& rhs);
-std::ostream& operator <<(std::ostream& ostr, const Cpoint& rhs);
+std::istream& operator >>(std::istream& istr, CPoint& rhs);
+std::ostream& operator <<(std::ostream& ostr, const CPoint& rhs);
 };
 
 #endif //PMVS3_POINT_H

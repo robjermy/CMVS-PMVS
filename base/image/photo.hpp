@@ -7,11 +7,11 @@
 
 namespace Image {
 
-// Cphoto is an image with camera parameters
-class Cphoto : public Cimage, public Ccamera {
+// CPhoto is an image with camera parameters
+class CPhoto : public CImage, public CCamera {
  public:
-  Cphoto(void);
-  virtual ~Cphoto();
+  CPhoto(void);
+  virtual ~CPhoto();
 
   virtual void init(const std::string name, const std::string mname,
 		    const std::string cname, const int maxLevel = 1);
@@ -50,24 +50,24 @@ class Cphoto : public Cimage, public Ccamera {
  protected:
 };
 
-Vec3f Cphoto::getColor(const float fx, const float fy, const int level) const {
-  return Cimage::getColor(fx, fy, level);
+Vec3f CPhoto::getColor(const float fx, const float fy, const int level) const {
+  return CImage::getColor(fx, fy, level);
 };
   
-Vec3f Cphoto::getColor(const Vec4f& coord, const int level) const {
+Vec3f CPhoto::getColor(const Vec4f& coord, const int level) const {
   const Vec3f icoord = project(coord, level);
-  return Cimage::getColor(icoord[0], icoord[1], level);
+  return CImage::getColor(icoord[0], icoord[1], level);
 };
   
-int Cphoto::getMask(const Vec4f& coord, const int level) const {
+int CPhoto::getMask(const Vec4f& coord, const int level) const {
   if (m_masks[level].empty())
     return 1;
   
   const Vec3f icoord = project(coord, level);
-  return Cimage::getMask(icoord[0], icoord[1], level);
+  return CImage::getMask(icoord[0], icoord[1], level);
 };
 
-int Cphoto::getEdge(const Vec4f& coord, const int level) const {
+int CPhoto::getEdge(const Vec4f& coord, const int level) const {
   if (m_edges[level].empty())
     return 1;
   
@@ -77,7 +77,7 @@ int Cphoto::getEdge(const Vec4f& coord, const int level) const {
       icoord[1] < 0 || m_heights[level] - 1 <= icoord[1])
     return 0;
   
-  return Cimage::getEdge(icoord[0], icoord[1], level);
+  return CImage::getEdge(icoord[0], icoord[1], level);
 };
 
 };

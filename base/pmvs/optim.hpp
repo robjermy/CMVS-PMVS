@@ -6,11 +6,11 @@
 
 namespace PMVS3 {
   
-class CfindMatch;
+class CFindMatch;
  
-class Coptim {
+class COptim {
  public:
-  Coptim(CfindMatch& findMatch);
+  COptim(CFindMatch& findMatch);
 
   void init(void);
 
@@ -18,51 +18,51 @@ class Coptim {
   // Image manipulation
   //-----------------------------------------------------------------
   void collectImages(const int index, std::vector<int>& indexes) const;
-  void addImages(Patch::Cpatch& patch) const;
-  void removeImagesEdge(Patch::Cpatch& patch) const;
+  void addImages(Patch::CPatch& patch) const;
+  void removeImagesEdge(Patch::CPatch& patch) const;
 
   float getUnit(const int index, const Vec4f& coord) const;
 
-  void computeUnits(const Patch::Cpatch& patch,
+  void computeUnits(const Patch::CPatch& patch,
                     std::vector<int>& indexes,
                     std::vector<float>& fineness,
                     std::vector<Vec4f>& rays) const;
-  void computeUnits(const Patch::Cpatch& patch,
+  void computeUnits(const Patch::CPatch& patch,
                     std::vector<float>& fineness) const;
   
   //-----------------------------------------------------------------
   // Optimization
   //-----------------------------------------------------------------
   
-  int preProcess(Patch::Cpatch& patch, const int id, const int seed);
-  void refinePatch(Patch::Cpatch& patch, const int id, const int time);
+  int preProcess(Patch::CPatch& patch, const int id, const int seed);
+  void refinePatch(Patch::CPatch& patch, const int id, const int time);
   
-  bool refinePatchBFGS(Patch::Cpatch& patch, const int id, const int time,
+  bool refinePatchBFGS(Patch::CPatch& patch, const int id, const int time,
                         const int ncc);
   
-  int postProcess(Patch::Cpatch& patch, const int id, const int seed);
+  int postProcess(Patch::CPatch& patch, const int id, const int seed);
 
-  void setRefImage(Patch::Cpatch& patch, const int id);
+  void setRefImage(Patch::CPatch& patch, const int id);
   
-  int check(Patch::Cpatch& patch);
+  int check(Patch::CPatch& patch);
 
   std::vector<int> m_status;
   
  protected:
-  void filterImagesByAngle(Patch::Cpatch& patch);
+  void filterImagesByAngle(Patch::CPatch& patch);
   
-  void sortImages(Patch::Cpatch& patch) const;
-  void constraintImages(Patch::Cpatch& patch, const float nccThreshold,
+  void sortImages(Patch::CPatch& patch) const;
+  void constraintImages(Patch::CPatch& patch, const float nccThreshold,
                         const int id);
-  void setRefConstraintImages(Patch::Cpatch& patch, const float nccThreshold,
+  void setRefConstraintImages(Patch::CPatch& patch, const float nccThreshold,
                               const int id);
   
-  void setINCCs(const Patch::Cpatch& patch,
+  void setINCCs(const Patch::CPatch& patch,
                 std::vector<float> & nccs,
                 const std::vector<int>& indexes,
                 const int id, const int robust);
   
-  void setINCCs(const Patch::Cpatch& patch,
+  void setINCCs(const Patch::CPatch& patch,
                 std::vector<std::vector<float> >& nccs,
                 const std::vector<int>& indexes,
                 const int id, const int robust);
@@ -107,7 +107,7 @@ class Coptim {
   
 
  public:
-  void setWeightsT(const Patch::Cpatch& patch, const int id);
+  void setWeightsT(const Patch::CPatch& patch, const int id);
   
   double computeINCC(const Vec4f& coord, const Vec4f& normal,
                      const std::vector<int>& indexes, const int id,
@@ -127,8 +127,8 @@ class Coptim {
   
   void setAxesScales(void);
   
-  static Coptim* m_one;  
-  CfindMatch& m_fm;
+  static COptim* m_one;  
+  CFindMatch& m_fm;
   
   //-----------------------------------------------------------------
   // Axes

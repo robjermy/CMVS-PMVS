@@ -33,14 +33,14 @@ using namespace Image;
 /* max3 -- return maximum of 3 values */
 #define max3(a, b, c) ((a)>(b) ? ((a)>(c) ? (a) : (c)) : ((b)>(c) ? (b) : (c)))
 
-Cimage::Cimage(void) {
+CImage::CImage(void) {
   m_alloc = 0;
 }
 
-Cimage::~Cimage() {
+CImage::~CImage() {
 }
 
-void Cimage::completeName(const std::string& lhs, std::string& rhs,
+void CImage::completeName(const std::string& lhs, std::string& rhs,
                           const int color) {
   if (5 <= lhs.length() && lhs[lhs.length() - 4] == '.') {
     rhs = lhs;
@@ -80,7 +80,7 @@ void Cimage::completeName(const std::string& lhs, std::string& rhs,
   }
 }
 
-void Cimage::init(const std::string name, const std::string mname,
+void CImage::init(const std::string name, const std::string mname,
 		  const int maxLevel) {
   m_alloc = 0;
 
@@ -97,14 +97,14 @@ void Cimage::init(const std::string name, const std::string mname,
   }
 }
 
-void Cimage::init(const std::string name, const std::string mname,
+void CImage::init(const std::string name, const std::string mname,
 		  const std::string ename, const int maxLevel) {
   init(name, mname, maxLevel);
   if (!ename.empty())
     completeName(ename, m_ename, 0);
 }
 
-void Cimage::alloc(const int fast, const int filter) {
+void CImage::alloc(const int fast, const int filter) {
   if (m_alloc == 1 && fast == 1)
     return;
   if (m_alloc == 2)
@@ -185,7 +185,7 @@ void Cimage::alloc(const int fast, const int filter) {
 }
 
 #ifdef FURUKAWA_IMAGE_GAMMA
-void Cimage::decodeGamma(void) {
+void CImage::decodeGamma(void) {
   m_dimages[0].resize((int)m_images[0].size());
   for (int i = 0; i < (int)m_images[0].size(); ++i) {
     float ftmp = (float)m_images[0][i] / 255.0;
@@ -198,7 +198,7 @@ void Cimage::decodeGamma(void) {
 #endif
 
 /*
-void Cimage::setColor(void) {
+void CImage::setColor(void) {
   m_color = 0;
   int index = 0;
   for (int y = 0; y < m_heights[0]; ++y) {
@@ -218,7 +218,7 @@ void Cimage::setColor(void) {
 }
 */
 
-void Cimage::free(const int freeLevel) {
+void CImage::free(const int freeLevel) {
   for (int l = 0; l < freeLevel; ++l) {
 #ifdef FURUKAWA_IMAGE_GAMMA
     vector<float>().swap(m_dimages[l]);
@@ -232,7 +232,7 @@ void Cimage::free(const int freeLevel) {
   }
 }
 
-void Cimage::free(void) {
+void CImage::free(void) {
   if (m_alloc != 0)
     m_alloc = 1;
   else
@@ -245,7 +245,7 @@ void Cimage::free(void) {
   //vector<int>().swap(m_heights);
 }
 
-void Cimage::buildImageMaskEdge(const int filter) {
+void CImage::buildImageMaskEdge(const int filter) {
   buildImage(filter);
 
   if (!m_mname.empty())
@@ -255,7 +255,7 @@ void Cimage::buildImageMaskEdge(const int filter) {
     buildEdge();
 }
 
-void Cimage::buildImage(const int filter) {
+void CImage::buildImage(const int filter) {
   Mat4 mask;
   mask[0] = Vec4(1.0, 3.0, 3.0, 1.0);  mask[1] = Vec4(3.0, 9.0, 9.0, 3.0);
   mask[2] = Vec4(3.0, 9.0, 9.0, 3.0);  mask[3] = Vec4(1.0, 3.0, 3.0, 1.0);
@@ -348,7 +348,7 @@ void Cimage::buildImage(const int filter) {
   }
 }
 
-void Cimage::buildMask(void) {
+void CImage::buildMask(void) {
   //----------------------------------------------------------------------
   // mask
   for (int level = 1; level < m_maxLevel; ++level) {
@@ -382,7 +382,7 @@ void Cimage::buildMask(void) {
   }
 }
 
-void Cimage::buildEdge(void) {
+void CImage::buildEdge(void) {
   //----------------------------------------------------------------------
   // edge
   for (int level = 1; level < m_maxLevel; ++level) {
@@ -416,7 +416,7 @@ void Cimage::buildEdge(void) {
   }
 }
 
-void Cimage::setEdge(const float threshold) {
+void CImage::setEdge(const float threshold) {
   const int size = m_widths[0] * m_heights[0];
   m_edges[0].resize(size);
   for (int i = 0; i < size; ++i)
@@ -491,7 +491,7 @@ void Cimage::setEdge(const float threshold) {
   buildEdge();
 }
 
-int Cimage::readAnyImage(const std::string file,
+int CImage::readAnyImage(const std::string file,
                         std::vector<unsigned char>& image,
                         int& width, int& height, const int fast)
 {
@@ -534,7 +534,7 @@ int Cimage::readAnyImage(const std::string file,
   return 1;
 }
 
-int Cimage::readPBMImage(const std::string file,
+int CImage::readPBMImage(const std::string file,
                          std::vector<unsigned char>& image,
                          int& width, int& height, const int fast) {
   if (file.substr(file.length() - 3, file.length()) != "pbm")
@@ -597,7 +597,7 @@ int Cimage::readPBMImage(const std::string file,
   return 1;
 }
 
-int Cimage::writePBMImage(const std::string file,
+int CImage::writePBMImage(const std::string file,
                           std::vector<unsigned char>& image,
                           int& width, int& height, const int fast) {
   ofstream ofstr;
@@ -631,7 +631,7 @@ int Cimage::writePBMImage(const std::string file,
   return 1;
 }
 
-int Cimage::writePGMImage(const std::string file,
+int CImage::writePGMImage(const std::string file,
                           const std::vector<unsigned char>& image,
                           const int width, const int height) {
   ofstream ofstr;
@@ -654,7 +654,7 @@ int Cimage::writePGMImage(const std::string file,
   return 1;
 }
 
-int Cimage::readPGMImage(const std::string file,
+int CImage::readPGMImage(const std::string file,
 			 std::vector<unsigned char>& image,
 			 int& width, int& height, const int fast) {
   if (file.substr(file.length() - 3, file.length()) != "pgm")
@@ -705,7 +705,7 @@ int Cimage::readPGMImage(const std::string file,
   return 1;
 }
 
-int Cimage::readPPMImage(const std::string file,
+int CImage::readPPMImage(const std::string file,
 			 std::vector<unsigned char>& image,
 			 int& width, int& height, const int fast) {
   if (file.substr(file.length() - 3, file.length()) != "ppm")
@@ -751,7 +751,7 @@ int Cimage::readPPMImage(const std::string file,
   return 1;
 }
 
-int Cimage::writePPMImage(const std::string file,
+int CImage::writePPMImage(const std::string file,
                           const std::vector<unsigned char>& image,
                           const int width, const int height) {
   ofstream ofstr;
@@ -798,7 +798,7 @@ my_error_exit (j_common_ptr cinfo)
   longjmp(myerr->setjmp_buffer, 1);
 }
 
-int Cimage::readJpegImage(const std::string file,
+int CImage::readJpegImage(const std::string file,
 			  std::vector<unsigned char>& image,
 			  int& width, int& height, const int fast) {
   if (file.substr(file.length() - 3, file.length()) != "jpg")
@@ -845,7 +845,7 @@ int Cimage::readJpegImage(const std::string file,
   return 1;
 }
 
-void Cimage::writeJpegImage(const std::string filename,
+void CImage::writeJpegImage(const std::string filename,
 			    const std::vector<unsigned char>& buffer,
 			    const int width, const int height, const int flip) {
   const int quality = 100;
@@ -892,19 +892,19 @@ void Cimage::writeJpegImage(const std::string filename,
   jpeg_destroy_compress(&cinfo);
 }
 
-void Cimage::rgb2hs(const Vec3f& rgb, float& h, float& s) {
+void CImage::rgb2hs(const Vec3f& rgb, float& h, float& s) {
   rgb2hs(rgb[0], rgb[1], rgb[2], h, s);
 }
 
-void Cimage::rgb2hs(const Vec3f& rgb, Vec2f& hs) {
+void CImage::rgb2hs(const Vec3f& rgb, Vec2f& hs) {
   rgb2hs(rgb[0], rgb[1], rgb[2], hs[0], hs[1]);
 }
 
-void Cimage::rgb2hs(const float r, const float g, const float b, Vec2f& hs) {
+void CImage::rgb2hs(const float r, const float g, const float b, Vec2f& hs) {
   rgb2hs(r, g, b, hs[0], hs[1]);
 }
 
-void Cimage::rgb2hs(const float r, const float g, const float b,
+void CImage::rgb2hs(const float r, const float g, const float b,
 		    float& h, float& s) {
   double max, min, del, rc, gc, bc;
 
@@ -930,7 +930,7 @@ void Cimage::rgb2hs(const float r, const float g, const float b,
 }
 
 /* rgb2hsv -- convert RGB to HSV */
-void Cimage::rgb2hsv(const float r, const float g, const float b,
+void CImage::rgb2hsv(const float r, const float g, const float b,
 		     float& h, float& s, float& v) {
   double max, min, del, rc, gc, bc;
 
@@ -957,19 +957,19 @@ void Cimage::rgb2hsv(const float r, const float g, const float b,
   }
 }
 
-void Cimage::rgb2hsv(const Vec3f& rgb, Vec3f& hsv) {
+void CImage::rgb2hsv(const Vec3f& rgb, Vec3f& hsv) {
   rgb2hsv(rgb[0], rgb[1], rgb[2], hsv[0], hsv[1], hsv[2]);
 }
 
-void Cimage::rgb2hsv(const Vec3f& rgb, float& hr, float& sr, float& vr) {
+void CImage::rgb2hsv(const Vec3f& rgb, float& hr, float& sr, float& vr) {
   rgb2hsv(rgb[0], rgb[1], rgb[2], hr, sr, vr);
 }
 
-void Cimage::rgb2hsv(const float r, const float g, const float b, Vec3f& hsv) {
+void CImage::rgb2hsv(const float r, const float g, const float b, Vec3f& hsv) {
   rgb2hsv(r, g, b, hsv[0], hsv[1], hsv[2]);
 }
 
-float Cimage::hsdis(const float h0, const float s0, const float h1, const float s1) {
+float CImage::hsdis(const float h0, const float s0, const float h1, const float s1) {
   // Represent by 2d vector each
   const float angle0 = h0 * M_PI / 180.0;
   Vec2f axis0(cos(angle0), sin(angle0));
@@ -982,7 +982,7 @@ float Cimage::hsdis(const float h0, const float s0, const float h1, const float 
   return norm(axis0 - axis1) / 2.0;
 }
 
-void Cimage::gray2rgb(const float gray, float& r, float& g, float& b) {
+void CImage::gray2rgb(const float gray, float& r, float& g, float& b) {
   if (gray < 0.5) {
     r = 0.0f;
     g = 2.0f * gray;
@@ -997,7 +997,7 @@ void Cimage::gray2rgb(const float gray, float& r, float& g, float& b) {
 
 // Some low-level image processing
 // 2D convolution with twice 1D gaussian convolution.
-void Cimage::filterG(const std::vector<float>& filter,
+void CImage::filterG(const std::vector<float>& filter,
                      std::vector<std::vector<float> >& data) {
   vector<vector<float> > buffer;
   const int height = (int)data.size();
@@ -1008,7 +1008,7 @@ void Cimage::filterG(const std::vector<float>& filter,
   filterG(filter, data, buffer);
 }
 
-void Cimage::filterG(const std::vector<float>& filter,
+void CImage::filterG(const std::vector<float>& filter,
                      const int width, const int height,
                      std::vector<float>& data) {
   vector<float> buffer;
@@ -1016,7 +1016,7 @@ void Cimage::filterG(const std::vector<float>& filter,
   filterG(filter, width, height, data, buffer);
 }
 
-void Cimage::filterG(const std::vector<float>& filter,
+void CImage::filterG(const std::vector<float>& filter,
                      const int width, const int height,
                      std::vector<float>& data,
                      std::vector<float>& buffer) {
@@ -1068,7 +1068,7 @@ void Cimage::filterG(const std::vector<float>& filter,
   buffer.swap(data);
 }
 
-void Cimage::filterG(const std::vector<float>& filter,
+void CImage::filterG(const std::vector<float>& filter,
                      std::vector<std::vector<float> >& data,
                      std::vector<std::vector<float> >& buffer) {
   if ((int)filter.size() % 2 == 0) {
@@ -1114,7 +1114,7 @@ void Cimage::filterG(const std::vector<float>& filter,
 }
 
 // non maximum surpression
-void Cimage::nms(std::vector<std::vector<float> >& data) {
+void CImage::nms(std::vector<std::vector<float> >& data) {
   vector<vector<float> > buffer;
   const int height = (int)data.size();
   const int width = (int)data[0].size();
@@ -1124,7 +1124,7 @@ void Cimage::nms(std::vector<std::vector<float> >& data) {
   nms(data, buffer);
 }
 
-void Cimage::nms(std::vector<std::vector<float> >& data,
+void CImage::nms(std::vector<std::vector<float> >& data,
                  std::vector<std::vector<float> >& buffer) {
   const int height = (int)data.size();
   const int width = (int)data[0].size();
@@ -1152,7 +1152,7 @@ void Cimage::nms(std::vector<std::vector<float> >& data,
   buffer.swap(data);
 }
 
-void Cimage::createFilter(const float sigma, std::vector<float>& filter) {
+void CImage::createFilter(const float sigma, std::vector<float>& filter) {
   const float sigma2 = 2.0f * sigma * sigma;
   const int margin = (int)floor(2 * sigma);
 
@@ -1166,7 +1166,7 @@ void Cimage::createFilter(const float sigma, std::vector<float>& filter) {
     filter[i] /= sum;
 }
 
-void Cimage::sift(const Vec3f& center,
+void CImage::sift(const Vec3f& center,
                   const Vec3f& xaxis, const Vec3f& yaxis,
                   std::vector<float>& descriptor) const {
   const float step = (norm(xaxis) + norm(yaxis)) / 2.0f;
@@ -1182,7 +1182,7 @@ void Cimage::sift(const Vec3f& center,
     sift(center, xaxis, yaxis, 0, descriptor);
 }
 
-void Cimage::sift(const Vec3f& center,
+void CImage::sift(const Vec3f& center,
                   const Vec3f& xaxis, const Vec3f& yaxis,
                   const int level, std::vector<float>& descriptor) const {
   /*
@@ -1302,7 +1302,7 @@ void Cimage::sift(const Vec3f& center,
 
 // Used to filter out outliers. Very general algorithm.
 // Use standard mean and deviation
-void Cimage::setInOut(const std::vector<vector<float> >& data, std::vector<int>& inout,
+void CImage::setInOut(const std::vector<vector<float> >& data, std::vector<int>& inout,
 		      const float sigma, const int specular) {
   const int size = (int)data.size();
   if (size == 0)
@@ -1343,7 +1343,7 @@ void Cimage::setInOut(const std::vector<vector<float> >& data, std::vector<int>&
 
 // Used to filter out outliers. Very general algorithm.
 // Use mean and deviation
-void Cimage::setInOut(const std::vector<Vec3f>& data, std::vector<int>& inout,
+void CImage::setInOut(const std::vector<Vec3f>& data, std::vector<int>& inout,
 		      const float sigma, const int specular) {
   const int size = (int)data.size();
   if (size == 0)
@@ -1378,7 +1378,7 @@ void Cimage::setInOut(const std::vector<Vec3f>& data, std::vector<int>& inout,
 }
 
 // Used to filter out outliers. HSV version for specular highlights.
-void Cimage::setInOutHSV(const std::vector<Vec3f>& hsvs, std::vector<int>& inout,
+void CImage::setInOutHSV(const std::vector<Vec3f>& hsvs, std::vector<int>& inout,
 			 const float sigma, const int specular) {
   const int size = (int)hsvs.size();
   if (size == 0)

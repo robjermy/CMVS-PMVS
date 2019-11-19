@@ -9,10 +9,10 @@
 
 namespace Image {
 
-class Cimage {
+class CImage {
  public:
-  Cimage(void);
-  virtual ~Cimage();
+  CImage(void);
+  virtual ~CImage();
 
   virtual void init(const std::string name, const std::string mname,
 		    const int maxLevel = 1);
@@ -216,7 +216,7 @@ class Cimage {
   int m_maxLevel;
 };
   
-inline int Cimage::isSafe(const Vec3f& icoord, const int level) const {
+inline int CImage::isSafe(const Vec3f& icoord, const int level) const {
 #ifdef FURUKAWA_IMAGE_BICUBIC
   if (icoord[0] < 1.0 || m_widths[level] - 3 < icoord[0] ||
       icoord[1] < 1.0 || m_heights[level] - 3 < icoord[1])
@@ -233,7 +233,7 @@ inline int Cimage::isSafe(const Vec3f& icoord, const int level) const {
 };
  
 // Check if a mask image exists
-inline int Cimage::isMask(void) const {
+inline int CImage::isMask(void) const {
   if (m_masks[0].empty())
     return 0;
   else
@@ -241,14 +241,14 @@ inline int Cimage::isMask(void) const {
  };
  
 // Check if an edge image exists
-inline int Cimage::isEdge(void) const {
+inline int CImage::isEdge(void) const {
   if (m_edges[0].empty())
     return 0;
   else
     return 1;
  };
  
-inline const std::vector<unsigned char>& Cimage::getImage(const int level) const{
+inline const std::vector<unsigned char>& CImage::getImage(const int level) const{
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
@@ -262,7 +262,7 @@ inline const std::vector<unsigned char>& Cimage::getImage(const int level) const
   return m_images[level];
 };
 
-inline const std::vector<unsigned char>& Cimage::getMask(const int level) const{
+inline const std::vector<unsigned char>& CImage::getMask(const int level) const{
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
@@ -270,7 +270,7 @@ inline const std::vector<unsigned char>& Cimage::getMask(const int level) const{
   return m_masks[level];
 };
 
-inline const std::vector<unsigned char>& Cimage::getEdge(const int level) const{
+inline const std::vector<unsigned char>& CImage::getEdge(const int level) const{
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
@@ -278,7 +278,7 @@ inline const std::vector<unsigned char>& Cimage::getEdge(const int level) const{
   return m_edges[level];
 };
 
-inline std::vector<unsigned char>& Cimage::getImage(const int level){
+inline std::vector<unsigned char>& CImage::getImage(const int level){
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
@@ -292,7 +292,7 @@ inline std::vector<unsigned char>& Cimage::getImage(const int level){
   return m_images[level];
 };
 
-inline std::vector<unsigned char>& Cimage::getMask(const int level){
+inline std::vector<unsigned char>& CImage::getMask(const int level){
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
@@ -300,7 +300,7 @@ inline std::vector<unsigned char>& Cimage::getMask(const int level){
   return m_masks[level];
 };
 
-inline std::vector<unsigned char>& Cimage::getEdge(const int level){
+inline std::vector<unsigned char>& CImage::getEdge(const int level){
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
@@ -308,7 +308,7 @@ inline std::vector<unsigned char>& Cimage::getEdge(const int level){
   return m_edges[level];
 };
 
-int Cimage::getWidth(const int level) const{
+int CImage::getWidth(const int level) const{
   if (m_alloc == 0) {
     std::cerr << "First allocate (getWidth)" << std::endl;
     exit (1);
@@ -316,7 +316,7 @@ int Cimage::getWidth(const int level) const{
   return m_widths[level];
 };
  
-int Cimage::getHeight(const int level) const{
+int CImage::getHeight(const int level) const{
   if (m_alloc == 0) {
     //alloc(1);
     std::cerr << "First allocate (getHeight)" << std::endl;
@@ -326,7 +326,7 @@ int Cimage::getHeight(const int level) const{
 };
 
 /* 
-int Cimage::getCWidth(const int beta, const int level) const{
+int CImage::getCWidth(const int beta, const int level) const{
   if (m_alloc == 0) {
     //alloc(1);
     std::cerr << "First allocate (getCWidth)" << std::endl;
@@ -336,7 +336,7 @@ int Cimage::getCWidth(const int beta, const int level) const{
 };
 */
 /* 
-int Cimage::getCHeight(const int beta, const int level) const{
+int CImage::getCHeight(const int beta, const int level) const{
   if (m_alloc == 0) {
     //alloc(1);
     std::cerr << "First allocate (getCHeight)" << std::endl;
@@ -346,7 +346,7 @@ int Cimage::getCHeight(const int beta, const int level) const{
 };
 */
  
-Vec3f Cimage::getColor(const float x, const float y, const int level) const{
+Vec3f CImage::getColor(const float x, const float y, const int level) const{
 #ifdef FURUKAWA_DEBUG
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
@@ -574,7 +574,7 @@ Vec3f Cimage::getColor(const float x, const float y, const int level) const{
 #endif
 };
 
-void Cimage::setColor(const int ix, const int iy, const int level,
+void CImage::setColor(const int ix, const int iy, const int level,
                       const Vec3f& rgb) {
 #ifdef FURUKAWA_DEBUG
   if (m_alloc != 2) {
@@ -595,7 +595,7 @@ void Cimage::setColor(const int ix, const int iy, const int level,
 #endif
 };
 
-Vec3f Cimage::getColor(const int ix, const int iy, const int level) const{
+Vec3f CImage::getColor(const int ix, const int iy, const int level) const{
 #ifdef FURUKAWA_DEBUG
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
@@ -615,7 +615,7 @@ Vec3f Cimage::getColor(const int ix, const int iy, const int level) const{
 #endif
 };
 
-int Cimage::getMask(const float fx, const float fy, const int level) const{
+int CImage::getMask(const float fx, const float fy, const int level) const{
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
@@ -629,7 +629,7 @@ int Cimage::getMask(const float fx, const float fy, const int level) const{
   return getMask(ix, iy, level);
 };
 
-int Cimage::getMask(const int ix, const int iy, const int level) const{
+int CImage::getMask(const int ix, const int iy, const int level) const{
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
@@ -645,7 +645,7 @@ int Cimage::getMask(const int ix, const int iy, const int level) const{
   return m_masks[level][index];
 };
 
-int Cimage::getEdge(const float fx, const float fy, const int level) const{
+int CImage::getEdge(const float fx, const float fy, const int level) const{
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
@@ -658,7 +658,7 @@ int Cimage::getEdge(const float fx, const float fy, const int level) const{
   return getEdge(ix, iy, level);
 };
 
-int Cimage::getEdge(const int ix, const int iy, const int level) const{
+int CImage::getEdge(const int ix, const int iy, const int level) const{
   if (m_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);

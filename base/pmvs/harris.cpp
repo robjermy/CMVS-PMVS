@@ -4,7 +4,7 @@
 using namespace PMVS3;
 using namespace std;
 
-void Charris::init(const std::vector<unsigned char>& image,
+void CHarris::init(const std::vector<unsigned char>& image,
 		   const std::vector<unsigned char>& mask,
                    const std::vector<unsigned char>& edge) {
   m_image.clear();
@@ -45,7 +45,7 @@ void Charris::init(const std::vector<unsigned char>& image,
   setGaussI(m_sigmaI, m_gaussI); 
 }
 
-void Charris::setDerivatives(void) {
+void CHarris::setDerivatives(void) {
   // set m_dIdx, m_dIdy
   preprocess();
   
@@ -53,7 +53,7 @@ void Charris::setDerivatives(void) {
   preprocess2();
 }
 
-void Charris::preprocess2(void) {
+void CHarris::preprocess2(void) {
   m_dIdxdIdx.clear();  m_dIdydIdy.clear();  m_dIdxdIdy.clear();
   m_dIdxdIdx.resize(m_height);
   m_dIdydIdy.resize(m_height);
@@ -103,7 +103,7 @@ void Charris::preprocess2(void) {
   convolveY(m_dIdxdIdy, m_mask, m_gaussI, vvftmp);
 }
 
-void Charris::preprocess(void) {
+void CHarris::preprocess(void) {
   vector<vector<Vec3f> > vvvftmp;
   vvvftmp.resize(m_height);
   for (int y = 0; y < m_height; ++y) {
@@ -128,7 +128,7 @@ void Charris::preprocess(void) {
   convolveY(m_dIdy, m_mask, dfilter, vvvftmp);
 }
 
-void Charris::setResponse(void) {
+void CHarris::setResponse(void) {
   m_response.clear();
   m_response.resize(m_height);
   for (int y = 0; y < m_height; ++y) {
@@ -159,12 +159,12 @@ void Charris::setResponse(void) {
   vvftmp.swap(m_response);
 }
 
-void Charris::run(const std::vector<unsigned char>& image,
+void CHarris::run(const std::vector<unsigned char>& image,
                   const std::vector<unsigned char>& mask,
                   const std::vector<unsigned char>& edge,
 		  const int width, const int height,
 		  const int gspeedup, const float sigma,
-		  std::multiset<Cpoint> & result) {
+		  std::multiset<CPoint> & result) {
 
   cerr << "Harris running ..." << flush;
   m_width = width;       m_height = height;
@@ -179,7 +179,7 @@ void Charris::run(const std::vector<unsigned char>& image,
   const int w = (m_width + gridsize - 1) / gridsize;
   const int h = (m_height + gridsize - 1) / gridsize;
   
-  vector<vector<multiset<Cpoint> > > resultgrids;
+  vector<vector<multiset<CPoint> > > resultgrids;
   resultgrids.resize(h);
   for (int y = 0; y < h; ++y)
     resultgrids[y].resize(w);
@@ -195,7 +195,7 @@ void Charris::run(const std::vector<unsigned char>& image,
       
       if ((int)resultgrids[y0][x0].size() < maxPointsGrid ||
 	  resultgrids[y0][x0].begin()->m_response < m_response[y][x]) {
-	Cpoint p;
+	CPoint p;
 	p.m_icoord = Vec3f(x, y, 1.0f);
 	p.m_response = m_response[y][x];
 	p.m_type = 0;
@@ -210,8 +210,8 @@ void Charris::run(const std::vector<unsigned char>& image,
   for (int y = 0; y < h; ++y)
     for (int x = 0; x < w; ++x) {
       //const float threshold = setThreshold(resultgrids[y][x]);      
-      multiset<Cpoint>::iterator begin = resultgrids[y][x].begin();
-      multiset<Cpoint>::iterator end = resultgrids[y][x].end();
+      multiset<CPoint>::iterator begin = resultgrids[y][x].begin();
+      multiset<CPoint>::iterator end = resultgrids[y][x].end();
       while (begin != end) {
 	//if (threshold <= begin->m_response)
 	  result.insert(*begin);

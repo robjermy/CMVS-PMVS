@@ -22,24 +22,24 @@
 
 namespace PMVS3 {
   
-class CfindMatch {
+class CFindMatch {
  public:
-  CfindMatch(void);
-  virtual ~CfindMatch();
+  CFindMatch(void);
+  virtual ~CFindMatch();
 
-  void init(const PMVS3::Soption& option);
+  void init(const PMVS3::SOption& option);
   void run(void);
   void write(const std::string prefix, bool bExportPLY, bool bExportPatch, bool bExportPSet);
   
   int insideBimages(const Vec4f& coord) const;
 
-  int isNeighborRadius(const Patch::Cpatch& lhs, const Patch::Cpatch& rhs,
+  int isNeighborRadius(const Patch::CPatch& lhs, const Patch::CPatch& rhs,
                        const float hunit, const float neighborThreshold,
                        const float radius) const;
   
-  int isNeighbor(const Patch::Cpatch& lhs, const Patch::Cpatch& rhs,
+  int isNeighbor(const Patch::CPatch& lhs, const Patch::CPatch& rhs,
                  const float hunit, const float neighborThreshold) const;
-  int isNeighbor(const Patch::Cpatch& lhs, const Patch::Cpatch& rhs,
+  int isNeighbor(const Patch::CPatch& lhs, const Patch::CPatch& rhs,
                  const float neighborThreshold) const;
   
   //----------------------------------------------------------------------
@@ -142,19 +142,19 @@ class CfindMatch {
   // Core members
   //----------------------------------------------------------------------
   // Images
-  Image::CphotoSetS m_pss;
+  Image::CPhotoSetS m_pss;
   // Patch organizer
-  CpatchOrganizerS m_pos;
+  CPatchOrganizerS m_pos;
   
   // Seed generator
-  Cseed m_seed;
+  CSeed m_seed;
   // Patch expansion
-  Cexpand m_expand;
+  CExpand m_expand;
  public:
   // Patch filter
-  Cfilter m_filter;
+  CFilter m_filter;
   // Patch optimizer
-  Coptim m_optim;
+  COptim m_optim;
 
   int m_debug;
  protected:

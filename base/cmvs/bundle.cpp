@@ -24,7 +24,7 @@ using namespace std;
 using namespace boost;
 using namespace CMVS;
 
-Cbundle::Cbundle(void) {
+CBundle::CBundle(void) {
   m_CPU = 8;
   m_junit = 100;
   mtx_init(&m_lock, mtx_plain | mtx_recursive);
@@ -33,10 +33,10 @@ Cbundle::Cbundle(void) {
   m_ptree = NULL;
 }
 
-Cbundle::~Cbundle() {
+CBundle::~CBundle() {
 }
 
-void Cbundle::prep(const std::string prefix, const int imageThreshold,
+void CBundle::prep(const std::string prefix, const int imageThreshold,
                    const int tau, const float scoreRatioThreshold,
                    const float coverageThreshold,
                    const int pnumThreshold, const int CPU) {
@@ -77,7 +77,7 @@ void Cbundle::prep(const std::string prefix, const int imageThreshold,
   cerr << "done" << flush;
 }
 
-void Cbundle::prep2(void) {
+void CBundle::prep2(void) {
   // Used in mergeSfMP now.
   {
     m_pweights.resize((int)m_coords.size(), 1);
@@ -124,7 +124,7 @@ void Cbundle::prep2(void) {
   m_oimages.resize((int)m_timages.size());  
 }
 
-void Cbundle::run(const std::string prefix, const int imageThreshold,
+void CBundle::run(const std::string prefix, const int imageThreshold,
                   const int tau, const float scoreRatioThreshold,
                   const float coverageThreshold,
                   const int pnumThreshold, const int CPU) {
@@ -182,7 +182,7 @@ void Cbundle::run(const std::string prefix, const int imageThreshold,
   writeGroups();
 }
 
-float Cbundle::computeLink(const int image0, const int image1) {
+float CBundle::computeLink(const int image0, const int image1) {
   vector<int> common;
   set_intersection(m_vpoints[image0].begin(), m_vpoints[image0].end(),
                    m_vpoints[image1].begin(), m_vpoints[image1].end(),
@@ -202,7 +202,7 @@ float Cbundle::computeLink(const int image0, const int image1) {
   return score;
 }
 
-void Cbundle::slimNeighborsSetLinks(void) {
+void CBundle::slimNeighborsSetLinks(void) {
   const int maxneighbor = 30;
   m_links.clear();
   m_links.resize(m_cnum);
@@ -236,7 +236,7 @@ void Cbundle::slimNeighborsSetLinks(void) {
   }
 }
 
-void Cbundle::setScoreThresholds(void) {
+void CBundle::setScoreThresholds(void) {
 #pragma omp parallel for
   for (int p = 0; p < (int)m_coords.size(); ++p) {
     m_sfms2[p].m_scoreThreshold =
@@ -245,7 +245,7 @@ void Cbundle::setScoreThresholds(void) {
   }
 }
 
-void Cbundle::sRemoveImages(void) {
+void CBundle::sRemoveImages(void) {
   m_removed.clear();
   m_removed.resize(m_cnum, 0);
     
@@ -290,7 +290,7 @@ void Cbundle::sRemoveImages(void) {
   cerr << "sRemoveImages: " << m_cnum << " -> " << kept << flush;
 }
 
-void Cbundle::resetVisibles(void) {
+void CBundle::resetVisibles(void) {
   // reset m_visibles. remove "removed images" from the list.
   for (int p = 0; p < (int)m_visibles.size(); ++p) {
     vector<int> newimages;
@@ -300,7 +300,7 @@ void Cbundle::resetVisibles(void) {
   }
 }
 
-void Cbundle::setNewImages(const int pid, const int rimage,
+void CBundle::setNewImages(const int pid, const int rimage,
                            std::vector<int>& newimages) {
   for (int i = 0; i < (int)m_visibles[pid].size(); ++i) {
     const int image = m_visibles[pid][i];
@@ -310,7 +310,7 @@ void Cbundle::setNewImages(const int pid, const int rimage,
   }
 }
 
-void Cbundle::checkImage(const int image) {
+void CBundle::checkImage(const int image) {
   // For each SfM, check if it will be unsatisfied by removing image.
   //  0: unsatisfy
   //  1: satisfy->satisfy
@@ -413,7 +413,7 @@ void Cbundle::checkImage(const int image) {
   }
 }
 
-void Cbundle::setNeighbors(void) {
+void CBundle::setNeighbors(void) {
   m_neighbors.clear();
   m_neighbors.resize(m_cnum);
 #pragma omp parallel for
@@ -436,7 +436,7 @@ void Cbundle::setNeighbors(void) {
   } 
 }
 
-void Cbundle::setTimages(void) {
+void CBundle::setTimages(void) {
   vector<int> lhs;
   for (int c = 0; c < m_cnum; ++c)
     if (m_removed[c] == 0)
@@ -455,7 +455,7 @@ void Cbundle::setTimages(void) {
   cerr << endl;
 }
 
-void Cbundle::divideImages(const std::vector<int>& lhs,
+void CBundle::divideImages(const std::vector<int>& lhs,
                            std::vector<std::vector<int> >& rhs) {
   const float iratio = 125.0f / 150.0f;
   // Candidates
@@ -504,7 +504,7 @@ void Cbundle::divideImages(const std::vector<int>& lhs,
     }
     xadj.push_back((int)adjncy.size());
 
-    Cgraclus::runE(xadj, adjncy, adjwgt, nparts, cutType, part);
+    CGraclus::runE(xadj, adjncy, adjwgt, nparts, cutType, part);
     
     // Divide into 2 groups
     vector<int> cand1, cand2;
@@ -538,7 +538,7 @@ void Cbundle::divideImages(const std::vector<int>& lhs,
   }
 }
 
-void Cbundle::readBundle(const std::string file) {
+void CBundle::readBundle(const std::string file) {
   // For each valid image, a list of connected images, and the second
   // value is the number of common points.
   ifstream ifstr;  ifstr.open(file.c_str());
@@ -625,7 +625,7 @@ void Cbundle::readBundle(const std::string file) {
   cerr << endl << m_cnum << " cameras -- " << m_pnum << " points" << flush;
 }
 
-void Cbundle::findPNeighbors(sfcnn<const float*, 3, float>& tree,
+void CBundle::findPNeighbors(sfcnn<const float*, 3, float>& tree,
                              const int pid, std::vector<int>& pneighbors) {
   const float thresh = m_dscale2 * m_dscale2 *
     m_minScales[pid] * m_minScales[pid];
@@ -662,7 +662,7 @@ void Cbundle::findPNeighbors(sfcnn<const float*, 3, float>& tree,
   }
 }
 
-void Cbundle::mergeSfMPThread(void) {
+void CBundle::mergeSfMPThread(void) {
   const int tenth = std::max(1, (int)m_coords.size() / 10);
   while (1) {
     int pid = -1;
@@ -721,15 +721,15 @@ void Cbundle::mergeSfMPThread(void) {
   }
 }
 
-int Cbundle::mergeSfMPThreadTmp(void* arg) {
-  ((Cbundle*)arg)->mergeSfMPThread();
+int CBundle::mergeSfMPThreadTmp(void* arg) {
+  ((CBundle*)arg)->mergeSfMPThread();
   return 0;
 }
 
 // Arbitrary seed for deterministic pseudorandomness.
 static const unsigned int RANDOM_SEED = 42;
 
-void Cbundle::mergeSfMP(void) {
+void CBundle::mergeSfMP(void) {
   // Repeat certain times until no change
   const int cpnum = (int)m_coords.size();
   m_minScales.resize(cpnum);
@@ -805,7 +805,7 @@ void Cbundle::mergeSfMP(void) {
 }
 
 // Based on m_puf, reset m_coords, m_coords, m_visibles, m_vpoints
-void Cbundle::resetPoints(void) {
+void CBundle::resetPoints(void) {
   vector<int> counts;
   vector<int> smallestids;
   counts.resize((int)m_coords.size(), 0);
@@ -865,7 +865,7 @@ void Cbundle::resetPoints(void) {
     m_pweights.push_back(counts[vv2[i][1]]);
 }
 
-void Cbundle::setScoresClusters(void) {
+void CBundle::setScoresClusters(void) {
 #pragma omp parallel for
   for (int p = 0; p < (int)m_coords.size(); ++p) {
     // if m_satisfied is 0, no hope (even all the images are in the
@@ -878,7 +878,7 @@ void Cbundle::setScoresClusters(void) {
   }
 }
 
-void Cbundle::setCluster(const int p) {
+void CBundle::setCluster(const int p) {
   m_sfms2[p].m_score = -1.0f;
   m_sfms2[p].m_cluster = -1;
   for (int c = 0; c < (int)m_timages.size(); ++c) {
@@ -933,7 +933,7 @@ void Cbundle::setCluster(const int p) {
   }
 }
 
-float Cbundle::angleScore(const Vec4f& ray0, const Vec4f& ray1) {
+float CBundle::angleScore(const Vec4f& ray0, const Vec4f& ray1) {
   const static float lsigma = 5.0f * M_PI / 180.f;
   const static float rsigma = 15.0f * M_PI / 180.0f;
   const static float lsigma2 = 2.0f * lsigma * lsigma;
@@ -949,7 +949,7 @@ float Cbundle::angleScore(const Vec4f& ray0, const Vec4f& ray1) {
     return exp(- diff * diff / rsigma2);
 }
 
-void Cbundle::setClusters(void) {
+void CBundle::setClusters(void) {
 #pragma omp parallel for
   for (int p = 0; p < (int)m_sfms2.size(); ++p) {
     if (m_sfms2[p].m_satisfied != 2)
@@ -959,7 +959,7 @@ void Cbundle::setClusters(void) {
   }
 }
 
-void Cbundle::addImagesP(void) {
+void CBundle::addImagesP(void) {
   // set m_lacks (how many more sfm points need to be satisfied)
   m_lacks.resize(m_cnum);
   for (int c = 0; c < m_cnum; ++c) {
@@ -1018,7 +1018,7 @@ void Cbundle::addImagesP(void) {
        << m_cnum << " -> " << beforenum <<  " -> " << totalnum << endl;
 }
 
-int Cbundle::addImages(void) {
+int CBundle::addImages(void) {
   m_thread = 0;
   m_jobs.clear();
   
@@ -1089,7 +1089,7 @@ int Cbundle::addImages(void) {
   return addImagesSub(cands);
 }
 
-int Cbundle::addImagesSub(const std::vector<std::map<int, float> >& cands) {
+int CBundle::addImagesSub(const std::vector<std::map<int, float> >& cands) {
   // Vec3f (gain, cluster, image). Start adding starting from the good
   // one, block neighboring images.
   vector<Vec3f> cands2;
@@ -1149,14 +1149,14 @@ int Cbundle::addImagesSub(const std::vector<std::map<int, float> >& cands) {
   return accumulate(addnum.begin(), addnum.end(), 0);
 }
 
-int Cbundle::totalNum(void) const{
+int CBundle::totalNum(void) const{
   int totalnum = 0;
   for (int c = 0; c < (int)m_timages.size(); ++c)
     totalnum += (int)m_timages[c].size();
   return totalnum;
 }
 
-int Cbundle::my_isIntersect(const std::vector<int>& lhs,
+int CBundle::my_isIntersect(const std::vector<int>& lhs,
                             const std::vector<int>& rhs) {
   vector<int>::const_iterator b0 = lhs.begin();
   vector<int>::const_iterator e0 = lhs.end();
@@ -1180,7 +1180,7 @@ int Cbundle::my_isIntersect(const std::vector<int>& lhs,
   }
 }
 
-void Cbundle::mymerge(const std::vector<int>& lhs,
+void CBundle::mymerge(const std::vector<int>& lhs,
                       const std::vector<int>& rhs,
                       std::vector<int>& output) {
   vector<int>::const_iterator b0 = lhs.begin();
@@ -1223,7 +1223,7 @@ T Log2( T n )
     return log( n ) / log( T(2) );
 }
 
-void Cbundle::setWidthsHeightsLevels(void) {
+void CBundle::setWidthsHeightsLevels(void) {
   m_widths.resize(m_cnum);
   m_heights.resize(m_cnum);
   m_levels.resize(m_cnum);
@@ -1238,13 +1238,13 @@ void Cbundle::setWidthsHeightsLevels(void) {
 }
 
  
-float Cbundle::computeScore2(const Vec4f& coord,
+float CBundle::computeScore2(const Vec4f& coord,
                              const std::vector<int>& images) const {
   vector<int> uimages;
   return computeScore2(coord, images, uimages);
 }
 
-float Cbundle::computeScore2(const Vec4f& coord,
+float CBundle::computeScore2(const Vec4f& coord,
                              const std::vector<int>& images,
                              std::vector<int>& uimages) const {
   const int inum = (int)images.size();
@@ -1313,7 +1313,7 @@ float Cbundle::computeScore2(const Vec4f& coord,
   return bestscore;
 }
 
-float Cbundle::computeScore2(const Vec4f& coord,
+float CBundle::computeScore2(const Vec4f& coord,
                              const std::vector<int>& images,
                              const int index) const {
   vector<int> uimages;
@@ -1366,7 +1366,7 @@ float Cbundle::computeScore2(const Vec4f& coord,
   return bestscore;
 }
 
-void Cbundle::writeVis(void) {
+void CBundle::writeVis(void) {
   ofstream ofstr;
   char buffer[1024];
   sprintf(buffer, "%svis.dat", m_prefix.c_str());
@@ -1398,7 +1398,7 @@ void Cbundle::writeVis(void) {
   
 }
 
-void Cbundle::writeCameraCenters(void) {
+void CBundle::writeCameraCenters(void) {
   for (int i = 0; i < (int)m_timages.size(); ++i) {
     char buffer[1024];
     sprintf(buffer, "%scenters-%04d.ply", m_prefix.c_str(), i);
@@ -1451,7 +1451,7 @@ void Cbundle::writeCameraCenters(void) {
   }
 }
 
-void Cbundle::writeGroups(void) {
+void CBundle::writeGroups(void) {
   char buffer[1024];
   sprintf(buffer, "%sske.dat", m_prefix.c_str());
   ofstream ofstr;
@@ -1471,11 +1471,11 @@ void Cbundle::writeGroups(void) {
   }
 }
 
-void Cbundle::startTimer(void) {
+void CBundle::startTimer(void) {
   time(&m_tv); 
 }
 
-time_t Cbundle::curTimer(void) {
+time_t CBundle::curTimer(void) {
   time(&m_curtime); 
   return m_tv - m_curtime;
 }

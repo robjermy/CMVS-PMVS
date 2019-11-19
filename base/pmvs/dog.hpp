@@ -8,7 +8,7 @@
 #include "point.hpp"
 
 namespace PMVS3 {
-class Cdog: public Cdetector {
+class CDifferenceOfGaussians: public CDetector {
  public:
   void run (const std::vector<unsigned char>& image,
 	    const std::vector<unsigned char>& mask,
@@ -17,9 +17,9 @@ class Cdog: public Cdetector {
 	    const int gspeedup,
 	    const float firstScale,   // 1.4f
 	    const float lastScale,    // 4.0f
-	    std::multiset<Cpoint> & result);
+	    std::multiset<CPoint> & result);
 
-  virtual ~Cdog() {
+  virtual ~CDifferenceOfGaussians() {
   }
   
  protected:

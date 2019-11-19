@@ -7,34 +7,34 @@
 #include "patchOrganizerS.hpp"
 
 namespace PMVS3 {
-class CfindMatch;
+class CFindMatch;
   
-class Cexpand {
+class CExpand {
  public:
-  Cexpand(CfindMatch& findMatch);
-  ~Cexpand() {};
+  CExpand(CFindMatch& findMatch);
+  ~CExpand() {};
 
   void init(void);
   void run(void);
 
-  float computeRadius(const Patch::Cpatch& patch);
+  float computeRadius(const Patch::CPatch& patch);
   
  protected:
-  int expandSub(const Patch::Ppatch& orgppatch, const int id,
+  int expandSub(const Patch::PPatch& orgppatch, const int id,
                 const Vec4f& canCoord);
   
-  int updateCounts(const Patch::Cpatch& patch);
+  int updateCounts(const Patch::CPatch& patch);
   
-  int checkCounts(Patch::Cpatch& patch);
+  int checkCounts(Patch::CPatch& patch);
   
-  void findEmptyBlocks(const Patch::Ppatch& ppatch,
+  void findEmptyBlocks(const Patch::PPatch& ppatch,
                        std::vector<std::vector<Vec4f> >& canCoords);
  protected:
 
-  std::priority_queue<Patch::Ppatch, std::vector<Patch::Ppatch>, P_compare>
+  std::priority_queue<Patch::PPatch, std::vector<Patch::PPatch>, P_compare>
     m_queue;
   
-  CfindMatch& m_fm;
+  CFindMatch& m_fm;
   
   //-----------------------------------------------------------------
   // thread related

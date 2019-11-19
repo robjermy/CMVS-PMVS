@@ -10,13 +10,13 @@ using namespace Patch;
 using namespace PMVS3;
 using namespace std;
 
-Cfilter::Cfilter(CfindMatch& findMatch) : m_fm(findMatch) {
+CFilter::CFilter(CFindMatch& findMatch) : m_fm(findMatch) {
 }
 
-void Cfilter::init(void) {
+void CFilter::init(void) {
 }
 
-void Cfilter::run(void) {
+void CFilter::run(void) {
   setDepthMapsVGridsVPGridsAddPatchV(0);
 
   filterOutside();
@@ -32,7 +32,7 @@ void Cfilter::run(void) {
   setDepthMapsVGridsVPGridsAddPatchV(1);
 }
 
-void Cfilter::filterOutside(void) {
+void CFilter::filterOutside(void) {
   time_t tv;
   time(&tv); 
   time_t curtime = tv;
@@ -85,7 +85,7 @@ void Cfilter::filterOutside(void) {
        << "%)\t" << (tv - curtime) / CLOCKS_PER_SEC << " secs" << endl;
 }
 
-float Cfilter::computeGain(const Patch::Cpatch& patch, const int lock) {
+float CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
   float gain = patch.score2(m_fm.m_nccThreshold);
 
   const int size = (int)patch.m_images.size();  
@@ -146,7 +146,7 @@ float Cfilter::computeGain(const Patch::Cpatch& patch, const int lock) {
   return gain;
 }
 
-void Cfilter::filterOutsideThread(void) {
+void CFilter::filterOutsideThread(void) {
   mtx_lock(&m_fm.m_lock);
   const int id = m_fm.m_count++;
   mtx_unlock(&m_fm.m_lock);
@@ -157,7 +157,7 @@ void Cfilter::filterOutsideThread(void) {
   const int end = min(size, (id + 1) * itmp);
   
   for (int p = begin; p < end; ++p) {
-    Ppatch& ppatch = m_fm.m_pos.m_ppatches[p];
+    PPatch& ppatch = m_fm.m_pos.m_ppatches[p];
     m_gains[p] = ppatch->score2(m_fm.m_nccThreshold);
     
     const int size = (int)ppatch->m_images.size();  
@@ -207,12 +207,12 @@ void Cfilter::filterOutsideThread(void) {
   }
 }
 
-int Cfilter::filterOutsideThreadTmp(void* arg) {
-  ((Cfilter*)arg)->filterOutsideThread();
+int CFilter::filterOutsideThreadTmp(void* arg) {
+  ((CFilter*)arg)->filterOutsideThread();
   return 0;
 }
 
-void Cfilter::filterExact(void) {
+void CFilter::filterExact(void) {
   time_t tv;
   time(&tv); 
   time_t curtime = tv;
@@ -264,7 +264,7 @@ void Cfilter::filterExact(void) {
     if (m_fm.m_pos.m_ppatches[p]->m_fix)
       continue;
     
-    Cpatch& patch = *m_fm.m_pos.m_ppatches[p];
+    CPatch& patch = *m_fm.m_pos.m_ppatches[p];
 
     // This should be images in targetting images. Has to come before the next for-loop.
     patch.m_timages = (int)m_newimages[p].size();
@@ -297,7 +297,7 @@ void Cfilter::filterExact(void) {
        << "%)\t" << (tv - curtime) / CLOCKS_PER_SEC << " secs" << endl;
 }
 
-void Cfilter::filterExactThread(void) {
+void CFilter::filterExactThread(void) {
   const int psize = (int)m_fm.m_pos.m_ppatches.size();
   vector<vector<int> > newimages, removeimages;
   vector<vector<TVec2<int> > > newgrids, removegrids;
@@ -321,7 +321,7 @@ void Cfilter::filterExactThread(void) {
       for (int x = 0; x < w; ++x) {
         ++index;
 	for (int i = 0; i < (int)m_fm.m_pos.m_pgrids[image][index].size(); ++i) {
-	  const Cpatch& patch = *m_fm.m_pos.m_pgrids[image][index][i];
+	  const CPatch& patch = *m_fm.m_pos.m_pgrids[image][index][i];
           if (patch.m_fix)
             continue;
           
@@ -366,12 +366,12 @@ void Cfilter::filterExactThread(void) {
   mtx_unlock(&m_fm.m_lock);
 }
 
-int Cfilter::filterExactThreadTmp(void* arg) {
-  ((Cfilter*)arg)->filterExactThread();
+int CFilter::filterExactThreadTmp(void* arg) {
+  ((CFilter*)arg)->filterExactThread();
   return 0;
 }
 
-void Cfilter::filterNeighborThread(void) {
+void CFilter::filterNeighborThread(void) {
   const int size = (int)m_fm.m_pos.m_ppatches.size();  
   while (1) {
     int jtmp = -1;
@@ -388,11 +388,11 @@ void Cfilter::filterNeighborThread(void) {
     const int end = min(size, m_fm.m_junit * (jtmp + 1));
 
     for (int p = begin; p < end; ++p) {
-      Ppatch& ppatch = m_fm.m_pos.m_ppatches[p];
+      PPatch& ppatch = m_fm.m_pos.m_ppatches[p];
       if (m_rejects[p])
         continue;
       
-      vector<Ppatch> neighbors;
+      vector<PPatch> neighbors;
       //m_fm.m_pos.findNeighbors(*ppatch, neighbors, 0, 4, 2);
       m_fm.m_pos.findNeighbors(*ppatch, neighbors, 0, 4, 2, 1);
       
@@ -419,11 +419,11 @@ void Cfilter::filterNeighborThread(void) {
   const int end = min(size, (id + 1) * itmp);
 
   for (int p = begin; p < end; ++p) {
-    Ppatch& ppatch = m_fm.m_pos.m_ppatches[p];
+    PPatch& ppatch = m_fm.m_pos.m_ppatches[p];
     if (m_rejects[p])
       continue;
 
-    vector<Ppatch> neighbors;
+    vector<PPatch> neighbors;
     m_fm.m_pos.findNeighbors(*ppatch, neighbors, 0, 4, 2);
 
     //?? new filter
@@ -439,8 +439,8 @@ void Cfilter::filterNeighborThread(void) {
   */
 }
 
-int Cfilter::filterQuad(const Patch::Cpatch& patch,
-                        const std::vector<Ppatch>& neighbors) const {
+int CFilter::filterQuad(const Patch::CPatch& patch,
+                        const std::vector<PPatch>& neighbors) const {
   vector<vector<float> > A;
   vector<float> b, x;
 
@@ -507,12 +507,12 @@ int Cfilter::filterQuad(const Patch::Cpatch& patch,
     return 1;
 }
 
-int Cfilter::filterNeighborThreadTmp(void* arg) {
-  ((Cfilter*)arg)->filterNeighborThread();
+int CFilter::filterNeighborThreadTmp(void* arg) {
+  ((CFilter*)arg)->filterNeighborThread();
   return 0;
 }
   
-void Cfilter::filterNeighbor(const int times) {
+void CFilter::filterNeighbor(const int times) {
   time_t tv;
   time(&tv); 
   time_t curtime = tv;
@@ -543,8 +543,8 @@ void Cfilter::filterNeighbor(const int times) {
     for (int i = 0; i < m_fm.m_CPU; ++i)
       thrd_join(threads[i], NULL);
     
-    vector<Ppatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
-    vector<Ppatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
+    vector<PPatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
+    vector<PPatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
     vector<int>::iterator breject = m_rejects.begin();
     
     while (bpatch != epatch) {
@@ -567,7 +567,7 @@ void Cfilter::filterNeighbor(const int times) {
 //----------------------------------------------------------------------
 // Take out small connected components
 //----------------------------------------------------------------------
-void Cfilter::filterSmallGroups(void) {
+void CFilter::filterSmallGroups(void) {
   time_t tv;
   time(&tv); 
   time_t curtime = tv;
@@ -582,7 +582,7 @@ void Cfilter::filterSmallGroups(void) {
   fill(label.begin(), label.end(), -1);
 
   list<int> untouch;
-  vector<Ppatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
+  vector<PPatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
   for (int p = 0; p < psize; ++p, ++bpatch) {
     untouch.push_back(p);
     (*bpatch)->m_flag = p;
@@ -657,11 +657,11 @@ void Cfilter::filterSmallGroups(void) {
        << "%)\t" << (tv - curtime)/CLOCKS_PER_SEC << " secs" << endl;
 }
 
-void Cfilter::filterSmallGroupsSub(const int pid, const int id,
+void CFilter::filterSmallGroupsSub(const int pid, const int id,
                                    std::vector<int>& label,
                                    std::list<int>& ltmp) const {  
   // find neighbors of ptmp and set their ids
-  const Cpatch& patch = *m_fm.m_pos.m_ppatches[pid];
+  const CPatch& patch = *m_fm.m_pos.m_ppatches[pid];
   
   const int index = patch.m_images[0];
   const int ix = patch.m_grids[0][0];
@@ -682,8 +682,8 @@ void Cfilter::filterSmallGroupsSub(const int pid, const int id,
       //continue;
 
       const int index2 = iytmp * gwidth + ixtmp;
-      vector<Ppatch>::iterator bgrid = m_fm.m_pos.m_pgrids[index][index2].begin();
-      vector<Ppatch>::iterator egrid = m_fm.m_pos.m_pgrids[index][index2].end();
+      vector<PPatch>::iterator bgrid = m_fm.m_pos.m_pgrids[index][index2].begin();
+      vector<PPatch>::iterator egrid = m_fm.m_pos.m_pgrids[index][index2].end();
       while (bgrid != egrid) {
         const int itmp = (*bgrid)->m_flag;
 	if (label[itmp] != -1) {
@@ -718,7 +718,7 @@ void Cfilter::filterSmallGroupsSub(const int pid, const int id,
   }
 }
 
-void Cfilter::setDepthMaps(void) {
+void CFilter::setDepthMaps(void) {
   // initialize
   for (int index = 0; index < m_fm.m_tnum; ++index) {
     fill(m_fm.m_pos.m_dpgrids[index].begin(), m_fm.m_pos.m_dpgrids[index].end(),
@@ -733,12 +733,12 @@ void Cfilter::setDepthMaps(void) {
     thrd_join(threads[i], NULL);
 }
 
-int Cfilter::setDepthMapsThreadTmp(void* arg) {
-  ((Cfilter*)arg)->setDepthMapsThread();
+int CFilter::setDepthMapsThreadTmp(void* arg) {
+  ((CFilter*)arg)->setDepthMapsThread();
   return 0;
 }
 
-void Cfilter::setDepthMapsThread(void) {
+void CFilter::setDepthMapsThread(void) {
   while (1) {
     mtx_lock(&m_fm.m_lock);
     const int index = m_fm.m_count++;
@@ -750,11 +750,11 @@ void Cfilter::setDepthMapsThread(void) {
     const int gwidth = m_fm.m_pos.m_gwidths[index];
     const int gheight = m_fm.m_pos.m_gheights[index];
 
-    vector<Ppatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
-    vector<Ppatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
+    vector<PPatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
+    vector<PPatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
 
     while (bpatch != epatch) {
-      Ppatch& ppatch = *bpatch;
+      PPatch& ppatch = *bpatch;
       const Vec3f icoord =
         m_fm.m_pss.project(index, ppatch->m_coord, m_fm.m_level);
       
@@ -788,14 +788,14 @@ void Cfilter::setDepthMapsThread(void) {
   }
 }  
 
-void Cfilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
+void CFilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
   m_fm.m_pos.collectPatches();
   setDepthMaps();
 
   // clear m_vpgrids
   for (int index = 0; index < m_fm.m_tnum; ++index) {
-    vector<vector<Ppatch> >::iterator bvvp = m_fm.m_pos.m_vpgrids[index].begin();
-    vector<vector<Ppatch> >::iterator evvp = m_fm.m_pos.m_vpgrids[index].end();
+    vector<vector<PPatch> >::iterator bvvp = m_fm.m_pos.m_vpgrids[index].begin();
+    vector<vector<PPatch> >::iterator evvp = m_fm.m_pos.m_vpgrids[index].end();
     while (bvvp != evvp) {
       (*bvvp).clear();
       ++bvvp;
@@ -804,8 +804,8 @@ void Cfilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
 
   if (additive == 0) {
     // initialization
-    vector<Ppatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
-    vector<Ppatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
+    vector<PPatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
+    vector<PPatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
     while (bpatch != epatch) {
       (*bpatch)->m_vimages.clear();
       (*bpatch)->m_vgrids.clear();
@@ -828,17 +828,17 @@ void Cfilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
     thrd_join(threads1[i], NULL);
 }
 
-int Cfilter::setVGridsVPGridsThreadTmp(void* arg) {
-  ((Cfilter*)arg)->setVGridsVPGridsThread();
+int CFilter::setVGridsVPGridsThreadTmp(void* arg) {
+  ((CFilter*)arg)->setVGridsVPGridsThread();
   return 0;
 }
 
-int Cfilter::addPatchVThreadTmp(void* arg) {
-  ((Cfilter*)arg)->addPatchVThread();
+int CFilter::addPatchVThreadTmp(void* arg) {
+  ((CFilter*)arg)->addPatchVThread();
   return 0;
 }
 
-void Cfilter::setVGridsVPGridsThread(void) {
+void CFilter::setVGridsVPGridsThread(void) {
   const int noj = 1000;
   const int size = (int)m_fm.m_pos.m_ppatches.size();    
   const int job = max(1, size / (noj - 1));
@@ -856,13 +856,13 @@ void Cfilter::setVGridsVPGridsThread(void) {
     
     // add patches to m_vpgrids
     for (int p = begin; p < end; ++p) {
-      Ppatch& ppatch = m_fm.m_pos.m_ppatches[p];
+      PPatch& ppatch = m_fm.m_pos.m_ppatches[p];
       m_fm.m_pos.setVImagesVGrids(ppatch);
     }
   }
 }
 
-void Cfilter::addPatchVThread(void) {
+void CFilter::addPatchVThread(void) {
   while (1) {
     mtx_lock(&m_fm.m_lock);
     const int index = m_fm.m_count++;
@@ -871,10 +871,10 @@ void Cfilter::addPatchVThread(void) {
     if (m_fm.m_tnum <= index)
       break;
     
-    vector<Ppatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
-    vector<Ppatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
+    vector<PPatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
+    vector<PPatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
     while (bpatch != epatch) {
-      Ppatch& ppatch = *bpatch;
+      PPatch& ppatch = *bpatch;
       vector<int>::iterator bimage = ppatch->m_vimages.begin();
       vector<int>::iterator eimage = ppatch->m_vimages.end();
       vector<Vec2i>::iterator bgrid = ppatch->m_vgrids.begin();

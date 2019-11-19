@@ -7,19 +7,19 @@
 
 namespace PMVS3 {
   
-class CfindMatch;
+class CFindMatch;
   
-class Cfilter {
+class CFilter {
  public:
-  Cfilter(CfindMatch& findMatch);
+  CFilter(CFindMatch& findMatch);
 
   void init(void);
   void run(void);
 
-  float computeGain(const Patch::Cpatch& patch, const int lock);
+  float computeGain(const Patch::CPatch& patch, const int lock);
 
-  int filterQuad(const Patch::Cpatch& patch,
-                 const std::vector<Patch::Ppatch>& neighbors) const;
+  int filterQuad(const Patch::CPatch& patch,
+                 const std::vector<Patch::PPatch>& neighbors) const;
   
   
  protected:
@@ -64,7 +64,7 @@ class Cfilter {
   void filterNeighborThread(void);
   static int filterNeighborThreadTmp(void* arg);
   
-  CfindMatch& m_fm;
+  CFindMatch& m_fm;
   
 };
 };

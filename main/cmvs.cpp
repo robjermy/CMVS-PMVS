@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
 
   const int iNumForScore = 4;
   const int pnumThreshold = 0;
-  CMVS::Cbundle bundle;
+  CMVS::CBundle bundle;
   bundle.run(argv[1], maximage, iNumForScore,
              scoreRatioThreshold, coverageThreshold,
              pnumThreshold, CPU);

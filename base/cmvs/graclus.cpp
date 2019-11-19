@@ -5,16 +5,16 @@ using namespace CMVS;
 using namespace std;
 
 
-Cgraclus::Cgraclus(void) {
+CGraclus::CGraclus(void) {
 }
 
-Cgraclus::~Cgraclus() {
+CGraclus::~CGraclus() {
 }
 
 /*************************************************************************
 * This function reads the spd matrix
 **************************************************************************/
-void Cgraclus::initGraph(GraphType& graph) {
+void CGraclus::initGraph(GraphType& graph) {
   graph.gdata = graph.rdata = NULL;
 
   graph.nvtxs = graph.nedges = -1;
@@ -44,7 +44,7 @@ void Cgraclus::initGraph(GraphType& graph) {
 //----------------------------------------------------------------------
 // cutType
 // 0: NCUT, 1: RASSO
-void Cgraclus::run(std::vector<idxtype>& xadj,
+void CGraclus::run(std::vector<idxtype>& xadj,
                    std::vector<idxtype>& adjncy,
                    const int nparts, const int cutType,
                    std::vector<idxtype>& part) {
@@ -65,7 +65,7 @@ void Cgraclus::run(std::vector<idxtype>& xadj,
   runSub(graph, nparts, cutType, wgtflag, part);
 }
 
-void Cgraclus::runV(std::vector<idxtype>& xadj,
+void CGraclus::runV(std::vector<idxtype>& xadj,
                     std::vector<idxtype>& adjncy,
                     std::vector<idxtype>& vwgt,
                     const int nparts, const int cutType,
@@ -88,7 +88,7 @@ void Cgraclus::runV(std::vector<idxtype>& xadj,
 }
 
 //----------------------------------------------------------------------
-void Cgraclus::runE(std::vector<idxtype>& xadj,
+void CGraclus::runE(std::vector<idxtype>& xadj,
                     std::vector<idxtype>& adjncy,
                     std::vector<idxtype>& adjwgt,
                     const int nparts, const int cutType,
@@ -110,7 +110,7 @@ void Cgraclus::runE(std::vector<idxtype>& xadj,
   runSub(graph, nparts, cutType, wgtflag, part);
 }
 
-void Cgraclus::runVE(std::vector<idxtype>& xadj,
+void CGraclus::runVE(std::vector<idxtype>& xadj,
                      std::vector<idxtype>& adjncy,
                      std::vector<idxtype>& vwgt,
                      std::vector<idxtype>& adjwgt,
@@ -133,13 +133,13 @@ void Cgraclus::runVE(std::vector<idxtype>& xadj,
   runSub(graph, nparts, cutType, wgtflag, part);
 }
 
-int Cgraclus::mylog2(int a) {
+int CGraclus::mylog2(int a) {
   int i;
   for (i = 1 ; a > 1; i++, a = a>>1);
   return i-1;
 }
 
-void Cgraclus::runSub(GraphType& graph, int nparts, int cutType,
+void CGraclus::runSub(GraphType& graph, int nparts, int cutType,
                       int wgtflag, std::vector<idxtype>& part) {
   const int levels =
     amax((graph.nvtxs)/(40*mylog2(nparts)), 20*(nparts));

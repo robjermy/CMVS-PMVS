@@ -4,7 +4,7 @@
 
 using namespace std;
 
-std::istream& Patch::operator >>(std::istream& istr, Cpatch& rhs) {
+std::istream& Patch::operator >>(std::istream& istr, CPatch& rhs) {
   string header;
   int itmp;
   istr >> header >> rhs.m_coord >> rhs.m_normal >> rhs.m_ncc
@@ -28,7 +28,7 @@ std::istream& Patch::operator >>(std::istream& istr, Cpatch& rhs) {
   return istr;
 }
 
-std::ostream& Patch::operator <<(std::ostream& ostr, const Cpatch& rhs) {
+std::ostream& Patch::operator <<(std::ostream& ostr, const CPatch& rhs) {
   ostr << "PATCHS" << endl
        << rhs.m_coord << endl
        << rhs.m_normal << endl

@@ -13,13 +13,13 @@ using namespace PMVS3;
 using namespace std;
 using namespace Patch;
 
-Cexpand::Cexpand(CfindMatch& findMatch) : m_fm(findMatch) {
+CExpand::CExpand(CFindMatch& findMatch) : m_fm(findMatch) {
 }
 
-void Cexpand::init(void) {
+void CExpand::init(void) {
 }
 
-void Cexpand::run(void) {
+void CExpand::run(void) {
   m_fm.m_count = 0;
   m_fm.m_jobs.clear();
   m_ecounts.resize(m_fm.m_CPU);
@@ -68,18 +68,18 @@ void Cexpand::run(void) {
        << 100 * (pass + fail1) / (float)trial << endl;
   
 }
-int Cexpand::expandThreadTmp(void* arg) {
-  ((Cexpand*)arg)->expandThread();
+int CExpand::expandThreadTmp(void* arg) {
+  ((CExpand*)arg)->expandThread();
   return 0;
 }
 
-void Cexpand::expandThread(void) {
+void CExpand::expandThread(void) {
   mtx_lock(&m_fm.m_lock);
   const int id = m_fm.m_count++;
   mtx_unlock(&m_fm.m_lock);
 
   while (1) {
-    Ppatch ppatch;
+    PPatch ppatch;
     int empty = 0;
     mtx_lock(&m_fm.m_lock);
     if (m_queue.empty())
@@ -108,11 +108,11 @@ void Cexpand::expandThread(void) {
   }
 }
 
-void Cexpand::findEmptyBlocks(const Ppatch& ppatch,
+void CExpand::findEmptyBlocks(const PPatch& ppatch,
 			      std::vector<std::vector<Vec4f> >& canCoords) {
   // dnum must be at most 8, because m_dflag is char
   const int dnum = 6;
-  const Cpatch& patch = *ppatch;
+  const CPatch& patch = *ppatch;
 
   // Empty six directions
   Vec4f xdir, ydir;
@@ -140,11 +140,11 @@ void Cexpand::findEmptyBlocks(const Ppatch& ppatch,
   const float radiuslow = radius / 6.0f;//2.0f;
   const float radiushigh = radius * 2.5f;//2.0f;//1.5f;
   
-  vector<Ppatch> neighbors;
+  vector<PPatch> neighbors;
   m_fm.m_pos.findNeighbors(patch, neighbors, 1, 4.0f);//3.0f);
 
-  vector<Ppatch>::iterator bpatch = neighbors.begin();
-  vector<Ppatch>::iterator epatch = neighbors.end();
+  vector<PPatch>::iterator bpatch = neighbors.begin();
+  vector<PPatch>::iterator epatch = neighbors.end();
   while (bpatch != epatch) {
     const Vec4f diff = (*bpatch)->m_coord - ppatch->m_coord;
     Vec2f f2(diff * xdir, diff * ydir);
@@ -187,7 +187,7 @@ void Cexpand::findEmptyBlocks(const Ppatch& ppatch,
   }
 }
 
-float Cexpand::computeRadius(const Patch::Cpatch& patch) {
+float CExpand::computeRadius(const Patch::CPatch& patch) {
   const int minnum = 2;
   vector<float> units;
   m_fm.m_optim.computeUnits(patch, units);
@@ -205,10 +205,10 @@ float Cexpand::computeRadius(const Patch::Cpatch& patch) {
   return (*(vftmp.begin() + minnum - 1)) * m_fm.m_csize;
 }
 
-int Cexpand::expandSub(const Ppatch& orgppatch, const int id,
+int CExpand::expandSub(const PPatch& orgppatch, const int id,
                        const Vec4f& canCoord) {
   // Choose the closest one
-  Cpatch patch;
+  CPatch patch;
   patch.m_coord = canCoord;
   patch.m_normal = orgppatch->m_normal;
   patch.m_flag = 1;
@@ -253,7 +253,7 @@ int Cexpand::expandSub(const Ppatch& orgppatch, const int id,
 
   //-----------------------------------------------------------------
   // Finally
-  Ppatch ppatch(new Cpatch(patch));
+  PPatch ppatch(new CPatch(patch));
 
   //patch.m_images = orgppatch->m_images;
   const int add = updateCounts(patch);
@@ -269,7 +269,7 @@ int Cexpand::expandSub(const Ppatch& orgppatch, const int id,
   return 0;
 }
 
-int Cexpand::checkCounts(Patch::Cpatch& patch) {
+int CExpand::checkCounts(Patch::CPatch& patch) {
   int full = 0;  int empty = 0;
 
   vector<int>::iterator begin = patch.m_images.begin();
@@ -329,7 +329,7 @@ int Cexpand::checkCounts(Patch::Cpatch& patch) {
   }
 }
 
-int Cexpand::updateCounts(const Cpatch& patch) {
+int CExpand::updateCounts(const CPatch& patch) {
   // Use m_images and m_vimages. Loosen when to set add = 1
   int full = 0;  int empty = 0;
 

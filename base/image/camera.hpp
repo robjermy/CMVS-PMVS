@@ -11,10 +11,10 @@
 
 namespace Image {
 
-class Ccamera {
+class CCamera {
  public:
-  Ccamera(void);
-  virtual ~Ccamera();
+  CCamera(void);
+  virtual ~CCamera();
   
   // Update projection matrices from intrinsics and extrinsics
   void updateProjection(void);
@@ -90,7 +90,7 @@ class Ccamera {
   Vec4f getOpticalCenter(void) const;
 };
 
-inline Vec3f Ccamera::project(const Vec4f& coord,
+inline Vec3f CCamera::project(const Vec4f& coord,
 			      const int level) const {
   Vec3f vtmp;    
   for (int i = 0; i < 3; ++i)
@@ -115,7 +115,7 @@ inline Vec3f Ccamera::project(const Vec4f& coord,
   return vtmp;
 };
 
-inline Vec3f Ccamera::mult(const Vec4f& coord,
+inline Vec3f CCamera::mult(const Vec4f& coord,
 			      const int level) const {
   Vec3f vtmp;    
   for (int i = 0; i < 3; ++i)
@@ -136,7 +136,7 @@ float computeEPD(const TMat3<T>& F, const TVec3<T>& p0, const TVec3<T>& p1) {
 };
 
 template<class T>
-void setF(const Image::Ccamera& lhs, const Image::Ccamera& rhs,
+void setF(const Image::CCamera& lhs, const Image::CCamera& rhs,
 	  TMat3<T>& F, const int level = 0) {
   const TVec4<T>& p00 = lhs.m_projection[level][0];
   const TVec4<T>& p01 = lhs.m_projection[level][1];

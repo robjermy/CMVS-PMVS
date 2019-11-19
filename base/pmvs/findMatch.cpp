@@ -11,12 +11,12 @@ using namespace PMVS3;
 using namespace std;
 using namespace Patch;
 
-CfindMatch::CfindMatch(void)
+CFindMatch::CFindMatch(void)
   : m_pos(*this), m_seed(*this), m_expand(*this), m_filter(*this), m_optim(*this) {
   m_debug = 0;
 }
 
-CfindMatch::~CfindMatch() {
+CFindMatch::~CFindMatch() {
   mtx_destroy(&m_lock);
 
   for (int image = 0; image < (int)m_imageLocks.size(); ++image)
@@ -25,14 +25,14 @@ CfindMatch::~CfindMatch() {
     m_countLocks[image].destroy();
 }
 
-void CfindMatch::updateThreshold(void) {
+void CFindMatch::updateThreshold(void) {
   m_nccThreshold -= 0.05f;
   m_nccThresholdBefore -= 0.05f;
   
   m_countThreshold1 = 2;
 }
 
-void CfindMatch::init(const Soption& option) {
+void CFindMatch::init(const SOption& option) {
   m_timages = option.m_timages;
   m_oimages = option.m_oimages;
   m_images.clear();
@@ -83,7 +83,7 @@ void CfindMatch::init(const Soption& option) {
   m_pss.setDistances();
 
   // Detect features if not yet done
-  CdetectFeatures df;
+  CDetectFeatures df;
   const int fcsize = 16;
   df.run(m_pss, m_num, fcsize, m_level, m_CPU);  
   
@@ -116,7 +116,7 @@ void CfindMatch::init(const Soption& option) {
   m_epThreshold = 2.0f;
 }
 
-int CfindMatch::insideBimages(const Vec4f& coord) const {
+int CFindMatch::insideBimages(const Vec4f& coord) const {
   for (int i = 0; i < (int)m_bindexes.size(); ++i) {
     const int index = m_bindexes[i];
     const Vec3f icoord = m_pss.project(index, coord, m_level);
@@ -127,7 +127,7 @@ int CfindMatch::insideBimages(const Vec4f& coord) const {
   return 1;
 }
 
-int CfindMatch::isNeighbor(const Patch::Cpatch& lhs, const Patch::Cpatch& rhs,
+int CFindMatch::isNeighbor(const Patch::CPatch& lhs, const Patch::CPatch& rhs,
                            const float neighborThreshold) const {  
   const float hunit = (m_optim.getUnit(lhs.m_images[0], lhs.m_coord) +
                        m_optim.getUnit(rhs.m_images[0], rhs.m_coord)) / 2.0
@@ -135,7 +135,7 @@ int CfindMatch::isNeighbor(const Patch::Cpatch& lhs, const Patch::Cpatch& rhs,
   return isNeighbor(lhs, rhs, hunit, neighborThreshold);
 }
 
-int CfindMatch::isNeighbor(const Patch::Cpatch& lhs, const Patch::Cpatch& rhs,
+int CFindMatch::isNeighbor(const Patch::CPatch& lhs, const Patch::CPatch& rhs,
                            const float hunit, const float neighborThreshold) const {
   if (lhs.m_normal * rhs.m_normal < cos(120.0 * M_PI / 180.0))
     return 0;
@@ -159,8 +159,8 @@ int CfindMatch::isNeighbor(const Patch::Cpatch& lhs, const Patch::Cpatch& rhs,
     return 0;
 }
 
-int CfindMatch::isNeighborRadius(const Patch::Cpatch& lhs,
-                                 const Patch::Cpatch& rhs,
+int CFindMatch::isNeighborRadius(const Patch::CPatch& lhs,
+                                 const Patch::CPatch& rhs,
                                  const float hunit,
                                  const float neighborThreshold,
                                  const float radius) const {
@@ -191,7 +191,7 @@ int CfindMatch::isNeighborRadius(const Patch::Cpatch& lhs,
     return 0;
 }
 
-void CfindMatch::run(void) {
+void CFindMatch::run(void) {
   time_t tv;
   time(&tv); 
   time_t curtime = tv;
@@ -228,6 +228,6 @@ void CfindMatch::run(void) {
   cerr << "---- Total: " << (tv - curtime)/CLOCKS_PER_SEC << " secs ----" << endl;
 }
 
-void CfindMatch::write(const std::string prefix, bool bExportPLY, bool bExportPatch, bool bExportPSet) {
+void CFindMatch::write(const std::string prefix, bool bExportPLY, bool bExportPatch, bool bExportPSet) {
   m_pos.writePatches2(prefix, bExportPLY, bExportPatch, bExportPSet);
 }

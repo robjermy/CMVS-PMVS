@@ -12,24 +12,24 @@
 #include "point.hpp"
 
 namespace Image {
-  class CphotoSetS;
+  class CPhotoSetS;
 };
 
 namespace PMVS3 {
 
-class CdetectFeatures {
+class CDetectFeatures {
  public:
-  CdetectFeatures(void);
-  virtual ~CdetectFeatures();
+  CDetectFeatures(void);
+  virtual ~CDetectFeatures();
 
-  void run(const Image::CphotoSetS& pss,
+  void run(const Image::CPhotoSetS& pss,
            const int num, const int csize, const int level,
            const int CPU = 1);
 
-  std::vector<std::vector<Cpoint> > m_points;
+  std::vector<std::vector<CPoint> > m_points;
   
  protected:
-  const Image::CphotoSetS* m_ppss;
+  const Image::CPhotoSetS* m_ppss;
   int m_csize;
   int m_level;
   

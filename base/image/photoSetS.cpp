@@ -7,14 +7,14 @@
 using namespace std;
 using namespace Image;
 
-CphotoSetS::CphotoSetS(void) {
+CPhotoSetS::CPhotoSetS(void) {
 }
 
-CphotoSetS::~CphotoSetS() {
+CPhotoSetS::~CPhotoSetS() {
 }
 
 
-void CphotoSetS::init(const std::vector<int>& images, const std::string prefix,
+void CPhotoSetS::init(const std::vector<int>& images, const std::string prefix,
                       const int maxLevel, const int size, const int alloc) {
   m_images = images;
   m_num = (int)images.size();
@@ -99,22 +99,22 @@ void CphotoSetS::init(const std::vector<int>& images, const std::string prefix,
   m_size = 2 * margin + 1;
 }
 
-void CphotoSetS::free(void) {
+void CPhotoSetS::free(void) {
   for (int index = 0; index < (int)m_photos.size(); ++index)
     m_photos[index].free();
 }
 
-void CphotoSetS::free(const int level) {
+void CPhotoSetS::free(const int level) {
   for (int index = 0; index < (int)m_photos.size(); ++index)
     m_photos[index].free(level);
 }
 
-void CphotoSetS::setEdge(const float threshold) {
+void CPhotoSetS::setEdge(const float threshold) {
   for (int index = 0; index < m_num; ++index)
     m_photos[index].setEdge(threshold);
 }
 
-void CphotoSetS::write(const std::string outdir) {
+void CPhotoSetS::write(const std::string outdir) {
   for (int index = 0; index < m_num; ++index) {
     const int image = m_images[index];
     char buffer[1024];
@@ -125,19 +125,19 @@ void CphotoSetS::write(const std::string outdir) {
 }
 
 // get x and y axis to collect textures given reference index and normal
-void CphotoSetS::getPAxes(const int index, const Vec4f& coord, const Vec4f& normal,
+void CPhotoSetS::getPAxes(const int index, const Vec4f& coord, const Vec4f& normal,
                           Vec4f& pxaxis, Vec4f& pyaxis) const{
   m_photos[index].getPAxes(coord, normal, pxaxis, pyaxis);
 }
 
-void CphotoSetS::grabTex(const int index, const int level, const Vec2f& icoord,
+void CPhotoSetS::grabTex(const int index, const int level, const Vec2f& icoord,
                          const Vec2f& xaxis, const Vec2f& yaxis,
                          std::vector<Vec3f>& tex, const int normalizef) const{
   m_photos[index].grabTex(level, icoord, xaxis, yaxis, m_size, tex, normalizef);
 }
 
 // grabTex given 3D sampling information
-void CphotoSetS::grabTex(const int index, const int level, const Vec4f& coord,
+void CPhotoSetS::grabTex(const int index, const int level, const Vec4f& coord,
                          const Vec4f& pxaxis, const Vec4f& pyaxis, const Vec4f& pzaxis,
                          std::vector<Vec3f>& tex, float& weight,
                          const int normalizef) const {
@@ -145,7 +145,7 @@ void CphotoSetS::grabTex(const int index, const int level, const Vec4f& coord,
                           m_size, tex, weight, normalizef);
 }
 
-float CphotoSetS::incc(const std::vector<std::vector<Vec3f> >& texs,
+float CPhotoSetS::incc(const std::vector<std::vector<Vec3f> >& texs,
                        const std::vector<float>& weights) {
   float incctmp = 0.0;
   float denom = 0.0;
@@ -157,7 +157,7 @@ float CphotoSetS::incc(const std::vector<std::vector<Vec3f> >& texs,
 	continue;
       
       const float weight = weights[i] * weights[j];
-      const float ftmp = Cphoto::idot(texs[i], texs[j]);
+      const float ftmp = CPhoto::idot(texs[i], texs[j]);
       incctmp += ftmp * weight;
       denom += weight;
     }
@@ -169,7 +169,7 @@ float CphotoSetS::incc(const std::vector<std::vector<Vec3f> >& texs,
     return incctmp / denom;
 }
 
-void CphotoSetS::getMinMaxAngles(const Vec4f& coord, const std::vector<int>& indexes,
+void CPhotoSetS::getMinMaxAngles(const Vec4f& coord, const std::vector<int>& indexes,
                                  float& minAngle, float& maxAngle) const {
   minAngle = M_PI;
   maxAngle = 0.0f;
@@ -190,7 +190,7 @@ void CphotoSetS::getMinMaxAngles(const Vec4f& coord, const std::vector<int>& ind
   }
 }
 
-int CphotoSetS::checkAngles(const Vec4f& coord,
+int CPhotoSetS::checkAngles(const Vec4f& coord,
                             const std::vector<int>& indexes,
                             const float minAngle, const float maxAngle,
                             const int num) const {
@@ -219,11 +219,11 @@ int CphotoSetS::checkAngles(const Vec4f& coord,
     return 0;
 }
 
-float CphotoSetS::computeDepth(const int index, const Vec4f& coord) const {
+float CPhotoSetS::computeDepth(const int index, const Vec4f& coord) const {
   return m_photos[index].computeDepth(coord);
 }
 
-void CphotoSetS::setDistances(void) {
+void CPhotoSetS::setDistances(void) {
   m_distances.resize(m_num);
   float avedis = 0.0f;
   int denom = 0;
@@ -265,7 +265,7 @@ void CphotoSetS::setDistances(void) {
   }
 }
 
-int CphotoSetS::image2index(const int image) const {
+int CPhotoSetS::image2index(const int image) const {
   map<int, int>::const_iterator pos = m_dict.find(image);
   if (pos == m_dict.end())
     return -1;
