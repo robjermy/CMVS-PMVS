@@ -521,8 +521,7 @@ void Coptim::computeUnits(const Patch::Cpatch& patch,
   }
 }
 
-void Coptim::refinePatch(Cpatch& patch, const int id,
-                         const int time) {
+void Coptim::refinePatch(Cpatch& patch, const int id, const int time) {
   if(!refinePatchBFGS(patch, id, 1000, 1))
 	  std::cout << "refinePatchBFGS failed!" << std::endl;
 
