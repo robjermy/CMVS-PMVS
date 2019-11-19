@@ -1,5 +1,5 @@
 #include <iostream>
-#include "graclus.h"
+#include "graclus.hpp"
 
 using namespace CMVS;
 using namespace std;

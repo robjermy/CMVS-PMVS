@@ -7,8 +7,8 @@
 #include <omp.h>
 #endif
 
-#include "graclus.h"
-#include "bundle.h"
+#include "graclus.hpp"
+#include "bundle.hpp"
 #define _USE_MATH_DEFINES
 #include <math.h>
 
