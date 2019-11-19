@@ -11,70 +11,70 @@ namespace Patch {
 class CPatch {
  public:
   CPatch(void) {
-    m_ncc = -1.0;
-    m_timages = 0;
-    m_fix = 0;
+    _ncc = -1.0;
+    _timages = 0;
+    _fix = 0;
     // dflag is initialized only once. if failed in one direction, we
     // never try that.
-    m_dflag = 0;
+    _dflag = 0;
 
     // All non-class member variables need to be initialized so that
     // they aren't just uninitialized memory.
-    m_flag = 0;
-    m_id = 0;
-    m_dscale = 0;
-    m_ascale = 0;
-    m_tmp = 0;
+    _flag = 0;
+    _id = 0;
+    _dscale = 0;
+    _ascale = 0;
+    _tmp = 0;
   }
   
   //----------------------------------------------------------------------
   // saved information
   // 3D coordinates of the center of the patch
-  Vec4f m_coord;
+  Vec4f _coord;
   // patch outward normal vector
-  Vec4f m_normal;
+  Vec4f _normal;
   
   // associated image ids. first image id is the reference one. images
   // can be non-targetting image.
-  std::vector<int> m_images;
-  std::vector<TVec2<int> > m_grids;
+  std::vector<int> _images;
+  std::vector<TVec2<int> > _grids;
   
-  // visible images. m_vimages must be targetting images.
-  std::vector<int> m_vimages;
-  std::vector<TVec2<int> > m_vgrids;
+  // visible images. _vimages must be targetting images.
+  std::vector<int> _vimages;
+  std::vector<TVec2<int> > _vgrids;
   
   //----------------------------------------------------------------------
   inline float score(const float threshold) const{
-    return std::max(0.0f, m_ncc - threshold) * (int)m_images.size();
+    return std::max(0.0f, _ncc - threshold) * (int)_images.size();
   }
   inline float score2(const float threshold) const{
-    return std::max(0.0f, m_ncc - threshold) * m_timages;
+    return std::max(0.0f, _ncc - threshold) * _timages;
   }
 
   // average ncc
-  float m_ncc;
-  // number of targetting images in m_images
-  int m_timages;
+  float _ncc;
+  // number of targetting images in _images
+  int _timages;
 
   // flat for expansion
   // 0: not yet tested
   // 1: done
-  int m_flag;
+  int _flag;
 
   // for directional flag
-  unsigned char m_dflag;
+  unsigned char _dflag;
 
   // fixed patch or not
-  char m_fix;
+  char _fix;
   
-  // id number in m_ppatches
-  int m_id;
+  // id number in _ppatches
+  int _id;
 
   // scaling factor corresponding to one pixel difference
-  float m_dscale;
-  float m_ascale;
+  float _dscale;
+  float _ascale;
   
-  float m_tmp;
+  float _tmp;
 };
 
 typedef boost::shared_ptr<CPatch> PPatch;

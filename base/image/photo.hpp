@@ -60,7 +60,7 @@ Vec3f CPhoto::getColor(const Vec4f& coord, const int level) const {
 };
   
 int CPhoto::getMask(const Vec4f& coord, const int level) const {
-  if (m_masks[level].empty())
+  if (_masks[level].empty())
     return 1;
   
   const Vec3f icoord = project(coord, level);
@@ -68,13 +68,13 @@ int CPhoto::getMask(const Vec4f& coord, const int level) const {
 };
 
 int CPhoto::getEdge(const Vec4f& coord, const int level) const {
-  if (m_edges[level].empty())
+  if (_edges[level].empty())
     return 1;
   
   const Vec3f icoord = project(coord, level);
 
-  if (icoord[0] < 0 || m_widths[level] - 1 <= icoord[0] ||
-      icoord[1] < 0 || m_heights[level] - 1 <= icoord[1])
+  if (icoord[0] < 0 || _widths[level] - 1 <= icoord[0] ||
+      icoord[1] < 0 || _heights[level] - 1 <= icoord[1])
     return 0;
   
   return CImage::getEdge(icoord[0], icoord[1], level);

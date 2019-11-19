@@ -44,119 +44,119 @@ class CFindMatch {
   
   //----------------------------------------------------------------------
   // num of target images
-  int m_tnum;
+  int _tnum;
   // num of total images
-  int m_num;
+  int _num;
   // target images
-  std::vector<int> m_timages;
+  std::vector<int> _timages;
   // other images where patches are not computed
-  std::vector<int> m_oimages;
+  std::vector<int> _oimages;
   // total images
-  std::vector<int> m_images;
+  std::vector<int> _images;
   
   // prefix
-  std::string m_prefix;
+  std::string _prefix;
   // level
-  int m_level;
+  int _level;
   // cellsize
-  int m_csize;
+  int _csize;
   // nccThreshold
-  float m_nccThreshold;  
+  float _nccThreshold;  
   // windows size
-  int m_wsize;
+  int _wsize;
   // mininum image num threshold
-  int m_minImageNumThreshold;
+  int _minImageNumThreshold;
   // use edge detection or not
-  float m_setEdge;
+  float _setEdge;
   // bounding images
-  std::vector<int> m_bindexes;
-  // visdata from SfM. m_num x m_num matrix
-  std::vector<std::vector<int> > m_visdata;
+  std::vector<int> _bindexes;
+  // visdata from SfM. _num x _num matrix
+  std::vector<std::vector<int> > _visdata;
   // an array of relavant images
-  std::vector<std::vector<int> > m_visdata2;  
+  std::vector<std::vector<int> > _visdata2;  
   // sequence Threshold
-  int m_sequenceThreshold;
+  int _sequenceThreshold;
   // CPU
-  int m_CPU;
+  int _CPU;
   // Threshold on filterQuad
-  float m_quadThreshold;
+  float _quadThreshold;
   
   // Maximum number of images used in the optimization
-  int m_tau;
+  int _tau;
 
   // If patches are dense or not, that is, if we use check(patch) after patch optimization
-  int m_depth;
+  int _depth;
   
   //----------------------------------------------------------------------
   // Thresholds
   //----------------------------------------------------------------------
   // For first feature matching. Images within this angle are used in
   // matching.
-  float m_angleThreshold0;
+  float _angleThreshold0;
   // tigher angle
-  float m_angleThreshold1;
+  float _angleThreshold1;
 
   // Number of success generation from each seed point
-  int m_countThreshold0;
+  int _countThreshold0;
   // Number of counts, expansion can be tried
-  int m_countThreshold1;
+  int _countThreshold1;
 
   // Number of trials for each cell in seed
-  int m_countThreshold2;
+  int _countThreshold2;
   
   // Parameter for isNeighbor in findemptyblocks
-  float m_neighborThreshold;
+  float _neighborThreshold;
   // Parameter for isNeighbor in filterOutside
-  float m_neighborThreshold1;
+  float _neighborThreshold1;
   // Parameter for filterNeighbor
-  float m_neighborThreshold2;
+  float _neighborThreshold2;
 
   // ncc threshold before optim
-  float m_nccThresholdBefore;
+  float _nccThresholdBefore;
   // Maximum angle of images must be at least as large as this
-  float m_maxAngleThreshold;
+  float _maxAngleThreshold;
 
   // visibility consistency threshold
-  float m_visibleThreshold;
-  float m_visibleThresholdLoose;
+  float _visibleThreshold;
+  float _visibleThresholdLoose;
     
   // Epipolar distance in seed generation
-  float m_epThreshold;
+  float _epThreshold;
   
   //----------------------------------------------------------------------
   // For threads related
   //----------------------------------------------------------------------
   // General lock
-  mtx_t m_lock;
+  mtx_t _lock;
   // For each image
-  std::vector<RWMutex> m_imageLocks;
-  std::vector<RWMutex> m_countLocks;
+  std::vector<RWMutex> _imageLocks;
+  std::vector<RWMutex> _countLocks;
   // count
-  int m_count;
+  int _count;
   // jobs
-  std::list<int> m_jobs;
+  std::list<int> _jobs;
   // job unit
-  int m_junit;
+  int _junit;
 
   //----------------------------------------------------------------------
   // Core members
   //----------------------------------------------------------------------
   // Images
-  Image::CPhotoSetS m_pss;
+  Image::CPhotoSetS _pss;
   // Patch organizer
-  CPatchOrganizerS m_pos;
+  CPatchOrganizerS _pos;
   
   // Seed generator
-  CSeed m_seed;
+  CSeed _seed;
   // Patch expansion
-  CExpand m_expand;
+  CExpand _expand;
  public:
   // Patch filter
-  CFilter m_filter;
+  CFilter _filter;
   // Patch optimizer
-  COptim m_optim;
+  COptim _optim;
 
-  int m_debug;
+  int _debug;
  protected:
   void init(void);
   void initTargets(void);

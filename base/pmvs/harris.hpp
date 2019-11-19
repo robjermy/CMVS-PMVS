@@ -22,20 +22,20 @@ class CHarris: public CDetector {
   }
   
  protected:
-  float m_sigmaD;
-  float m_sigmaI;
+  float _sigmaD;
+  float _sigmaI;
   
-  std::vector<float> m_gaussD;
-  std::vector<float> m_gaussI;
+  std::vector<float> _gaussD;
+  std::vector<float> _gaussI;
   
-  std::vector<std::vector<Vec3f> > m_dIdx;
-  std::vector<std::vector<Vec3f> > m_dIdy;
+  std::vector<std::vector<Vec3f> > _dIdx;
+  std::vector<std::vector<Vec3f> > _dIdy;
   
-  std::vector<std::vector<float> > m_dIdxdIdx;
-  std::vector<std::vector<float> > m_dIdydIdy;
-  std::vector<std::vector<float> > m_dIdxdIdy;
+  std::vector<std::vector<float> > _dIdxdIdx;
+  std::vector<std::vector<float> > _dIdydIdy;
+  std::vector<std::vector<float> > _dIdxdIdy;
 
-  std::vector<std::vector<float> > m_response;
+  std::vector<std::vector<float> > _response;
   
   void init(const std::vector<unsigned char>& image,
             const std::vector<unsigned char>& mask,

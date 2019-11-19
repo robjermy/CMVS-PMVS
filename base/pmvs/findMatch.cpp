@@ -12,116 +12,116 @@ using namespace std;
 using namespace Patch;
 
 CFindMatch::CFindMatch(void)
-  : m_pos(*this), m_seed(*this), m_expand(*this), m_filter(*this), m_optim(*this) {
-  m_debug = 0;
+  : _pos(*this), _seed(*this), _expand(*this), _filter(*this), _optim(*this) {
+  _debug = 0;
 }
 
 CFindMatch::~CFindMatch() {
-  mtx_destroy(&m_lock);
+  mtx_destroy(&_lock);
 
-  for (int image = 0; image < (int)m_imageLocks.size(); ++image)
-    m_imageLocks[image].destroy();
-  for (int image = 0; image < (int)m_countLocks.size(); ++image)
-    m_countLocks[image].destroy();
+  for (int image = 0; image < (int)_imageLocks.size(); ++image)
+    _imageLocks[image].destroy();
+  for (int image = 0; image < (int)_countLocks.size(); ++image)
+    _countLocks[image].destroy();
 }
 
 void CFindMatch::updateThreshold(void) {
-  m_nccThreshold -= 0.05f;
-  m_nccThresholdBefore -= 0.05f;
+  _nccThreshold -= 0.05f;
+  _nccThresholdBefore -= 0.05f;
   
-  m_countThreshold1 = 2;
+  _countThreshold1 = 2;
 }
 
 void CFindMatch::init(const SOption& option) {
-  m_timages = option.m_timages;
-  m_oimages = option.m_oimages;
-  m_images.clear();
-  m_images.insert(m_images.end(), m_timages.begin(), m_timages.end());
-  m_images.insert(m_images.end(), m_oimages.begin(), m_oimages.end());
+  _timages = option._timages;
+  _oimages = option._oimages;
+  _images.clear();
+  _images.insert(_images.end(), _timages.begin(), _timages.end());
+  _images.insert(_images.end(), _oimages.begin(), _oimages.end());
   
-  m_tnum = (int)m_timages.size();
-  m_num = (int)m_images.size();
+  _tnum = (int)_timages.size();
+  _num = (int)_images.size();
   
-  m_prefix = option.m_prefix;
-  m_level = option.m_level;
-  m_csize = option.m_csize;
-  m_nccThreshold = option.m_threshold;
-  m_wsize = option.m_wsize;
-  m_minImageNumThreshold = option.m_minImageNum;
-  m_CPU = option.m_CPU;
-  m_setEdge = option.m_setEdge;
-  m_sequenceThreshold = option.m_sequence;
+  _prefix = option._prefix;
+  _level = option._level;
+  _csize = option._csize;
+  _nccThreshold = option._threshold;
+  _wsize = option._wsize;
+  _minImageNumThreshold = option._minImageNum;
+  _CPU = option._CPU;
+  _setEdge = option._setEdge;
+  _sequenceThreshold = option._sequence;
 
-  m_junit = 100;
+  _junit = 100;
   // This initialization does not matter
-  m_visibleThreshold = 0.0f;
-  m_visibleThresholdLoose = 0.0f;
+  _visibleThreshold = 0.0f;
+  _visibleThresholdLoose = 0.0f;
   
-  //m_tau = max(option.m_minImageNum * 2, min(m_num, 5));
-  m_tau = min(option.m_minImageNum * 2, m_num);
+  //_tau = max(option._minImageNum * 2, min(_num, 5));
+  _tau = min(option._minImageNum * 2, _num);
   
-  m_depth = 0;
+  _depth = 0;
   
   // set target images and other images
-  m_bindexes = option.m_bindexes;
-  m_visdata = option.m_visdata;
-  m_visdata2 = option.m_visdata2;
+  _bindexes = option._bindexes;
+  _visdata = option._visdata;
+  _visdata2 = option._visdata2;
   
   //----------------------------------------------------------------------
-  mtx_init(&m_lock, mtx_plain | mtx_recursive);
-  m_imageLocks.resize(m_num);
-  m_countLocks.resize(m_num);
-  for (int image = 0; image < m_num; ++image) {
-    m_imageLocks[image].init();
-    m_countLocks[image].init();
+  mtx_init(&_lock, mtx_plain | mtx_recursive);
+  _imageLocks.resize(_num);
+  _countLocks.resize(_num);
+  for (int image = 0; image < _num; ++image) {
+    _imageLocks[image].init();
+    _countLocks[image].init();
   }
-  // We set m_level + 3, to use multi-resolutional texture grabbing
-  m_pss.init(m_images, m_prefix, m_level + 3, m_wsize, 1);
+  // We set _level + 3, to use multi-resolutional texture grabbing
+  _pss.init(_images, _prefix, _level + 3, _wsize, 1);
 
-  if (m_setEdge != 0.0f)
-    m_pss.setEdge(m_setEdge);
-  m_pss.setDistances();
+  if (_setEdge != 0.0f)
+    _pss.setEdge(_setEdge);
+  _pss.setDistances();
 
   // Detect features if not yet done
   CDetectFeatures df;
   const int fcsize = 16;
-  df.run(m_pss, m_num, fcsize, m_level, m_CPU);  
+  df.run(_pss, _num, fcsize, _level, _CPU);  
   
-  // Initialize each core member. m_po should be first
-  m_pos.init();
-  m_seed.init(df.m_points);
-  m_expand.init();
-  m_filter.init();
-  m_optim.init();
+  // Initialize each core member. _po should be first
+  _pos.init();
+  _seed.init(df._points);
+  _expand.init();
+  _filter.init();
+  _optim.init();
   //----------------------------------------------------------------------
   // Init thresholds
-  m_angleThreshold0 = 60.0f * M_PI / 180.0f;
-  m_angleThreshold1 = 60.0f * M_PI / 180.0f;
+  _angleThreshold0 = 60.0f * M_PI / 180.0f;
+  _angleThreshold1 = 60.0f * M_PI / 180.0f;
 
-  m_countThreshold0 = 2;
-  m_countThreshold1 = 4;
-  m_countThreshold2 = 2;
+  _countThreshold0 = 2;
+  _countThreshold1 = 4;
+  _countThreshold2 = 2;
 
-  m_neighborThreshold = 0.5f;
-  m_neighborThreshold1 = 1.0f;
+  _neighborThreshold = 0.5f;
+  _neighborThreshold1 = 1.0f;
   
-  m_neighborThreshold2 = 1.0f;
+  _neighborThreshold2 = 1.0f;
 
-  m_maxAngleThreshold = option.m_maxAngleThreshold;
+  _maxAngleThreshold = option._maxAngleThreshold;
 
-  m_nccThresholdBefore = m_nccThreshold - 0.3f;
+  _nccThresholdBefore = _nccThreshold - 0.3f;
   
-  m_quadThreshold = option.m_quadThreshold;
+  _quadThreshold = option._quadThreshold;
   
-  m_epThreshold = 2.0f;
+  _epThreshold = 2.0f;
 }
 
 int CFindMatch::insideBimages(const Vec4f& coord) const {
-  for (int i = 0; i < (int)m_bindexes.size(); ++i) {
-    const int index = m_bindexes[i];
-    const Vec3f icoord = m_pss.project(index, coord, m_level);
-    if (icoord[0] < 0.0 || m_pss.getWidth(index, m_level) - 1 < icoord[0] ||
-        icoord[1] < 0.0 || m_pss.getHeight(index, m_level) - 1 < icoord[1])
+  for (int i = 0; i < (int)_bindexes.size(); ++i) {
+    const int index = _bindexes[i];
+    const Vec3f icoord = _pss.project(index, coord, _level);
+    if (icoord[0] < 0.0 || _pss.getWidth(index, _level) - 1 < icoord[0] ||
+        icoord[1] < 0.0 || _pss.getHeight(index, _level) - 1 < icoord[1])
       return 0;
   }
   return 1;
@@ -129,27 +129,27 @@ int CFindMatch::insideBimages(const Vec4f& coord) const {
 
 int CFindMatch::isNeighbor(const Patch::CPatch& lhs, const Patch::CPatch& rhs,
                            const float neighborThreshold) const {  
-  const float hunit = (m_optim.getUnit(lhs.m_images[0], lhs.m_coord) +
-                       m_optim.getUnit(rhs.m_images[0], rhs.m_coord)) / 2.0
-    * m_csize;
+  const float hunit = (_optim.getUnit(lhs._images[0], lhs._coord) +
+                       _optim.getUnit(rhs._images[0], rhs._coord)) / 2.0
+    * _csize;
   return isNeighbor(lhs, rhs, hunit, neighborThreshold);
 }
 
 int CFindMatch::isNeighbor(const Patch::CPatch& lhs, const Patch::CPatch& rhs,
                            const float hunit, const float neighborThreshold) const {
-  if (lhs.m_normal * rhs.m_normal < cos(120.0 * M_PI / 180.0))
+  if (lhs._normal * rhs._normal < cos(120.0 * M_PI / 180.0))
     return 0;
-  const Vec4f diff = rhs.m_coord - lhs.m_coord;
+  const Vec4f diff = rhs._coord - lhs._coord;
   
-  const float vunit = lhs.m_dscale + rhs.m_dscale;
+  const float vunit = lhs._dscale + rhs._dscale;
   
-  const float f0 = lhs.m_normal * diff;
-  const float f1 = rhs.m_normal * diff;   
+  const float f0 = lhs._normal * diff;
+  const float f1 = rhs._normal * diff;   
   float ftmp = (fabs(f0) + fabs(f1)) / 2.0;
   ftmp /= vunit;
 
   // this may loosen the isneighbor testing. need to tighten (decrease) threshold?  
-  const float hsize = norm(2 * diff - lhs.m_normal * f0 - rhs.m_normal * f1) / 2.0 / hunit;
+  const float hsize = norm(2 * diff - lhs._normal * f0 - rhs._normal * f1) / 2.0 / hunit;
   if (1.0 < hsize)
     ftmp /= min(2.0f, hsize);
   
@@ -164,19 +164,19 @@ int CFindMatch::isNeighborRadius(const Patch::CPatch& lhs,
                                  const float hunit,
                                  const float neighborThreshold,
                                  const float radius) const {
-  if (lhs.m_normal * rhs.m_normal < cos(120.0 * M_PI / 180.0))
+  if (lhs._normal * rhs._normal < cos(120.0 * M_PI / 180.0))
     return 0;
-  const Vec4f diff = rhs.m_coord - lhs.m_coord;
+  const Vec4f diff = rhs._coord - lhs._coord;
   
-  const float vunit = lhs.m_dscale + rhs.m_dscale;
+  const float vunit = lhs._dscale + rhs._dscale;
   
-  const float f0 = lhs.m_normal * diff;
-  const float f1 = rhs.m_normal * diff;   
+  const float f0 = lhs._normal * diff;
+  const float f1 = rhs._normal * diff;   
   float ftmp = (fabs(f0) + fabs(f1)) / 2.0;
   ftmp /= vunit;
 
   // this may loosen the isneighbor testing. need to tighten (decrease) threshold?  
-  const float hsize = norm(2 * diff - lhs.m_normal * f0 - rhs.m_normal * f1) / 2.0 / hunit;
+  const float hsize = norm(2 * diff - lhs._normal * f0 - rhs._normal * f1) / 2.0 / hunit;
 
   // radius check
   if (radius / hunit < hsize)
@@ -198,36 +198,36 @@ void CFindMatch::run(void) {
   
   //----------------------------------------------------------------------
   // Seed generation
-  m_seed.run();
-  m_seed.clear();
+  _seed.run();
+  _seed.clear();
   
-  ++m_depth;
-  m_pos.collectPatches();
+  ++_depth;
+  _pos.collectPatches();
   
   //----------------------------------------------------------------------
   // Expansion
   const int TIME = 3;
   for (int t = 0; t < TIME; ++t) {
-    m_expand.run();
+    _expand.run();
 
-    m_filter.run();
+    _filter.run();
         
     updateThreshold();
 
     cout << "STATUS: ";
-    for (int i = 0; i < (int)m_optim.m_status.size(); ++i) {
-      cout << m_optim.m_status[i] << ' ';
+    for (int i = 0; i < (int)_optim._status.size(); ++i) {
+      cout << _optim._status[i] << ' ';
       if (i % 10 == 9)
         cout << endl;
     }
     cout << endl;
     
-    ++m_depth;
+    ++_depth;
   }
   time(&tv);
   cerr << "---- Total: " << (tv - curtime)/CLOCKS_PER_SEC << " secs ----" << endl;
 }
 
 void CFindMatch::write(const std::string prefix, bool bExportPLY, bool bExportPatch, bool bExportPSet) {
-  m_pos.writePatches2(prefix, bExportPLY, bExportPatch, bExportPSet);
+  _pos.writePatches2(prefix, bExportPLY, bExportPatch, bExportPSet);
 }

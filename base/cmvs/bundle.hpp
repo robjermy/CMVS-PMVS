@@ -20,25 +20,25 @@
 namespace CMVS {
 
 struct Sadd {
-  Sadd(const int image, const float gain) : m_image(image), m_gain(gain) {
+  Sadd(const int image, const float gain) : _image(image), _gain(gain) {
   };
   
-  int m_image;
-  float m_gain;
+  int _image;
+  float _gain;
 };
 
 struct Ssfm2 {
-  Ssfm2(void) : m_cluster(-1), m_score(-2.0f),
-                m_scoreThreshold(-1.0f), m_satisfied(1) {
+  Ssfm2(void) : _cluster(-1), _score(-2.0f),
+                _scoreThreshold(-1.0f), _satisfied(1) {
   }
   // which cluster it belongs to currently
-  int m_cluster;
+  int _cluster;
 
   // current score
-  float m_score;
+  float _score;
   
   // score threshold
-  float m_scoreThreshold;
+  float _scoreThreshold;
 
   // If SFM is satisfied or not.
   // 1: satisfied, 0: not satisfied
@@ -46,14 +46,14 @@ struct Ssfm2 {
   // In adding images,
   // 2: currently not satisfied, 1: satisfied,
   // 0: not satisfied from the begining and no hope
-  char m_satisfied;
+  char _satisfied;
   
   // For SfM point that has not bee satisfied, compute several number
   // of images that can be added to gain more info
-  std::vector<Sadd> m_adds;
+  std::vector<Sadd> _adds;
 
   // best images
-  std::vector<int> m_uimages;
+  std::vector<int> _uimages;
   
 };
 
@@ -67,43 +67,43 @@ class CBundle {
            const float coverageThreshold, const int pnumThreshold,
            const int CPU);
   // root dir
-  std::string m_prefix;
+  std::string _prefix;
 
   // # of cameras
-  int m_cnum;
+  int _cnum;
   // # of points
-  int m_pnum;
+  int _pnum;
   
   // Point params
-  std::vector<Vec4f> m_coords;
-  std::vector<std::vector<int> > m_visibles;
+  std::vector<Vec4f> _coords;
+  std::vector<std::vector<int> > _visibles;
 
-  std::vector<Vec3f> m_colors;
+  std::vector<Vec3f> _colors;
   
   // A set of point ids visible in each camera
-  std::vector<std::vector<int> > m_vpoints;
+  std::vector<std::vector<int> > _vpoints;
 
-  std::vector<int> m_pweights;
+  std::vector<int> _pweights;
 
   //----------------------------------------------------------------------
   // Generated data
   //----------------------------------------------------------------------
   // A list of connected images, for each camera.
-  std::vector<std::vector<int> > m_neighbors;
+  std::vector<std::vector<int> > _neighbors;
 
   // Width and height of depth map
-  std::vector<int> m_widths;
-  std::vector<int> m_heights;
+  std::vector<int> _widths;
+  std::vector<int> _heights;
   // scale
-  std::vector<int> m_levels;
+  std::vector<int> _levels;
 
   //----------------------------------------------------------------------
   // Output
   //----------------------------------------------------------------------
   // clusters
-  // m_timages need to be sorted for addImages.
-  std::vector<std::vector<int> > m_timages;
-  std::vector<std::vector<int> > m_oimages;
+  // _timages need to be sorted for addImages.
+  std::vector<std::vector<int> > _timages;
+  std::vector<std::vector<int> > _oimages;
   
  protected:
   void prep(const std::string prefix, const int imageThreshold,
@@ -119,12 +119,12 @@ class CBundle {
   
   int totalNum(void) const;
 
-  // set m_scoreThresholds
+  // set _scoreThresholds
   void setScoreThresholds(void);
   
   void resetVisibles(void);
   
-  // set new images without image while taking into account m_removed
+  // set new images without image while taking into account _removed
   void setNewImages(const int pid, const int rimage,
                     std::vector<int>& newimages);
 
@@ -154,7 +154,7 @@ class CBundle {
   void mergeSfMPThread(void);
   static int mergeSfMPThreadTmp(void* arg); 
     
-  std::vector<char> m_merged;
+  std::vector<char> _merged;
   
   void findPNeighbors(sfcnn<const float*, 3, float>& tree,
                       const int pid, std::vector<int>& pneighbors);
@@ -189,90 +189,90 @@ class CBundle {
   //-----------------------------------------------------------------
   //-----------------------------------------------------------------
   // Link info
-  std::vector<std::vector<float> > m_links;
+  std::vector<std::vector<float> > _links;
   
   // Removed or not for images
-  std::vector<int> m_removed;
+  std::vector<int> _removed;
   // Number of SFM points above threshold for each image. We can
-  // remove images until m_allows is non-negative for all the images.
+  // remove images until _allows is non-negative for all the images.
   // Used in removing images
-  std::vector<int> m_allows;
+  std::vector<int> _allows;
   // Used in adding images
-  std::vector<int> m_lacks;
+  std::vector<int> _lacks;
 
-  // For an image, how sfm point (m_vpoints) changes if the image is
+  // For an image, how sfm point (_vpoints) changes if the image is
   // removed.
   //  0: unsatisfy
   //  1: satisfy->satisfy
   //  2: satisfy->unsatisfy
-  std::vector<char> m_statsT;
+  std::vector<char> _statsT;
   // image under consideration
-  int m_imageT;
+  int _imageT;
   // The value of lacks
-  int m_lacksT;
+  int _lacksT;
   
   // sfm information used in addimages
-  std::vector<Ssfm2> m_sfms2;
+  std::vector<Ssfm2> _sfms2;
 
   // Number of images used in computeScore2
-  int m_tau;
+  int _tau;
   // union find operations to be executed
-  std::vector<std::vector<std::vector<int> > > m_ufsT;
+  std::vector<std::vector<std::vector<int> > > _ufsT;
   // Smallest scale
-  std::vector<float> m_minScales;  
+  std::vector<float> _minScales;  
 
   // add nums
-  std::vector<int> m_addnums;
+  std::vector<int> _addnums;
   
   // scaling factor for depth
-  float m_dscale;
+  float _dscale;
   // scaling for kdtree version
-  float m_dscale2;
+  float _dscale2;
 
   //----------------------------------------------------------------------
-  Image::CPhotoSetS m_pss;
+  Image::CPhotoSetS _pss;
 
   // depth level
-  int m_dlevel;
-  // maxLevel in m_pss.
-  int m_maxLevel;
+  int _dlevel;
+  // maxLevel in _pss.
+  int _maxLevel;
   
-  int m_imageThreshold;
+  int _imageThreshold;
   // Num of points for images to be connected
-  int m_pnumThreshold;
+  int _pnumThreshold;
 
   // link threshold for neighbor
-  float m_linkThreshold;
+  float _linkThreshold;
 
   // Score ratio threshold. Optimal score using all the visible images
   // times this threshold is the mimimum possible score to be
   // satisfied.
-  float m_scoreRatioThreshold;
+  float _scoreRatioThreshold;
   // How much SFM must be satisfied in each image.
-  float m_coverageThreshold;
+  float _coverageThreshold;
 
   // union find for sfm points
-  boost::disjoint_sets_with_storage<>* m_puf;
+  boost::disjoint_sets_with_storage<>* _puf;
 
-  sfcnn<const float*, 3, float>* m_ptree;
+  sfcnn<const float*, 3, float>* _ptree;
   
   //----------------------------------------------------------------------
   // Threads
-  int m_CPU;
-  mtx_t m_lock;
-  std::list<int> m_jobs;
-  int m_junit;
-  int m_thread;
-  int m_count;
+  int _CPU;
+  mtx_t _lock;
+  std::list<int> _jobs;
+  int _junit;
+  int _thread;
+  int _count;
   
-  int m_debug;
+  int _debug;
 
 
   void startTimer(void);
   time_t curTimer(void);
   
-  time_t m_tv; //PM
-  time_t m_curtime;
+  time_t _tv; //PM
+  time_t _curtime;
 };
 };
 

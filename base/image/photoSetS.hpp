@@ -70,20 +70,20 @@ class CPhotoSetS {
   float computeDepth(const int index, const Vec4f& coord) const;
   
   // Take care of indexes
-  std::vector<int> m_images;
-  std::vector<CPhoto> m_photos;
+  std::vector<int> _images;
+  std::vector<CPhoto> _photos;
 
   int image2index(const int image) const;
-  std::map<int, int> m_dict;
+  std::map<int, int> _dict;
   
   // Number of cameras.
-  int m_num;
+  int _num;
   // Root directory
-  std::string m_prefix;
+  std::string _prefix;
   // maximum level
-  int m_maxLevel;
+  int _maxLevel;
   // Window size used to refine location
-  int m_size;
+  int _size;
 
   // getPAxes
   void getPAxes(const int index, const Vec4f& coord, const Vec4f& normal,
@@ -91,45 +91,45 @@ class CPhotoSetS {
 
   // pairwise distance based on optical center and viewing direction
   void setDistances(void);
-  std::vector<std::vector<float> > m_distances;
+  std::vector<std::vector<float> > _distances;
  protected:  
 }; 
  
 Vec3f CPhotoSetS::project(const int index, const Vec4f& coord,
                                     const int level) const{
-  return m_photos[index].project(coord, level);
+  return _photos[index].project(coord, level);
 };
 
 Vec3f CPhotoSetS::mult(const int index, const Vec4f& coord,
                                     const int level) const{
-  return m_photos[index].mult(coord, level);
+  return _photos[index].mult(coord, level);
 };
  
 int CPhotoSetS::getWidth(const int index, const int level) const {
-  return m_photos[index].getWidth(level);
+  return _photos[index].getWidth(level);
 };
  
 int CPhotoSetS::getHeight(const int index, const int level) const {
-  return m_photos[index].getHeight(level);
+  return _photos[index].getHeight(level);
 };
 
 Vec3f CPhotoSetS::getColor(const Vec4f& coord, const int index,
                           const int level) const {
-  return m_photos[index].getColor(coord, level);
+  return _photos[index].getColor(coord, level);
 };
  
 Vec3f CPhotoSetS::getColor(const int index, const float fx, const float fy,
                           const int level) const {
-  return m_photos[index].Image::CImage::getColor(fx, fy, level);
+  return _photos[index].Image::CImage::getColor(fx, fy, level);
 };
  
 Vec3f CPhotoSetS::getColor(const int index, const int ix, const int iy,
                           const int level) const {
-  return m_photos[index].Image::CImage::getColor(ix, iy, level);
+  return _photos[index].Image::CImage::getColor(ix, iy, level);
 };
  
 int CPhotoSetS::getMask(const Vec4f& coord, const int level) const {
-  for (int index = 0; index < m_num; ++index)
+  for (int index = 0; index < _num; ++index)
     if (getMask(coord, index, level) == 0)
       return 0;
   return 1;
@@ -137,32 +137,32 @@ int CPhotoSetS::getMask(const Vec4f& coord, const int level) const {
  
 int CPhotoSetS::getMask(const Vec4f& coord, const int index,
                        const int level) const {
-  return m_photos[index].getMask(coord, level);
+  return _photos[index].getMask(coord, level);
 };
  
 int CPhotoSetS::getMask(const int index, const float fx, const float fy,
                        const int level) const {
-  return m_photos[index].Image::CImage::getMask(fx, fy, level);
+  return _photos[index].Image::CImage::getMask(fx, fy, level);
 };
 
 int CPhotoSetS::getMask(const int index, const int ix, const int iy,
                        const int level) const {
-  return m_photos[index].Image::CImage::getMask(ix, iy, level); 
+  return _photos[index].Image::CImage::getMask(ix, iy, level); 
 };
 
 int CPhotoSetS::getEdge(const Vec4f& coord, const int index,
                        const int level) const {
-  return m_photos[index].getEdge(coord, level);
+  return _photos[index].getEdge(coord, level);
 };
  
 int CPhotoSetS::getEdge(const int index, const float fx, const float fy,
                        const int level) const {
-  return m_photos[index].Image::CImage::getEdge(fx, fy, level);
+  return _photos[index].Image::CImage::getEdge(fx, fy, level);
 };
 
 int CPhotoSetS::getEdge(const int index, const int ix, const int iy,
                        const int level) const {
-  return m_photos[index].Image::CImage::getEdge(ix, iy, level); 
+  return _photos[index].Image::CImage::getEdge(ix, iy, level); 
 };
  
 };

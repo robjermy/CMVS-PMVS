@@ -16,18 +16,18 @@ CPhotoSetS::~CPhotoSetS() {
 
 void CPhotoSetS::init(const std::vector<int>& images, const std::string prefix,
                       const int maxLevel, const int size, const int alloc) {
-  m_images = images;
-  m_num = (int)images.size();
+  _images = images;
+  _num = (int)images.size();
   
   for (int i = 0; i < (int)images.size(); ++i)
-    m_dict[images[i]] = i;
+    _dict[images[i]] = i;
   
-  m_prefix = prefix;
-  m_maxLevel = max(1, maxLevel);
-  m_photos.resize(m_num);
+  _prefix = prefix;
+  _maxLevel = max(1, maxLevel);
+  _photos.resize(_num);
   cerr << "Reading images: " << flush;
-  for (int index = 0; index < m_num; ++index) {
-    const int image = m_images[index];
+  for (int index = 0; index < _num; ++index) {
+    const int image = _images[index];
 
     char test0[1024], test1[1024];
     char test2[1024], test3[1024];
@@ -51,11 +51,11 @@ void CPhotoSetS::init(const std::vector<int>& images, const std::string prefix,
       sprintf(ename, "%sedges/%08d", prefix.c_str(), image);
       sprintf(cname, "%stxt/%08d.txt", prefix.c_str(), image);
       
-      m_photos[index].init(name, mname, ename, cname, m_maxLevel);        
+      _photos[index].init(name, mname, ename, cname, _maxLevel);        
       if (alloc)
-        m_photos[index].alloc();
+        _photos[index].alloc();
       else
-        m_photos[index].alloc(1);
+        _photos[index].alloc(1);
       cerr << '*' << flush;
     }
     // try 4 digits
@@ -68,16 +68,16 @@ void CPhotoSetS::init(const std::vector<int>& images, const std::string prefix,
       sprintf(ename, "%sedges/%04d", prefix.c_str(), image);
       sprintf(cname, "%stxt/%04d.txt", prefix.c_str(), image);
       
-      m_photos[index].init(name, mname, ename, cname, m_maxLevel);        
+      _photos[index].init(name, mname, ename, cname, _maxLevel);        
       if (alloc)
-        m_photos[index].alloc();
+        _photos[index].alloc();
       else
-        m_photos[index].alloc(1);
+        _photos[index].alloc(1);
       cerr << '*' << flush;
     }
 
     /*
-    const int image = m_images[index];
+    const int image = _images[index];
     char name[1024], mname[1024], ename[1024], cname[1024];
 
     // Set name
@@ -86,54 +86,54 @@ void CPhotoSetS::init(const std::vector<int>& images, const std::string prefix,
     sprintf(ename, "%sedges/%08d", prefix.c_str(), image);
     sprintf(cname, "%stxt/%08d.txt", prefix.c_str(), image);
 
-    m_photos[index].init(name, mname, ename, cname, m_maxLevel);        
+    _photos[index].init(name, mname, ename, cname, _maxLevel);        
     if (alloc)
-      m_photos[index].alloc();
+      _photos[index].alloc();
     else
-      m_photos[index].alloc(1);
+      _photos[index].alloc(1);
     cerr << '*' << flush;
     */
   }
   cerr << endl;
   const int margin = size / 2;
-  m_size = 2 * margin + 1;
+  _size = 2 * margin + 1;
 }
 
 void CPhotoSetS::free(void) {
-  for (int index = 0; index < (int)m_photos.size(); ++index)
-    m_photos[index].free();
+  for (int index = 0; index < (int)_photos.size(); ++index)
+    _photos[index].free();
 }
 
 void CPhotoSetS::free(const int level) {
-  for (int index = 0; index < (int)m_photos.size(); ++index)
-    m_photos[index].free(level);
+  for (int index = 0; index < (int)_photos.size(); ++index)
+    _photos[index].free(level);
 }
 
 void CPhotoSetS::setEdge(const float threshold) {
-  for (int index = 0; index < m_num; ++index)
-    m_photos[index].setEdge(threshold);
+  for (int index = 0; index < _num; ++index)
+    _photos[index].setEdge(threshold);
 }
 
 void CPhotoSetS::write(const std::string outdir) {
-  for (int index = 0; index < m_num; ++index) {
-    const int image = m_images[index];
+  for (int index = 0; index < _num; ++index) {
+    const int image = _images[index];
     char buffer[1024];
     sprintf(buffer, "%s%08d.txt", outdir.c_str(), image);
     
-    m_photos[index].write(buffer);
+    _photos[index].write(buffer);
   }
 }
 
 // get x and y axis to collect textures given reference index and normal
 void CPhotoSetS::getPAxes(const int index, const Vec4f& coord, const Vec4f& normal,
                           Vec4f& pxaxis, Vec4f& pyaxis) const{
-  m_photos[index].getPAxes(coord, normal, pxaxis, pyaxis);
+  _photos[index].getPAxes(coord, normal, pxaxis, pyaxis);
 }
 
 void CPhotoSetS::grabTex(const int index, const int level, const Vec2f& icoord,
                          const Vec2f& xaxis, const Vec2f& yaxis,
                          std::vector<Vec3f>& tex, const int normalizef) const{
-  m_photos[index].grabTex(level, icoord, xaxis, yaxis, m_size, tex, normalizef);
+  _photos[index].grabTex(level, icoord, xaxis, yaxis, _size, tex, normalizef);
 }
 
 // grabTex given 3D sampling information
@@ -141,8 +141,8 @@ void CPhotoSetS::grabTex(const int index, const int level, const Vec4f& coord,
                          const Vec4f& pxaxis, const Vec4f& pyaxis, const Vec4f& pzaxis,
                          std::vector<Vec3f>& tex, float& weight,
                          const int normalizef) const {
-  m_photos[index].grabTex(level, coord, pxaxis, pyaxis, pzaxis,
-                          m_size, tex, weight, normalizef);
+  _photos[index].grabTex(level, coord, pxaxis, pyaxis, pzaxis,
+                          _size, tex, weight, normalizef);
 }
 
 float CPhotoSetS::incc(const std::vector<std::vector<Vec3f> >& texs,
@@ -176,7 +176,7 @@ void CPhotoSetS::getMinMaxAngles(const Vec4f& coord, const std::vector<int>& ind
   vector<Vec4f> rays;  rays.resize((int)indexes.size());
   for (int i = 0; i < (int)indexes.size(); ++i) {
     const int index = indexes[i];
-    rays[i] = m_photos[index].m_center - coord;
+    rays[i] = _photos[index]._center - coord;
     unitize(rays[i]);
   }
   
@@ -199,7 +199,7 @@ int CPhotoSetS::checkAngles(const Vec4f& coord,
   vector<Vec4f> rays;  rays.resize((int)indexes.size());
   for (int i = 0; i < (int)indexes.size(); ++i) {
     const int index = indexes[i];
-    rays[i] = m_photos[index].m_center - coord;
+    rays[i] = _photos[index]._center - coord;
     unitize(rays[i]);
   }
   
@@ -220,21 +220,21 @@ int CPhotoSetS::checkAngles(const Vec4f& coord,
 }
 
 float CPhotoSetS::computeDepth(const int index, const Vec4f& coord) const {
-  return m_photos[index].computeDepth(coord);
+  return _photos[index].computeDepth(coord);
 }
 
 void CPhotoSetS::setDistances(void) {
-  m_distances.resize(m_num);
+  _distances.resize(_num);
   float avedis = 0.0f;
   int denom = 0;
-  for (int i = 0; i < m_num; ++i) {
-    m_distances[i].resize(m_num);
-    for (int j = 0; j < m_num; ++j) {
+  for (int i = 0; i < _num; ++i) {
+    _distances[i].resize(_num);
+    for (int j = 0; j < _num; ++j) {
       if (i == j)
-        m_distances[i][j] = 0.0f;
+        _distances[i][j] = 0.0f;
       else {
-        const float ftmp = norm(m_photos[i].m_center - m_photos[j].m_center);
-        m_distances[i][j] = ftmp;
+        const float ftmp = norm(_photos[i]._center - _photos[j]._center);
+        _distances[i][j] = ftmp;
         avedis += ftmp;
         denom++;
       }
@@ -250,24 +250,24 @@ void CPhotoSetS::setDistances(void) {
   }
   
   // plus angle difference
-  for (int i = 0; i < m_num; ++i) {
-    Vec4f ray0 = m_photos[i].m_oaxis;
+  for (int i = 0; i < _num; ++i) {
+    Vec4f ray0 = _photos[i]._oaxis;
     ray0[3] = 0.0f;
-    for (int j = 0; j < m_num; ++j) {
-      Vec4f ray1 = m_photos[j].m_oaxis;
+    for (int j = 0; j < _num; ++j) {
+      Vec4f ray1 = _photos[j]._oaxis;
       ray1[3] = 0.0f;
       
-      m_distances[i][j] /= avedis;
+      _distances[i][j] /= avedis;
       const float margin = cos(10.0f * M_PI / 180.0f);
       const float dis = max(0.0f, 1.0f - ray0 * ray1 - margin);
-      m_distances[i][j] += dis;
+      _distances[i][j] += dis;
     }
   }
 }
 
 int CPhotoSetS::image2index(const int image) const {
-  map<int, int>::const_iterator pos = m_dict.find(image);
-  if (pos == m_dict.end())
+  map<int, int>::const_iterator pos = _dict.find(image);
+  if (pos == _dict.end())
     return -1;
   else
     return pos->second;

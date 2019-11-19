@@ -46,7 +46,7 @@ class COptim {
   
   int check(Patch::CPatch& patch);
 
-  std::vector<int> m_status;
+  std::vector<int> _status;
   
  protected:
   void filterImagesByAngle(Patch::CPatch& patch);
@@ -127,35 +127,35 @@ class COptim {
   
   void setAxesScales(void);
   
-  static COptim* m_one;  
-  CFindMatch& m_fm;
+  static COptim* _one;  
+  CFindMatch& _fm;
   
   //-----------------------------------------------------------------
   // Axes
-  std::vector<Vec3f> m_xaxes;
-  std::vector<Vec3f> m_yaxes;
-  std::vector<Vec3f> m_zaxes;
+  std::vector<Vec3f> _xaxes;
+  std::vector<Vec3f> _yaxes;
+  std::vector<Vec3f> _zaxes;
   // Scales
-  std::vector<float> m_ipscales;
+  std::vector<float> _ipscales;
   
   //-----------------------------------------------------------------
   // For threads
-  std::vector<float> m_vect0T;  
-  std::vector<Vec4f> m_centersT;
-  std::vector<Vec4f> m_raysT;
-  std::vector<std::vector<int> > m_indexesT;
-  std::vector<float> m_dscalesT;
-  std::vector<float> m_ascalesT;
+  std::vector<float> _vect0T;  
+  std::vector<Vec4f> _centersT;
+  std::vector<Vec4f> _raysT;
+  std::vector<std::vector<int> > _indexesT;
+  std::vector<float> _dscalesT;
+  std::vector<float> _ascalesT;
 
   // stores current parameters for derivative computation
-  std::vector<Vec3f> m_paramsT;
+  std::vector<Vec3f> _paramsT;
   
   // Grabbed texture
-  std::vector<std::vector<std::vector<float> > > m_texsT; // last is 7x7x3 patch
+  std::vector<std::vector<std::vector<float> > > _texsT; // last is 7x7x3 patch
   // weights for refineDepthOrientationWeighed
-  std::vector<std::vector<float> > m_weightsT;
+  std::vector<std::vector<float> > _weightsT;
   // Working array for levmar
-  std::vector<std::vector<double> > m_worksT;
+  std::vector<std::vector<double> > _worksT;
   
 };
 };

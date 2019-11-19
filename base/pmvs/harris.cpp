@@ -7,112 +7,112 @@ using namespace std;
 void CHarris::init(const std::vector<unsigned char>& image,
 		   const std::vector<unsigned char>& mask,
                    const std::vector<unsigned char>& edge) {
-  m_image.clear();
-  m_image.resize(m_height);
+  _image.clear();
+  _image.resize(_height);
   int count = 0;
-  for (int y = 0; y < m_height; ++y) {
-    m_image[y].resize(m_width);
-    for (int x = 0; x < m_width; ++x) {
-      m_image[y][x][0] = ((int)image[count++]) / 255.0f;
-      m_image[y][x][1] = ((int)image[count++]) / 255.0f;
-      m_image[y][x][2] = ((int)image[count++]) / 255.0f;
+  for (int y = 0; y < _height; ++y) {
+    _image[y].resize(_width);
+    for (int x = 0; x < _width; ++x) {
+      _image[y][x][0] = ((int)image[count++]) / 255.0f;
+      _image[y][x][1] = ((int)image[count++]) / 255.0f;
+      _image[y][x][2] = ((int)image[count++]) / 255.0f;
     }
   }
 
-  m_mask.clear();
+  _mask.clear();
   if (!mask.empty() || !edge.empty()) {
-    m_mask.resize(m_height);
+    _mask.resize(_height);
     count = 0;
-    for (int y = 0; y < m_height; ++y) {
-      m_mask[y].resize(m_width);
-      for (int x = 0; x < m_width; ++x) {
+    for (int y = 0; y < _height; ++y) {
+      _mask[y].resize(_width);
+      for (int x = 0; x < _width; ++x) {
         if (mask.empty())
-          m_mask[y][x] = edge[count++];
+          _mask[y][x] = edge[count++];
         else if (edge.empty())
-          m_mask[y][x] = mask[count++];
+          _mask[y][x] = mask[count++];
         else {
           if (mask[count] && edge[count])
-            m_mask[y][x] = (unsigned char)255;
+            _mask[y][x] = (unsigned char)255;
           else
-            m_mask[y][x] = 0;
+            _mask[y][x] = 0;
           count++;
         }
       }
     }
   }
   
-  setGaussD(m_sigmaD, m_gaussD);
-  setGaussI(m_sigmaI, m_gaussI); 
+  setGaussD(_sigmaD, _gaussD);
+  setGaussI(_sigmaI, _gaussI); 
 }
 
 void CHarris::setDerivatives(void) {
-  // set m_dIdx, m_dIdy
+  // set _dIdx, _dIdy
   preprocess();
   
-  // now set m_dIdxdIdx, m_dIdydIdy, m_dIdxDIdy
+  // now set _dIdxdIdx, _dIdydIdy, _dIdxDIdy
   preprocess2();
 }
 
 void CHarris::preprocess2(void) {
-  m_dIdxdIdx.clear();  m_dIdydIdy.clear();  m_dIdxdIdy.clear();
-  m_dIdxdIdx.resize(m_height);
-  m_dIdydIdy.resize(m_height);
-  m_dIdxdIdy.resize(m_height);
-  for (int y = 0; y < m_height; ++y) {
-    m_dIdxdIdx[y].resize(m_width);
-    m_dIdydIdy[y].resize(m_width);
-    m_dIdxdIdy[y].resize(m_width);
-    for (int x = 0; x < m_width; ++x) {
-      m_dIdxdIdx[y][x] = m_dIdydIdy[y][x] = m_dIdxdIdy[y][x] = 0.0;
-      if (!m_mask.empty() && m_mask[y][x] == 0)	continue;
+  _dIdxdIdx.clear();  _dIdydIdy.clear();  _dIdxdIdy.clear();
+  _dIdxdIdx.resize(_height);
+  _dIdydIdy.resize(_height);
+  _dIdxdIdy.resize(_height);
+  for (int y = 0; y < _height; ++y) {
+    _dIdxdIdx[y].resize(_width);
+    _dIdydIdy[y].resize(_width);
+    _dIdxdIdy[y].resize(_width);
+    for (int x = 0; x < _width; ++x) {
+      _dIdxdIdx[y][x] = _dIdydIdy[y][x] = _dIdxdIdy[y][x] = 0.0;
+      if (!_mask.empty() && _mask[y][x] == 0)	continue;
       
-      m_dIdxdIdx[y][x] += m_dIdx[y][x] * m_dIdx[y][x];
-      m_dIdydIdy[y][x] += m_dIdy[y][x] * m_dIdy[y][x];
-      m_dIdxdIdy[y][x] += m_dIdx[y][x] * m_dIdy[y][x];
+      _dIdxdIdx[y][x] += _dIdx[y][x] * _dIdx[y][x];
+      _dIdydIdy[y][x] += _dIdy[y][x] * _dIdy[y][x];
+      _dIdxdIdy[y][x] += _dIdx[y][x] * _dIdy[y][x];
     }
   }
 
   {
-    vector<vector<Vec3f> >().swap(m_dIdx);
-    vector<vector<Vec3f> >().swap(m_dIdy);
+    vector<vector<Vec3f> >().swap(_dIdx);
+    vector<vector<Vec3f> >().swap(_dIdy);
   }
   
   //----------------------------------------------------------------------
   // blur
   vector<vector<float> > vvftmp;
-  vvftmp.resize(m_height);
-  for (int y = 0; y < m_height; ++y) {
-    vvftmp[y].resize(m_width);
-    for (int x = 0; x < m_width; ++x)
+  vvftmp.resize(_height);
+  for (int y = 0; y < _height; ++y) {
+    vvftmp[y].resize(_width);
+    for (int x = 0; x < _width; ++x)
       vvftmp[y][x] = 0.0;
   }
   
   //----------------------------------------------------------------------
-  // m_dIdxdIdx
-  convolveX(m_dIdxdIdx, m_mask, m_gaussI, vvftmp);
-  convolveY(m_dIdxdIdx, m_mask, m_gaussI, vvftmp);
+  // _dIdxdIdx
+  convolveX(_dIdxdIdx, _mask, _gaussI, vvftmp);
+  convolveY(_dIdxdIdx, _mask, _gaussI, vvftmp);
   
   //----------------------------------------------------------------------
-  // m_dIdydIdy
-  convolveX(m_dIdydIdy, m_mask, m_gaussI, vvftmp);
-  convolveY(m_dIdydIdy, m_mask, m_gaussI, vvftmp);
+  // _dIdydIdy
+  convolveX(_dIdydIdy, _mask, _gaussI, vvftmp);
+  convolveY(_dIdydIdy, _mask, _gaussI, vvftmp);
   
   //----------------------------------------------------------------------
-  // m_dIdxdIdy
-  convolveX(m_dIdxdIdy, m_mask, m_gaussI, vvftmp);
-  convolveY(m_dIdxdIdy, m_mask, m_gaussI, vvftmp);
+  // _dIdxdIdy
+  convolveX(_dIdxdIdy, _mask, _gaussI, vvftmp);
+  convolveY(_dIdxdIdy, _mask, _gaussI, vvftmp);
 }
 
 void CHarris::preprocess(void) {
   vector<vector<Vec3f> > vvvftmp;
-  vvvftmp.resize(m_height);
-  for (int y = 0; y < m_height; ++y) {
-    vvvftmp[y].resize(m_width);
-    for (int x = 0; x < m_width; ++x)
+  vvvftmp.resize(_height);
+  for (int y = 0; y < _height; ++y) {
+    vvvftmp[y].resize(_width);
+    for (int x = 0; x < _width; ++x)
       vvvftmp[y][x] = Vec3f();
   }
   
-  m_dIdx = m_image;
+  _dIdx = _image;
 
   vector<float> dfilter, ifilter;
   dfilter.resize(3);
@@ -120,43 +120,43 @@ void CHarris::preprocess(void) {
   ifilter.resize(3);
   ifilter[0] = 1.0 / 3.0;  ifilter[1] = 1.0 / 3.0;  ifilter[2] = 1.0 / 3.0;
 
-  convolveX(m_dIdx, m_mask, dfilter, vvvftmp);
-  convolveY(m_dIdx, m_mask, ifilter, vvvftmp);
+  convolveX(_dIdx, _mask, dfilter, vvvftmp);
+  convolveY(_dIdx, _mask, ifilter, vvvftmp);
   
-  m_dIdy = m_image;
-  convolveX(m_dIdy, m_mask, ifilter, vvvftmp);
-  convolveY(m_dIdy, m_mask, dfilter, vvvftmp);
+  _dIdy = _image;
+  convolveX(_dIdy, _mask, ifilter, vvvftmp);
+  convolveY(_dIdy, _mask, dfilter, vvvftmp);
 }
 
 void CHarris::setResponse(void) {
-  m_response.clear();
-  m_response.resize(m_height);
-  for (int y = 0; y < m_height; ++y) {
-    m_response[y].resize(m_width);
-    for (int x = 0; x < m_width; ++x) {
-      m_response[y][x] = 0.0;
-      if (!m_mask.empty() && m_mask[y][x] == 0)	continue;
+  _response.clear();
+  _response.resize(_height);
+  for (int y = 0; y < _height; ++y) {
+    _response[y].resize(_width);
+    for (int x = 0; x < _width; ++x) {
+      _response[y][x] = 0.0;
+      if (!_mask.empty() && _mask[y][x] == 0)	continue;
       
-      const float D = m_dIdxdIdx[y][x] * m_dIdydIdy[y][x] - m_dIdxdIdy[y][x] * m_dIdxdIdy[y][x];
-      const float tr = m_dIdxdIdx[y][x] + m_dIdydIdy[y][x];
-      m_response[y][x] = D - 0.06 * tr * tr;
+      const float D = _dIdxdIdx[y][x] * _dIdydIdy[y][x] - _dIdxdIdy[y][x] * _dIdxdIdy[y][x];
+      const float tr = _dIdxdIdx[y][x] + _dIdydIdy[y][x];
+      _response[y][x] = D - 0.06 * tr * tr;
     }
   }
   
   //----------------------------------------------------------------------
   // suppress non local max
-  vector<vector<float> > vvftmp = m_response;
-  for (int y = 1; y < m_height - 1; ++y) {
-    for (int x = 1; x < m_width - 1; ++x) {
-      if (m_response[y][x] < m_response[y][x+1] ||
-	  m_response[y][x] < m_response[y][x-1] ||
-	  m_response[y][x] < m_response[y+1][x] ||
-	  m_response[y][x] < m_response[y-1][x])
+  vector<vector<float> > vvftmp = _response;
+  for (int y = 1; y < _height - 1; ++y) {
+    for (int x = 1; x < _width - 1; ++x) {
+      if (_response[y][x] < _response[y][x+1] ||
+	  _response[y][x] < _response[y][x-1] ||
+	  _response[y][x] < _response[y+1][x] ||
+	  _response[y][x] < _response[y-1][x])
 	vvftmp[y][x] = 0.0;
     }
   }
   
-  vvftmp.swap(m_response);
+  vvftmp.swap(_response);
 }
 
 void CHarris::run(const std::vector<unsigned char>& image,
@@ -167,8 +167,8 @@ void CHarris::run(const std::vector<unsigned char>& image,
 		  std::multiset<CPoint> & result) {
 
   cerr << "Harris running ..." << flush;
-  m_width = width;       m_height = height;
-  m_sigmaD = sigma;      m_sigmaI = sigma;
+  _width = width;       _height = height;
+  _sigmaD = sigma;      _sigmaI = sigma;
   init(image, mask, edge);
   setDerivatives();  setResponse();
 
@@ -176,29 +176,29 @@ void CHarris::run(const std::vector<unsigned char>& image,
   const int maxPointsGrid = factor * factor;
   const int gridsize = gspeedup * factor;
 
-  const int w = (m_width + gridsize - 1) / gridsize;
-  const int h = (m_height + gridsize - 1) / gridsize;
+  const int w = (_width + gridsize - 1) / gridsize;
+  const int h = (_height + gridsize - 1) / gridsize;
   
   vector<vector<multiset<CPoint> > > resultgrids;
   resultgrids.resize(h);
   for (int y = 0; y < h; ++y)
     resultgrids[y].resize(w);
 
-  const int margin = (int)m_gaussD.size() / 2;
-  for (int y = margin; y < m_height - margin; ++y) {
-    for (int x = margin; x < m_width - margin; ++x) {
-      if (m_response[y][x] == 0.0)
+  const int margin = (int)_gaussD.size() / 2;
+  for (int y = margin; y < _height - margin; ++y) {
+    for (int x = margin; x < _width - margin; ++x) {
+      if (_response[y][x] == 0.0)
 	continue;
 
       const int x0 = min(x / gridsize, w - 1);
       const int y0 = min(y / gridsize, h - 1);
       
       if ((int)resultgrids[y0][x0].size() < maxPointsGrid ||
-	  resultgrids[y0][x0].begin()->m_response < m_response[y][x]) {
+	  resultgrids[y0][x0].begin()->_response < _response[y][x]) {
 	CPoint p;
-	p.m_icoord = Vec3f(x, y, 1.0f);
-	p.m_response = m_response[y][x];
-	p.m_type = 0;
+	p._icoord = Vec3f(x, y, 1.0f);
+	p._response = _response[y][x];
+	p._type = 0;
 	
 	resultgrids[y0][x0].insert(p);
 	if (maxPointsGrid < (int)resultgrids[y0][x0].size())
@@ -213,7 +213,7 @@ void CHarris::run(const std::vector<unsigned char>& image,
       multiset<CPoint>::iterator begin = resultgrids[y][x].begin();
       multiset<CPoint>::iterator end = resultgrids[y][x].end();
       while (begin != end) {
-	//if (threshold <= begin->m_response)
+	//if (threshold <= begin->_response)
 	  result.insert(*begin);
 	begin++;
       }

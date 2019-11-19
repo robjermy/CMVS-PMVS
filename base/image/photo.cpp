@@ -136,7 +136,7 @@ void CPhoto::grabTex(const int level, const Vec4f& coord,
 
   grabTex(level, icoord, xaxis, yaxis, size, tex, normalizef);
 
-  Vec4f ray = m_center - coord;
+  Vec4f ray = _center - coord;
   unitize(ray);
   weight = max(0.0f, pzaxis * ray);
 }

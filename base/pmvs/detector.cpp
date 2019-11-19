@@ -14,7 +14,7 @@ void CDetector::setGaussD(const float sigmaD, std::vector<float>& gaussD) {
   gaussD.resize(sizeD);
 
   //----------------------------------------------------------------------
-  // set m_gaussD
+  // set _gaussD
   float denom = 0.0;
   for (int x = 0; x < sizeD; ++x) {
     int xtmp = x - marginD;
@@ -35,7 +35,7 @@ void CDetector::setGaussI(const float sigmaI, std::vector<float>& gaussI) {
   gaussI.resize(sizeI);
   
   //----------------------------------------------------------------------
-  // set m_gaussI
+  // set _gaussI
   float denom = 0.0;
   for (int x = 0; x < sizeI; ++x) {
     int xtmp = x - marginI;
@@ -56,8 +56,8 @@ float CDetector::setThreshold(std::multiset<CPoint>& grid) {
   int count = 0;
   while (begin != end) {
     count++;
-    ave += begin->m_response;
-    ave2 += begin->m_response * begin->m_response;
+    ave += begin->_response;
+    ave2 += begin->_response * begin->_response;
     begin++;
   }
   if (count == 0)
@@ -72,11 +72,11 @@ float CDetector::setThreshold(std::multiset<CPoint>& grid) {
 }
 
 int CDetector::isCloseBoundary(const int x, const int y, const int margin) const {
-  if (m_mask.empty())
+  if (_mask.empty())
     return 0;
 
-  if (x - margin < 0 || m_width <= x + margin ||
-      y - margin < 0 || m_height <= y + margin)
+  if (x - margin < 0 || _width <= x + margin ||
+      y - margin < 0 || _height <= y + margin)
     return 1;
   
   for (int j = -margin; j <= margin; ++j) {
@@ -84,7 +84,7 @@ int CDetector::isCloseBoundary(const int x, const int y, const int margin) const
     for (int i = -margin; i <= margin; ++i) {
       const int xtmp = x + i;
 
-      if (m_mask[ytmp][xtmp] == 0)
+      if (_mask[ytmp][xtmp] == 0)
 	return 1;
     }
   }

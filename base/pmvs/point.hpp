@@ -10,21 +10,21 @@ class CPoint {
   CPoint(void);
   virtual ~CPoint();
   
-  Vec3f m_icoord;
-  float m_response;
+  Vec3f _icoord;
+  float _response;
 
   // 0: Harris
   // 1: DoG
-  int m_type;
+  int _type;
 
   // tempporary variable, used to store original imageid in initial match
-  int m_itmp;
+  int _itmp;
 
   // 3D coordinate
-  Vec4f m_coord;
+  Vec4f _coord;
   
   bool operator < (const CPoint& rhs) const {
-    return m_response < rhs.m_response;
+    return _response < rhs._response;
   }
 
   friend std::istream& operator >>(std::istream& istr, CPoint& rhs);

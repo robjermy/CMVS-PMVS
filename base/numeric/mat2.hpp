@@ -7,15 +7,15 @@ template <class T>
 class TMat2
 {
  private:
-  TVec2<T> m_row[2];
+  TVec2<T> _row[2];
   
  public:
   // Standard constructors
   //
   TMat2() { *this = 0.0; }
   TMat2(T a, T b, T c, T d)
-    { m_row[0][0]=a; m_row[0][1]=b; m_row[1][0]=c; m_row[1][1]=d; }
-  TMat2(const TVec2<T> &r0,const TVec2<T> &r1) { m_row[0]=r0; m_row[1]=r1; }
+    { _row[0][0]=a; _row[0][1]=b; _row[1][0]=c; _row[1][1]=d; }
+  TMat2(const TVec2<T> &r0,const TVec2<T> &r1) { _row[0]=r0; _row[1]=r1; }
   TMat2(const TMat2 &m) { *this = m; }
   
   // Descriptive interface
@@ -27,15 +27,15 @@ class TMat2
   
   // Access methods        note: A(i, j) == row i, col j
   //
-  T& operator()(int i, int j)       { return m_row[i][j]; }
-  T  operator()(int i, int j) const { return m_row[i][j]; }
-  TVec2<T>&       operator[](int i)       { return m_row[i]; }
-  const TVec2<T>& operator[](int i) const { return m_row[i]; }
-  inline TVec2<T> col(int i) const {return TVec2<T>(m_row[0][i],m_row[1][i]);}
+  T& operator()(int i, int j)       { return _row[i][j]; }
+  T  operator()(int i, int j) const { return _row[i][j]; }
+  TVec2<T>&       operator[](int i)       { return _row[i]; }
+  const TVec2<T>& operator[](int i) const { return _row[i]; }
+  inline TVec2<T> col(int i) const {return TVec2<T>(_row[0][i],_row[1][i]);}
   
-  operator       T*()       { return m_row[0]; }
-  operator const T*()       { return m_row[0]; }
-  operator const T*() const { return m_row[0]; }
+  operator       T*()       { return _row[0]; }
+  operator const T*()       { return _row[0]; }
+  operator const T*() const { return _row[0]; }
   
   // Assignment methods
   //
@@ -69,31 +69,31 @@ class TMat2
 
 template <class T>
 inline TMat2<T>& TMat2<T>::operator=(const TMat2<T>& m)
-	{ m_row[0]=m[0];  m_row[1]=m[1];  return *this; }
+	{ _row[0]=m[0];  _row[1]=m[1];  return *this; }
 
 template <class T>
 inline TMat2<T>& TMat2<T>::operator=(T s)
-	{ m_row[0]=s;  m_row[1]=s;  return *this; }
+	{ _row[0]=s;  _row[1]=s;  return *this; }
 
 template <class T>
 inline TMat2<T>& TMat2<T>::operator+=(const TMat2<T>& m)
-	{ m_row[0] += m.m_row[0]; m_row[1] += m.m_row[1];  return *this;}
+	{ _row[0] += m._row[0]; _row[1] += m._row[1];  return *this;}
 
 template <class T>
 inline TMat2<T>& TMat2<T>::operator-=(const TMat2<T>& m)
-	{ m_row[0] -= m.m_row[0]; m_row[1] -= m.m_row[1];  return *this; }
+	{ _row[0] -= m._row[0]; _row[1] -= m._row[1];  return *this; }
 
 template <class T>
 inline TMat2<T>& TMat2<T>::operator*=(T s)
-	{ m_row[0] *= s; m_row[1] *= s;  return *this; }
+	{ _row[0] *= s; _row[1] *= s;  return *this; }
 
 template <class T>
 inline TMat2<T>& TMat2<T>::operator/=(T s)
-	{ m_row[0] /= s; m_row[1] /= s;  return *this; }
+	{ _row[0] /= s; _row[1] /= s;  return *this; }
 
 template <class T>
 inline bool TMat2<T>::operator==(const TMat2<T>& m) const {
-    if (m_row[0] == m.m_row[0] && m_row[1] == m.m_row[1])
+    if (_row[0] == m._row[0] && _row[1] == m._row[1])
 	return true;
     else
 	return false;
@@ -176,8 +176,8 @@ TMat2<T> TMat2<T>::I() { return TMat2<T>(1,0,  0,1); }
 template <class T>
 TMat2<T> &TMat2<T>::diag(T d)
 {
-    m_row[0][0] = d;   m_row[0][1] = 0;
-    m_row[1][0] = 0;   m_row[1][1] = d;
+    _row[0][0] = d;   _row[0][1] = 0;
+    _row[1][0] = 0;   _row[1][1] = d;
 
     return *this;
 }

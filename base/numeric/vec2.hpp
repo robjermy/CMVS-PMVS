@@ -7,20 +7,20 @@
 template<class T>
 class TVec2 {
 private:
-  T m_elt[2];
+  T _elt[2];
     
 public:
   // Standard constructors
   //
   TVec2(T s=0) { *this = s; }
-  TVec2(T x, T y) { m_elt[0]=x; m_elt[1]=y; }
+  TVec2(T x, T y) { _elt[0]=x; _elt[1]=y; }
   
   // Copy constructors & assignment operators
   template<class U> TVec2(const TVec2<U>& v) { *this = v; }
-  template<class U> TVec2(const U v[2]) { m_elt[0]=v[0]; m_elt[1]=v[1]; }
+  template<class U> TVec2(const U v[2]) { _elt[0]=v[0]; _elt[1]=v[1]; }
   template<class U> TVec2& operator=(const TVec2<U>& v)
-  { m_elt[0]=v[0];  m_elt[1]=v[1];  return *this; }
-  TVec2& operator=(T s) { m_elt[0]=m_elt[1]=s; return *this; }
+  { _elt[0]=v[0];  _elt[1]=v[1];  return *this; }
+  TVec2& operator=(T s) { _elt[0]=_elt[1]=s; return *this; }
   
   // Descriptive interface
   //
@@ -29,12 +29,12 @@ public:
   
   // Access methods
   //
-  operator       T*()       { return m_elt; }
-  operator const T*() const { return m_elt; }
+  operator       T*()       { return _elt; }
+  operator const T*() const { return _elt; }
   
-  T& operator[](int i)       { return m_elt[i]; }
-  T  operator[](int i) const { return m_elt[i]; }
-  operator const T*()       { return m_elt; }
+  T& operator[](int i)       { return _elt[i]; }
+  T  operator[](int i) const { return _elt[i]; }
+  operator const T*()       { return _elt; }
   
   // In-place arithmetic methods
   inline TVec2& operator+=(const TVec2& v);
@@ -56,7 +56,7 @@ public:
     
     if(denom2 != 1.0 && denom2 != 0.0 ) {
       const T denom = sqrt(denom2);
-      m_elt[0] /= denom;	m_elt[1] /= denom;
+      _elt[0] /= denom;	_elt[1] /= denom;
     }
   }      
 };
@@ -66,19 +66,19 @@ public:
 // Method definitions
 //
 template<class T> inline TVec2<T>& TVec2<T>::operator+=(const TVec2<T>& v)
-{ m_elt[0] += v[0];   m_elt[1] += v[1];   return *this; };
+{ _elt[0] += v[0];   _elt[1] += v[1];   return *this; };
 
 template<class T> inline TVec2<T>& TVec2<T>::operator-=(const TVec2<T>& v)
-{ m_elt[0] -= v[0];   m_elt[1] -= v[1];   return *this; };
+{ _elt[0] -= v[0];   _elt[1] -= v[1];   return *this; };
 
 template<class T> inline TVec2<T>& TVec2<T>::operator*=(T s)
-{ m_elt[0] *= s;   m_elt[1] *= s;   return *this; };
+{ _elt[0] *= s;   _elt[1] *= s;   return *this; };
 
 template<class T> inline TVec2<T>& TVec2<T>::operator/=(T s)
-{ m_elt[0] /= s;   m_elt[1] /= s;   return *this; };
+{ _elt[0] /= s;   _elt[1] /= s;   return *this; };
 
 template<class T> inline bool TVec2<T>::operator==(const TVec2<T>& v) const{
-    if (m_elt[0] == v.m_elt[0] && m_elt[1] == v.m_elt[1])
+    if (_elt[0] == v._elt[0] && _elt[1] == v._elt[1])
 	return true;
     else
 	return false;

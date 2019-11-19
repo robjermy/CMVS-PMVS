@@ -41,13 +41,13 @@ class CFilter {
   
   void setConf(const int image);
 
-  std::vector<float> m_gains;
+  std::vector<float> _gains;
 
-  std::vector<std::vector<int> > m_newimages, m_removeimages;
-  std::vector<std::vector<TVec2<int> > > m_newgrids, m_removegrids;
+  std::vector<std::vector<int> > _newimages, _removeimages;
+  std::vector<std::vector<TVec2<int> > > _newgrids, _removegrids;
 
-  int m_time;
-  std::vector<int> m_rejects;
+  int _time;
+  std::vector<int> _rejects;
   
   //----------------------------------------------------------------------
   // Thread related
@@ -64,7 +64,7 @@ class CFilter {
   void filterNeighborThread(void);
   static int filterNeighborThreadTmp(void* arg);
   
-  CFindMatch& m_fm;
+  CFindMatch& _fm;
   
 };
 };

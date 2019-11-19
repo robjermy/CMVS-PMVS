@@ -8,20 +8,20 @@ using namespace std;
 using namespace Image;
 
 CCamera::CCamera(void) {
-  m_axesScale = 1.0f;
-  m_maxLevel = 1;
+  _axesScale = 1.0f;
+  _maxLevel = 1;
 }
 
 CCamera::~CCamera() {
 }
 
 void CCamera::init(const std::string cname, const int maxLevel) {
-  m_cname = cname;
-  m_maxLevel = maxLevel;
+  _cname = cname;
+  _maxLevel = maxLevel;
 
   // initialize camera
-  m_intrinsics.resize(6);
-  m_extrinsics.resize(6);
+  _intrinsics.resize(6);
+  _extrinsics.resize(6);
 
   ifstream ifstr;
   ifstr.open(cname.c_str());
@@ -29,76 +29,76 @@ void CCamera::init(const std::string cname, const int maxLevel) {
   string header;
   ifstr >> header;
   if (header == "CONTOUR")
-    m_txtType = 0;
+    _txtType = 0;
   else if (header == "CONTOUR2")
-    m_txtType = 2;
+    _txtType = 2;
   else if (header == "CONTOUR3")
-    m_txtType = 3;
+    _txtType = 3;
   else {
     cerr << "Unrecognizable txt format" << endl;
     exit (1);
   }
 
   for (int i = 0; i < 6; ++i)
-    ifstr >> m_intrinsics[i];
+    ifstr >> _intrinsics[i];
   for (int i = 0; i < 6; ++i)
-    ifstr >> m_extrinsics[i];
+    ifstr >> _extrinsics[i];
 
   ifstr.close();
   
   //----------------------------------------------------------------------
-  m_projection.resize(maxLevel);
+  _projection.resize(maxLevel);
   for (int level = 0; level < maxLevel; ++level)
-    m_projection[level].resize(3);
+    _projection[level].resize(3);
 
   updateCamera();
 }
 
 void CCamera::updateProjection(void) {
   // Set bottom level
-  setProjection(m_intrinsics, m_extrinsics, m_projection[0], m_txtType);
+  setProjection(_intrinsics, _extrinsics, _projection[0], _txtType);
 
-  for (int level = 1; level < m_maxLevel; ++level) {
+  for (int level = 1; level < _maxLevel; ++level) {
     for (int i = 0; i < 3; ++i)
-      m_projection[level][i] = m_projection[level - 1][i];
+      _projection[level][i] = _projection[level - 1][i];
 
-    m_projection[level][0] /= 2.0;
-    m_projection[level][1] /= 2.0;
+    _projection[level][0] /= 2.0;
+    _projection[level][1] /= 2.0;
   }
 }
 
 void CCamera::write(const std::string file) {
   ofstream ofstr;
   ofstr.open(file.c_str());
-  if (m_txtType == 0) {
+  if (_txtType == 0) {
     ofstr << "CONTOUR" << endl
-	  << m_intrinsics[0] << ' ' << m_intrinsics[1] << ' '
-	  << m_intrinsics[2] << ' ' << m_intrinsics[3] << endl
-	  << m_intrinsics[4] << ' ' << m_intrinsics[5] << ' '
-	  << m_extrinsics[0] << ' ' << m_extrinsics[1] << endl
-	  << m_extrinsics[2] << ' ' << m_extrinsics[3] << ' '
-	  << m_extrinsics[4] << ' ' << m_extrinsics[5] << endl;
+	  << _intrinsics[0] << ' ' << _intrinsics[1] << ' '
+	  << _intrinsics[2] << ' ' << _intrinsics[3] << endl
+	  << _intrinsics[4] << ' ' << _intrinsics[5] << ' '
+	  << _extrinsics[0] << ' ' << _extrinsics[1] << endl
+	  << _extrinsics[2] << ' ' << _extrinsics[3] << ' '
+	  << _extrinsics[4] << ' ' << _extrinsics[5] << endl;
   }
-  else if (m_txtType == 2) {
+  else if (_txtType == 2) {
     ofstr << "CONTOUR2" << endl;
     for (int i = 0; i < 6; ++i)
-      ofstr << m_intrinsics[i] << ' ';
+      ofstr << _intrinsics[i] << ' ';
     ofstr << endl;
     for (int i = 0; i < 6; ++i)
-      ofstr << m_extrinsics[i] << ' ';
+      ofstr << _extrinsics[i] << ' ';
     ofstr << endl;
   }
-  else if (m_txtType == 3) {
+  else if (_txtType == 3) {
     ofstr << "CONTOUR3" << endl;
     for (int i = 0; i < 6; ++i)
-      ofstr << m_intrinsics[i] << ' ';
+      ofstr << _intrinsics[i] << ' ';
     ofstr << endl;
     for (int i = 0; i < 6; ++i)
-      ofstr << m_extrinsics[i] << ' ';
+      ofstr << _extrinsics[i] << ' ';
     ofstr << endl;
   }
   else {
-    cerr << "No way. Unrecognizable format: " << m_txtType << endl;
+    cerr << "No way. Unrecognizable format: " << _txtType << endl;
     exit (1);
   }
   
@@ -109,39 +109,39 @@ void CCamera::updateCamera(void) {
   updateProjection();
   
   //----------------------------------------------------------------------
-  m_oaxis = m_projection[0][2];
-  m_oaxis[3] = 0.0;
-  const float ftmp = norm(m_oaxis);
-  m_oaxis[3] = m_projection[0][2][3];
-  m_oaxis /= ftmp;
+  _oaxis = _projection[0][2];
+  _oaxis[3] = 0.0;
+  const float ftmp = norm(_oaxis);
+  _oaxis[3] = _projection[0][2][3];
+  _oaxis /= ftmp;
 
-  m_center = getOpticalCenter();
+  _center = getOpticalCenter();
 
-  m_zaxis = Vec3f(m_oaxis[0], m_oaxis[1], m_oaxis[2]);
-  m_xaxis = Vec3f(m_projection[0][0][0],
-		  m_projection[0][0][1],
-		  m_projection[0][0][2]);
-  m_yaxis = cross(m_zaxis, m_xaxis);
-  unitize(m_yaxis);
-  m_xaxis = cross(m_yaxis, m_zaxis);
+  _zaxis = Vec3f(_oaxis[0], _oaxis[1], _oaxis[2]);
+  _xaxis = Vec3f(_projection[0][0][0],
+		  _projection[0][0][1],
+		  _projection[0][0][2]);
+  _yaxis = cross(_zaxis, _xaxis);
+  unitize(_yaxis);
+  _xaxis = cross(_yaxis, _zaxis);
   
-  Vec4f xaxis = m_projection[0][0];  xaxis[3] = 0.0f;    
-  Vec4f yaxis = m_projection[0][1];  yaxis[3] = 0.0f;
+  Vec4f xaxis = _projection[0][0];  xaxis[3] = 0.0f;    
+  Vec4f yaxis = _projection[0][1];  yaxis[3] = 0.0f;
   float ftmp2 = (norm(xaxis) + norm(yaxis)) / 2.0f;
   if (ftmp2 == 0.0f)
     ftmp2 = 1.0f;
-  m_ipscale = ftmp2;
+  _ipscale = ftmp2;
 }
 
 Vec4f CCamera::getOpticalCenter(void) const {
   // orthographic case
   Vec4f ans;
-  if (m_projection[0][2][0] == 0.0 && m_projection[0][2][1] == 0.0 &&
-      m_projection[0][2][2] == 0.0) {
+  if (_projection[0][2][0] == 0.0 && _projection[0][2][1] == 0.0 &&
+      _projection[0][2][2] == 0.0) {
     Vec3f vtmp[2];
     for (int i = 0; i < 2; ++i)
       for (int y = 0; y < 3; ++y)
-	vtmp[i][y] = m_projection[0][i][y];
+	vtmp[i][y] = _projection[0][i][y];
 	
     Vec3f vtmp2 = cross(vtmp[0], vtmp[1]);
     unitize(vtmp2);
@@ -154,8 +154,8 @@ Vec4f CCamera::getOpticalCenter(void) const {
     Vec3 b;
     for (int y = 0; y < 3; ++y) {
       for (int x = 0; x < 3; ++x)
-	A[y][x] = m_projection[0][y][x];
-      b[y] = - m_projection[0][y][3];
+	A[y][x] = _projection[0][y][x];
+      b[y] = - _projection[0][y][3];
     }
     Mat3 iA;
     invert(iA, A);
@@ -170,32 +170,32 @@ Vec4f CCamera::getOpticalCenter(void) const {
 
 // get scale
 float CCamera::getScale(const Vec4f& coord, const int level) const {
-  if (m_maxLevel <= level) {
-    cerr << "Level is not within a range: " << level << ' ' << m_maxLevel << endl;
+  if (_maxLevel <= level) {
+    cerr << "Level is not within a range: " << level << ' ' << _maxLevel << endl;
     exit (1);
   }
 
   // For orthographic case
-  if (m_projection[0][2][0] == 0.0 && m_projection[0][2][1] == 0.0 &&
-      m_projection[0][2][2] == 0.0) {
-    const Vec3f xaxis(m_projection[0][0][0], m_projection[0][0][1],
-		      m_projection[0][0][2]);
-    const Vec3f yaxis(m_projection[0][1][0], m_projection[0][1][1],
-		      m_projection[0][1][2]);
+  if (_projection[0][2][0] == 0.0 && _projection[0][2][1] == 0.0 &&
+      _projection[0][2][2] == 0.0) {
+    const Vec3f xaxis(_projection[0][0][0], _projection[0][0][1],
+		      _projection[0][0][2]);
+    const Vec3f yaxis(_projection[0][1][0], _projection[0][1][1],
+		      _projection[0][1][2]);
     return (0x0001 << level) / ((xaxis.norm() + yaxis.norm()) / 2.0);
   }
   else {      
-    //const float fz = coord * m_projection[level][2];    
-    //return fz * (0x0001 << level) / m_ipscale;
+    //const float fz = coord * _projection[level][2];    
+    //return fz * (0x0001 << level) / _ipscale;
     // ???? new by take into angle difference
-    Vec4f ray = coord - m_center;
-    return norm(ray) * (0x0001 << level) / m_ipscale;
+    Vec4f ray = coord - _center;
+    return norm(ray) * (0x0001 << level) / _ipscale;
   }
 }
 
 void CCamera::setK(Mat3f& K) const{
-  if (m_txtType != 2) {
-    cerr << "getK not supported for txtType: " << m_txtType << endl;
+  if (_txtType != 2) {
+    cerr << "getK not supported for txtType: " << _txtType << endl;
     exit (1);
   }
 
@@ -203,23 +203,23 @@ void CCamera::setK(Mat3f& K) const{
     for (int x = 0; x < 3; ++x)
       K[y][x] = 0.0;
 
-  K[0][0] = m_intrinsics[0];
-  K[1][1] = m_intrinsics[1];
-  K[0][1] = m_intrinsics[2];
-  K[0][2] = m_intrinsics[3];
-  K[1][2] = m_intrinsics[4];
+  K[0][0] = _intrinsics[0];
+  K[1][1] = _intrinsics[1];
+  K[0][1] = _intrinsics[2];
+  K[0][2] = _intrinsics[3];
+  K[1][2] = _intrinsics[4];
   K[2][2] = 1.0;
 }
 
 void CCamera::setRT(Mat4f& RT) const{
-  if (m_txtType != 2) {
-    cerr << "getRT not supported for txtType: " << m_txtType << endl;
+  if (_txtType != 2) {
+    cerr << "getRT not supported for txtType: " << _txtType << endl;
     exit (1);
   }
 
   double params[6];
   for (int i = 0; i < 6; ++i)
-    params[i] = m_extrinsics[i];
+    params[i] = _extrinsics[i];
     
   Mat4 RTd;
   q2proj(params, RTd);
@@ -230,14 +230,14 @@ void CCamera::setRT(Mat4f& RT) const{
 }
 
 void CCamera::getR(Mat3f& R) const {
-  if (m_txtType != 2) {
-    cerr << "Not supported: " << m_txtType << endl;
+  if (_txtType != 2) {
+    cerr << "Not supported: " << _txtType << endl;
     exit (1);
   }
 
   double params[6];
   for (int i = 0; i < 6; ++i)
-    params[i] = m_extrinsics[i];
+    params[i] = _extrinsics[i];
 
   Mat4 mtmp;
   q2proj(params, mtmp);
@@ -430,33 +430,33 @@ void CCamera::q2proj(const double q[6], Mat4& mat) {
 
 float CCamera::computeDepthDif(const Vec4f& lhs, const Vec4f& rhs) const {
   // orthographic projection case
-  if (m_projection[0][2][0] == 0.0 && m_projection[0][2][1] == 0.0 &&
-      m_projection[0][2][2] == 0.0) {
-    return - m_center * (lhs - rhs);
+  if (_projection[0][2][0] == 0.0 && _projection[0][2][1] == 0.0 &&
+      _projection[0][2][2] == 0.0) {
+    return - _center * (lhs - rhs);
   }
   else {
-    return m_oaxis * (lhs - rhs);
+    return _oaxis * (lhs - rhs);
   }
 }
 
 float CCamera::computeDistance(const Vec4f& point) const {
-  const float fx = point[0] - m_center[0];
-  const float fy = point[1] - m_center[1];
-  const float fz = point[2] - m_center[2];
+  const float fx = point[0] - _center[0];
+  const float fy = point[1] - _center[1];
+  const float fz = point[2] - _center[2];
   
   return sqrt(fx * fx + fy * fy + fz * fz);
 }
 
 float CCamera::computeDepth(const Vec4f& point) const {
   // orthographic projection case
-  if (m_projection[0][2][0] == 0.0 && m_projection[0][2][1] == 0.0 &&
-      m_projection[0][2][2] == 0.0) {
+  if (_projection[0][2][0] == 0.0 && _projection[0][2][1] == 0.0 &&
+      _projection[0][2][2] == 0.0) {
 
     //cerr << "Because I'm using negative depth to represent flip. this could be a problem" << endl;
-    return - m_center * point;
+    return - _center * point;
   }
   else {
-    return m_oaxis * point;
+    return _oaxis * point;
   }
 }
 
@@ -466,7 +466,7 @@ void CCamera::getPAxes(const Vec4f& coord, const Vec4f& normal,
   const float pscale = getScale(coord, level);
 
   Vec3f normal3(normal[0], normal[1], normal[2]);
-  Vec3f yaxis3 = cross(normal3, m_xaxis);
+  Vec3f yaxis3 = cross(normal3, _xaxis);
   unitize(yaxis3);
   Vec3f xaxis3 = cross(yaxis3, normal3);
   pxaxis[0] = xaxis3[0];  pxaxis[1] = xaxis3[1];  pxaxis[2] = xaxis3[2];  pxaxis[3] = 0.0;
@@ -478,13 +478,13 @@ void CCamera::getPAxes(const Vec4f& coord, const Vec4f& normal,
                           project(coord, level));
   const float ydis = norm(project(coord + pyaxis, level) -
                           project(coord, level));
-  pxaxis *= m_axesScale / xdis;
-  pyaxis *= m_axesScale / ydis;
+  pxaxis *= _axesScale / xdis;
+  pyaxis *= _axesScale / ydis;
   
   /*
   Vec3f normal3(normal[0], normal[1], normal[2]);
 
-  Vec3f yaxis3 = cross(normal3, m_xaxis);
+  Vec3f yaxis3 = cross(normal3, _xaxis);
   unitize(yaxis3);
   Vec3f xaxis3 = cross(yaxis3, normal3);
 
@@ -496,8 +496,8 @@ void CCamera::getPAxes(const Vec4f& coord, const Vec4f& normal,
   // ??? in order to get less noisy results with orientation optimization
   const int lessnoisy = 0;
   if (lessnoisy) {
-    float xtmp = m_oaxis * pxaxis;
-    float ytmp = m_oaxis * pyaxis;
+    float xtmp = _oaxis * pxaxis;
+    float ytmp = _oaxis * pyaxis;
     xtmp = sqrt(max(0.0f, 1.0f - xtmp * xtmp));
     ytmp = sqrt(max(0.0f, 1.0f - ytmp * ytmp));
     if (xtmp == 0.0f)
@@ -515,7 +515,7 @@ void CCamera::getPAxes(const Vec4f& coord, const Vec4f& normal,
   }
 
   // How many pixels per step
-  const float scale = getScale(coord, 0) * m_axesScale;
+  const float scale = getScale(coord, 0) * _axesScale;
 
   pxaxis *= scale;
   pyaxis *= scale;
@@ -523,12 +523,12 @@ void CCamera::getPAxes(const Vec4f& coord, const Vec4f& normal,
 }
 
 void CCamera::setAxesScale(const float axesScale) {
-  m_axesScale = axesScale;
+  _axesScale = axesScale;
 }  
 
 void CCamera::intersect(const Vec4f& coord, const Vec4f& abcd,
                         Vec4f& cross, float& distance) const {
-  Vec4f ray = coord - m_center;
+  Vec4f ray = coord - _center;
   unitize(ray);
   const float A = coord * abcd;
   const float B = ray * abcd;
@@ -544,7 +544,7 @@ void CCamera::intersect(const Vec4f& coord, const Vec4f& abcd,
 }
 
 Vec4f CCamera::intersect(const Vec4f& coord, const Vec4f& abcd) const {
-  Vec4f ray = m_center - coord;
+  Vec4f ray = _center - coord;
 
   const float A = coord * abcd;
   const float B = ray * abcd;
@@ -555,13 +555,13 @@ Vec4f CCamera::intersect(const Vec4f& coord, const Vec4f& abcd) const {
     return coord - A / B * ray;
 }
 
-Vec4f CCamera::unproject(const Vec3f& icoord, const int m_level) const {
+Vec4f CCamera::unproject(const Vec3f& icoord, const int _level) const {
   Mat3 A;
   Vec3 b(icoord[0], icoord[1], icoord[2]);
   for (int y = 0; y < 3; ++y) {
     for (int x = 0; x < 3; ++x)
-      A[y][x] = m_projection[m_level][y][x];
-    b[y] -= m_projection[m_level][y][3];    
+      A[y][x] = _projection[_level][y][x];
+    b[y] -= _projection[_level][y][3];    
   }
   Mat3 IA;
   invert(IA, A);

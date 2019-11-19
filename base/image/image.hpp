@@ -184,48 +184,48 @@ class CImage {
   // 0: nothing allocated
   // 1: width/height allocated
   // 2: memory allocated
-  int m_alloc;
+  int _alloc;
   // a pyramid of images
-  std::vector<std::vector<unsigned char> > m_images;
+  std::vector<std::vector<unsigned char> > _images;
   // a pyramid of masks
-  std::vector<std::vector<unsigned char> > m_masks;
+  std::vector<std::vector<unsigned char> > _masks;
   // a pyramid of images specifying regions with edges(texture)
-  std::vector<std::vector<unsigned char> > m_edges;
+  std::vector<std::vector<unsigned char> > _edges;
   
   // width of an image in each level
-  std::vector<int> m_widths;
+  std::vector<int> _widths;
   // height of an image in each level
-  std::vector<int> m_heights;
+  std::vector<int> _heights;
 
 #ifdef FURUKAWA_IMAGE_GAMMA
   // For gamma decoded images
-  std::vector<std::vector<float> > m_dimages;
+  std::vector<std::vector<float> > _dimages;
 #endif
   
   //----------------------------------------------------------------------
   // Variables keep fixed
   //----------------------------------------------------------------------  
   // a name of an image
-  std::string m_name;
+  std::string _name;
   // a name of a mask image
-  std::string m_mname;
+  std::string _mname;
   // a name of an image specifying regions with edges(texture)
-  std::string m_ename;
+  std::string _ename;
   
   // number of levels
-  int m_maxLevel;
+  int _maxLevel;
 };
   
 inline int CImage::isSafe(const Vec3f& icoord, const int level) const {
 #ifdef FURUKAWA_IMAGE_BICUBIC
-  if (icoord[0] < 1.0 || m_widths[level] - 3 < icoord[0] ||
-      icoord[1] < 1.0 || m_heights[level] - 3 < icoord[1])
+  if (icoord[0] < 1.0 || _widths[level] - 3 < icoord[0] ||
+      icoord[1] < 1.0 || _heights[level] - 3 < icoord[1])
     return 0;
   else
     return 1;
 #else
-  if (icoord[0] < 0.0 || m_widths[level] - 2 < icoord[0] ||
-      icoord[1] < 0.0 || m_heights[level] - 2 < icoord[1])
+  if (icoord[0] < 0.0 || _widths[level] - 2 < icoord[0] ||
+      icoord[1] < 0.0 || _heights[level] - 2 < icoord[1])
     return 0;
   else
     return 1;
@@ -234,7 +234,7 @@ inline int CImage::isSafe(const Vec3f& icoord, const int level) const {
  
 // Check if a mask image exists
 inline int CImage::isMask(void) const {
-  if (m_masks[0].empty())
+  if (_masks[0].empty())
     return 0;
   else
     return 1;
@@ -242,14 +242,14 @@ inline int CImage::isMask(void) const {
  
 // Check if an edge image exists
 inline int CImage::isEdge(void) const {
-  if (m_edges[0].empty())
+  if (_edges[0].empty())
     return 0;
   else
     return 1;
  };
  
 inline const std::vector<unsigned char>& CImage::getImage(const int level) const{
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }
@@ -259,27 +259,27 @@ inline const std::vector<unsigned char>& CImage::getImage(const int level) const
   exit (1);
 #endif
   
-  return m_images[level];
+  return _images[level];
 };
 
 inline const std::vector<unsigned char>& CImage::getMask(const int level) const{
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }  
-  return m_masks[level];
+  return _masks[level];
 };
 
 inline const std::vector<unsigned char>& CImage::getEdge(const int level) const{
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }  
-  return m_edges[level];
+  return _edges[level];
 };
 
 inline std::vector<unsigned char>& CImage::getImage(const int level){
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }
@@ -289,66 +289,66 @@ inline std::vector<unsigned char>& CImage::getImage(const int level){
   exit (1);
 #endif
   
-  return m_images[level];
+  return _images[level];
 };
 
 inline std::vector<unsigned char>& CImage::getMask(const int level){
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }  
-  return m_masks[level];
+  return _masks[level];
 };
 
 inline std::vector<unsigned char>& CImage::getEdge(const int level){
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }  
-  return m_edges[level];
+  return _edges[level];
 };
 
 int CImage::getWidth(const int level) const{
-  if (m_alloc == 0) {
+  if (_alloc == 0) {
     std::cerr << "First allocate (getWidth)" << std::endl;
     exit (1);
   }
-  return m_widths[level];
+  return _widths[level];
 };
  
 int CImage::getHeight(const int level) const{
-  if (m_alloc == 0) {
+  if (_alloc == 0) {
     //alloc(1);
     std::cerr << "First allocate (getHeight)" << std::endl;
     exit (1);
   }    
-  return m_heights[level];
+  return _heights[level];
 };
 
 /* 
 int CImage::getCWidth(const int beta, const int level) const{
-  if (m_alloc == 0) {
+  if (_alloc == 0) {
     //alloc(1);
     std::cerr << "First allocate (getCWidth)" << std::endl;
     exit (1);
   }    
-  return (m_widths[level] - 1) / beta + 1;
+  return (_widths[level] - 1) / beta + 1;
 };
 */
 /* 
 int CImage::getCHeight(const int beta, const int level) const{
-  if (m_alloc == 0) {
+  if (_alloc == 0) {
     //alloc(1);
     std::cerr << "First allocate (getCHeight)" << std::endl;
     exit (1);
   }    
-  return (m_heights[level] - 1) / beta + 1;
+  return (_heights[level] - 1) / beta + 1;
 };
 */
  
 Vec3f CImage::getColor(const float x, const float y, const int level) const{
 #ifdef FURUKAWA_DEBUG
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }
@@ -376,116 +376,116 @@ Vec3f CImage::getColor(const float x, const float y, const int level) const{
   f = 1 - q;
   const float wy2 = (((1) * f - 2) * f) * f + 1;
   
-  const int offset = m_widths[level] * 3;
-  const int index0 = ((y1 - 1) * m_widths[level] + x1 - 1) * 3;
+  const int offset = _widths[level] * 3;
+  const int index0 = ((y1 - 1) * _widths[level] + x1 - 1) * 3;
   const int index1 = index0 + offset;
   const int index2 = index1 + offset;
   const int index3 = index2 + offset;
   
 #ifdef FURUKAWA_IMAGE_GAMMA
-  const float& r00 = m_dimages[level][index0];
-  const float& g00 = m_dimages[level][index0+1];
-  const float& b00 = m_dimages[level][index0+2];
-  const float& r01 = m_dimages[level][index0+3];
-  const float& g01 = m_dimages[level][index0+4];
-  const float& b01 = m_dimages[level][index0+5];
-  const float& r02 = m_dimages[level][index0+6];
-  const float& g02 = m_dimages[level][index0+7];
-  const float& b02 = m_dimages[level][index0+8];
-  const float& r03 = m_dimages[level][index0+9];
-  const float& g03 = m_dimages[level][index0+10];
-  const float& b03 = m_dimages[level][index0+11];
+  const float& r00 = _dimages[level][index0];
+  const float& g00 = _dimages[level][index0+1];
+  const float& b00 = _dimages[level][index0+2];
+  const float& r01 = _dimages[level][index0+3];
+  const float& g01 = _dimages[level][index0+4];
+  const float& b01 = _dimages[level][index0+5];
+  const float& r02 = _dimages[level][index0+6];
+  const float& g02 = _dimages[level][index0+7];
+  const float& b02 = _dimages[level][index0+8];
+  const float& r03 = _dimages[level][index0+9];
+  const float& g03 = _dimages[level][index0+10];
+  const float& b03 = _dimages[level][index0+11];
   
-  const float& r10 = m_dimages[level][index1];
-  const float& g10 = m_dimages[level][index1+1];
-  const float& b10 = m_dimages[level][index1+2];
-  const float& r11 = m_dimages[level][index1+3];
-  const float& g11 = m_dimages[level][index1+4];
-  const float& b11 = m_dimages[level][index1+5];
-  const float& r12 = m_dimages[level][index1+6];
-  const float& g12 = m_dimages[level][index1+7];
-  const float& b12 = m_dimages[level][index1+8];
-  const float& r13 = m_dimages[level][index1+9];
-  const float& g13 = m_dimages[level][index1+10];
-  const float& b13 = m_dimages[level][index1+11];
+  const float& r10 = _dimages[level][index1];
+  const float& g10 = _dimages[level][index1+1];
+  const float& b10 = _dimages[level][index1+2];
+  const float& r11 = _dimages[level][index1+3];
+  const float& g11 = _dimages[level][index1+4];
+  const float& b11 = _dimages[level][index1+5];
+  const float& r12 = _dimages[level][index1+6];
+  const float& g12 = _dimages[level][index1+7];
+  const float& b12 = _dimages[level][index1+8];
+  const float& r13 = _dimages[level][index1+9];
+  const float& g13 = _dimages[level][index1+10];
+  const float& b13 = _dimages[level][index1+11];
   
-  const float& r20 = m_dimages[level][index2];
-  const float& g20 = m_dimages[level][index2+1];
-  const float& b20 = m_dimages[level][index2+2];
-  const float& r21 = m_dimages[level][index2+3];
-  const float& g21 = m_dimages[level][index2+4];
-  const float& b21 = m_dimages[level][index2+5];
-  const float& r22 = m_dimages[level][index2+6];
-  const float& g22 = m_dimages[level][index2+7];
-  const float& b22 = m_dimages[level][index2+8];
-  const float& r23 = m_dimages[level][index2+9];
-  const float& g23 = m_dimages[level][index2+10];
-  const float& b23 = m_dimages[level][index2+11];
+  const float& r20 = _dimages[level][index2];
+  const float& g20 = _dimages[level][index2+1];
+  const float& b20 = _dimages[level][index2+2];
+  const float& r21 = _dimages[level][index2+3];
+  const float& g21 = _dimages[level][index2+4];
+  const float& b21 = _dimages[level][index2+5];
+  const float& r22 = _dimages[level][index2+6];
+  const float& g22 = _dimages[level][index2+7];
+  const float& b22 = _dimages[level][index2+8];
+  const float& r23 = _dimages[level][index2+9];
+  const float& g23 = _dimages[level][index2+10];
+  const float& b23 = _dimages[level][index2+11];
   
-  const float& r30 = m_dimages[level][index3];
-  const float& g30 = m_dimages[level][index3+1];
-  const float& b30 = m_dimages[level][index3+2];
-  const float& r31 = m_dimages[level][index3+3];
-  const float& g31 = m_dimages[level][index3+4];
-  const float& b31 = m_dimages[level][index3+5];
-  const float& r32 = m_dimages[level][index3+6];
-  const float& g32 = m_dimages[level][index3+7];
-  const float& b32 = m_dimages[level][index3+8];
-  const float& r33 = m_dimages[level][index3+9];
-  const float& g33 = m_dimages[level][index3+10];
-  const float& b33 = m_dimages[level][index3+11];
+  const float& r30 = _dimages[level][index3];
+  const float& g30 = _dimages[level][index3+1];
+  const float& b30 = _dimages[level][index3+2];
+  const float& r31 = _dimages[level][index3+3];
+  const float& g31 = _dimages[level][index3+4];
+  const float& b31 = _dimages[level][index3+5];
+  const float& r32 = _dimages[level][index3+6];
+  const float& g32 = _dimages[level][index3+7];
+  const float& b32 = _dimages[level][index3+8];
+  const float& r33 = _dimages[level][index3+9];
+  const float& g33 = _dimages[level][index3+10];
+  const float& b33 = _dimages[level][index3+11];
 #else
-  const unsigned char& r00 = m_images[level][index0];
-  const unsigned char& g00 = m_images[level][index0+1];
-  const unsigned char& b00 = m_images[level][index0+2];
-  const unsigned char& r01 = m_images[level][index0+3];
-  const unsigned char& g01 = m_images[level][index0+4];
-  const unsigned char& b01 = m_images[level][index0+5];
-  const unsigned char& r02 = m_images[level][index0+6];
-  const unsigned char& g02 = m_images[level][index0+7];
-  const unsigned char& b02 = m_images[level][index0+8];
-  const unsigned char& r03 = m_images[level][index0+9];
-  const unsigned char& g03 = m_images[level][index0+10];
-  const unsigned char& b03 = m_images[level][index0+11];
+  const unsigned char& r00 = _images[level][index0];
+  const unsigned char& g00 = _images[level][index0+1];
+  const unsigned char& b00 = _images[level][index0+2];
+  const unsigned char& r01 = _images[level][index0+3];
+  const unsigned char& g01 = _images[level][index0+4];
+  const unsigned char& b01 = _images[level][index0+5];
+  const unsigned char& r02 = _images[level][index0+6];
+  const unsigned char& g02 = _images[level][index0+7];
+  const unsigned char& b02 = _images[level][index0+8];
+  const unsigned char& r03 = _images[level][index0+9];
+  const unsigned char& g03 = _images[level][index0+10];
+  const unsigned char& b03 = _images[level][index0+11];
   
-  const unsigned char& r10 = m_images[level][index1];
-  const unsigned char& g10 = m_images[level][index1+1];
-  const unsigned char& b10 = m_images[level][index1+2];
-  const unsigned char& r11 = m_images[level][index1+3];
-  const unsigned char& g11 = m_images[level][index1+4];
-  const unsigned char& b11 = m_images[level][index1+5];
-  const unsigned char& r12 = m_images[level][index1+6];
-  const unsigned char& g12 = m_images[level][index1+7];
-  const unsigned char& b12 = m_images[level][index1+8];
-  const unsigned char& r13 = m_images[level][index1+9];
-  const unsigned char& g13 = m_images[level][index1+10];
-  const unsigned char& b13 = m_images[level][index1+11];
+  const unsigned char& r10 = _images[level][index1];
+  const unsigned char& g10 = _images[level][index1+1];
+  const unsigned char& b10 = _images[level][index1+2];
+  const unsigned char& r11 = _images[level][index1+3];
+  const unsigned char& g11 = _images[level][index1+4];
+  const unsigned char& b11 = _images[level][index1+5];
+  const unsigned char& r12 = _images[level][index1+6];
+  const unsigned char& g12 = _images[level][index1+7];
+  const unsigned char& b12 = _images[level][index1+8];
+  const unsigned char& r13 = _images[level][index1+9];
+  const unsigned char& g13 = _images[level][index1+10];
+  const unsigned char& b13 = _images[level][index1+11];
   
-  const unsigned char& r20 = m_images[level][index2];
-  const unsigned char& g20 = m_images[level][index2+1];
-  const unsigned char& b20 = m_images[level][index2+2];
-  const unsigned char& r21 = m_images[level][index2+3];
-  const unsigned char& g21 = m_images[level][index2+4];
-  const unsigned char& b21 = m_images[level][index2+5];
-  const unsigned char& r22 = m_images[level][index2+6];
-  const unsigned char& g22 = m_images[level][index2+7];
-  const unsigned char& b22 = m_images[level][index2+8];
-  const unsigned char& r23 = m_images[level][index2+9];
-  const unsigned char& g23 = m_images[level][index2+10];
-  const unsigned char& b23 = m_images[level][index2+11];
+  const unsigned char& r20 = _images[level][index2];
+  const unsigned char& g20 = _images[level][index2+1];
+  const unsigned char& b20 = _images[level][index2+2];
+  const unsigned char& r21 = _images[level][index2+3];
+  const unsigned char& g21 = _images[level][index2+4];
+  const unsigned char& b21 = _images[level][index2+5];
+  const unsigned char& r22 = _images[level][index2+6];
+  const unsigned char& g22 = _images[level][index2+7];
+  const unsigned char& b22 = _images[level][index2+8];
+  const unsigned char& r23 = _images[level][index2+9];
+  const unsigned char& g23 = _images[level][index2+10];
+  const unsigned char& b23 = _images[level][index2+11];
   
-  const unsigned char& r30 = m_images[level][index3];
-  const unsigned char& g30 = m_images[level][index3+1];
-  const unsigned char& b30 = m_images[level][index3+2];
-  const unsigned char& r31 = m_images[level][index3+3];
-  const unsigned char& g31 = m_images[level][index3+4];
-  const unsigned char& b31 = m_images[level][index3+5];
-  const unsigned char& r32 = m_images[level][index3+6];
-  const unsigned char& g32 = m_images[level][index3+7];
-  const unsigned char& b32 = m_images[level][index3+8];
-  const unsigned char& r33 = m_images[level][index3+9];
-  const unsigned char& g33 = m_images[level][index3+10];
-  const unsigned char& b33 = m_images[level][index3+11];
+  const unsigned char& r30 = _images[level][index3];
+  const unsigned char& g30 = _images[level][index3+1];
+  const unsigned char& b30 = _images[level][index3+2];
+  const unsigned char& r31 = _images[level][index3+3];
+  const unsigned char& g31 = _images[level][index3+4];
+  const unsigned char& b31 = _images[level][index3+5];
+  const unsigned char& r32 = _images[level][index3+6];
+  const unsigned char& g32 = _images[level][index3+7];
+  const unsigned char& b32 = _images[level][index3+8];
+  const unsigned char& r33 = _images[level][index3+9];
+  const unsigned char& g33 = _images[level][index3+10];
+  const unsigned char& b33 = _images[level][index3+11];
 #endif
   // separate x and y
   const float row0[3] = {wx0 * r00 + wx1 * r01 + wx2 * r02 + wx3 * r03,
@@ -510,18 +510,18 @@ Vec3f CImage::getColor(const float x, const float y, const int level) const{
   // Bilinear case
   const int lx = static_cast<int>(x);
   const int ly = static_cast<int>(y);
-  const int index = 3 * (ly * m_widths[level] + lx);
+  const int index = 3 * (ly * _widths[level] + lx);
 
   const float dx1 = x - lx;  const float dx0 = 1.0f - dx1;
   const float dy1 = y - ly;  const float dy0 = 1.0f - dy1;
 
   const float f00 = dx0 * dy0;  const float f01 = dx0 * dy1;
   const float f10 = dx1 * dy0;  const float f11 = dx1 * dy1;
-  const int index2 = index + 3 * m_widths[level];
+  const int index2 = index + 3 * _widths[level];
     
 #ifdef FURUKAWA_IMAGE_GAMMA
-  const float* fp0 = &m_dimages[level][index] - 1;
-  const float* fp1 = &m_dimages[level][index2] - 1;
+  const float* fp0 = &_dimages[level][index] - 1;
+  const float* fp1 = &_dimages[level][index2] - 1;
   float r = 0.0f;  float g = 0.0f;  float b = 0.0f;
   r += *(++fp0) * f00 + *(++fp1) * f01;
   g += *(++fp0) * f00 + *(++fp1) * f01;
@@ -531,16 +531,16 @@ Vec3f CImage::getColor(const float x, const float y, const int level) const{
   b += *(++fp0) * f10 + *(++fp1) * f11;
   return Vec3f(r, g, b);
   /*
-  return Vec3f(m_dimages[level][index] * f00 + m_dimages[level][index + 3] * f10 +
-               m_dimages[level][index2] * f01 + m_dimages[level][index2 + 3] * f11,
-               m_dimages[level][index + 1] * f00 + m_dimages[level][index + 4] * f10 +
-               m_dimages[level][index2 + 1] * f01 + m_dimages[level][index2 + 4] * f11,
-               m_dimages[level][index + 2] * f00 + m_dimages[level][index + 5] * f10 +
-               m_dimages[level][index2 + 2] * f01 + m_dimages[level][index2 + 5] * f11);
+  return Vec3f(_dimages[level][index] * f00 + _dimages[level][index + 3] * f10 +
+               _dimages[level][index2] * f01 + _dimages[level][index2 + 3] * f11,
+               _dimages[level][index + 1] * f00 + _dimages[level][index + 4] * f10 +
+               _dimages[level][index2 + 1] * f01 + _dimages[level][index2 + 4] * f11,
+               _dimages[level][index + 2] * f00 + _dimages[level][index + 5] * f10 +
+               _dimages[level][index2 + 2] * f01 + _dimages[level][index2 + 5] * f11);
   */
 #else
-  const unsigned char* ucp0 = &m_images[level][index] - 1;
-  const unsigned char* ucp1 = &m_images[level][index2] - 1;
+  const unsigned char* ucp0 = &_images[level][index] - 1;
+  const unsigned char* ucp1 = &_images[level][index2] - 1;
   float r = 0.0f;  float g = 0.0f;  float b = 0.0f;
   r += *(++ucp0) * f00 + *(++ucp1) * f01;
   g += *(++ucp0) * f00 + *(++ucp1) * f01;
@@ -550,14 +550,14 @@ Vec3f CImage::getColor(const float x, const float y, const int level) const{
   b += *(++ucp0) * f10 + *(++ucp1) * f11;
   return Vec3f(r, g, b);
   /*
-  return Vec3f(m_images[level][index] * f00 + m_images[level][index + 3] * f10 +
-               m_images[level][index2] * f01 + m_images[level][index2 + 3] * f11,
+  return Vec3f(_images[level][index] * f00 + _images[level][index + 3] * f10 +
+               _images[level][index2] * f01 + _images[level][index2 + 3] * f11,
                
-               m_images[level][index + 1] * f00 + m_images[level][index + 4] * f10 +
-               m_images[level][index2 + 1] * f01 + m_images[level][index2 + 4] * f11,
+               _images[level][index + 1] * f00 + _images[level][index + 4] * f10 +
+               _images[level][index2 + 1] * f01 + _images[level][index2 + 4] * f11,
                
-               m_images[level][index + 2] * f00 + m_images[level][index + 5] * f10 +
-               m_images[level][index2 + 2] * f01 + m_images[level][index2 + 5] * f11);
+               _images[level][index + 2] * f00 + _images[level][index + 5] * f10 +
+               _images[level][index2 + 2] * f01 + _images[level][index2 + 5] * f11);
   */
 #endif
   /*
@@ -577,51 +577,51 @@ Vec3f CImage::getColor(const float x, const float y, const int level) const{
 void CImage::setColor(const int ix, const int iy, const int level,
                       const Vec3f& rgb) {
 #ifdef FURUKAWA_DEBUG
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }  
 #endif  
-  const int index = (iy * m_widths[level] + ix) * 3;
+  const int index = (iy * _widths[level] + ix) * 3;
 
 #ifdef FURUKAWA_IMAGE_GAMMA
-  m_dimages[level][index] = rgb[0];
-  m_dimages[level][index+1] = rgb[1];
-  m_dimages[level][index+2] = rgb[2];
+  _dimages[level][index] = rgb[0];
+  _dimages[level][index+1] = rgb[1];
+  _dimages[level][index+2] = rgb[2];
 #else
-  m_images[level][index] = (unsigned char)floor(rgb[0] + 0.5f);
-  m_images[level][index+1] = (unsigned char)floor(rgb[1] + 0.5f);
-  m_images[level][index+2] = (unsigned char)floor(rgb[2] + 0.5f);
+  _images[level][index] = (unsigned char)floor(rgb[0] + 0.5f);
+  _images[level][index+1] = (unsigned char)floor(rgb[1] + 0.5f);
+  _images[level][index+2] = (unsigned char)floor(rgb[2] + 0.5f);
 #endif
 };
 
 Vec3f CImage::getColor(const int ix, const int iy, const int level) const{
 #ifdef FURUKAWA_DEBUG
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }  
 #endif  
-  const int index = (iy * m_widths[level] + ix) * 3;
+  const int index = (iy * _widths[level] + ix) * 3;
 
 #ifdef FURUKAWA_IMAGE_GAMMA
-  return Vec3f(m_dimages[level][index],
-	       m_dimages[level][index+1],
-	       m_dimages[level][index+2]);
+  return Vec3f(_dimages[level][index],
+	       _dimages[level][index+1],
+	       _dimages[level][index+2]);
 #else
-  return Vec3f(m_images[level][index],
-	       m_images[level][index+1],
-	       m_images[level][index+2]);
+  return Vec3f(_images[level][index],
+	       _images[level][index+1],
+	       _images[level][index+2]);
 #endif
 };
 
 int CImage::getMask(const float fx, const float fy, const int level) const{
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }    
   
-  if (m_masks[level].empty())
+  if (_masks[level].empty())
     return 1;
   
   const int ix = (int)floor(fx + 0.5f);
@@ -630,28 +630,28 @@ int CImage::getMask(const float fx, const float fy, const int level) const{
 };
 
 int CImage::getMask(const int ix, const int iy, const int level) const{
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }    
 
-  if (m_masks[level].empty())
+  if (_masks[level].empty())
     return 1;
 
-  if (ix < 0 || m_widths[level] <= ix || iy < 0 || m_heights[level] <= iy)
+  if (ix < 0 || _widths[level] <= ix || iy < 0 || _heights[level] <= iy)
     return 1;
   
-  const int index = iy * m_widths[level] + ix;
-  return m_masks[level][index];
+  const int index = iy * _widths[level] + ix;
+  return _masks[level][index];
 };
 
 int CImage::getEdge(const float fx, const float fy, const int level) const{
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }    
 
-  if (m_edges[level].empty())
+  if (_edges[level].empty())
     return 1;    
   const int ix = (int)floor(fx + 0.5f);
   const int iy = (int)floor(fy + 0.5f);
@@ -659,19 +659,19 @@ int CImage::getEdge(const float fx, const float fy, const int level) const{
 };
 
 int CImage::getEdge(const int ix, const int iy, const int level) const{
-  if (m_alloc != 2) {
+  if (_alloc != 2) {
     std::cerr << "First allocate" << std::endl;
     exit (1);
   }    
   
-  if (m_edges[level].empty())
+  if (_edges[level].empty())
     return 1;
 
-  if (ix < 0 || m_widths[level] <= ix || iy < 0 || m_heights[level] <= iy)
+  if (ix < 0 || _widths[level] <= ix || iy < 0 || _heights[level] <= iy)
     return 1;
   
-  const int index = iy * m_widths[level] + ix;
-  return m_edges[level][index];
+  const int index = iy * _widths[level] + ix;
+  return _edges[level][index];
 };
   
 };

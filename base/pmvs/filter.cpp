@@ -10,7 +10,7 @@ using namespace Patch;
 using namespace PMVS3;
 using namespace std;
 
-CFilter::CFilter(CFindMatch& findMatch) : m_fm(findMatch) {
+CFilter::CFilter(CFindMatch& findMatch) : _fm(findMatch) {
 }
 
 void CFilter::init(void) {
@@ -37,23 +37,23 @@ void CFilter::filterOutside(void) {
   time(&tv); 
   time_t curtime = tv;
   cerr << "FilterOutside" << endl;
-  //??? notice (1) here to avoid removing m_fix=1
-  m_fm.m_pos.collectPatches(1);
+  //??? notice (1) here to avoid removing _fix=1
+  _fm._pos.collectPatches(1);
 
-  const int psize = (int)m_fm.m_pos.m_ppatches.size();  
-  m_gains.resize(psize);
+  const int psize = (int)_fm._pos._ppatches.size();  
+  _gains.resize(psize);
   
   cerr << "mainbody: " << flush;
   
-  m_fm.m_count = 0;
-  vector<thrd_t> threads(m_fm.m_CPU);
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  _fm._count = 0;
+  vector<thrd_t> threads(_fm._CPU);
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_create(&threads[i], &filterOutsideThreadTmp, (void*)this);
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_join(threads[i], NULL);
   cerr << endl;
 
-  // delete patches with positive m_gains
+  // delete patches with positive _gains
   int count = 0;
 
   double ave = 0.0f;
@@ -61,12 +61,12 @@ void CFilter::filterOutside(void) {
   int denom = 0;  
   
   for (int p = 0; p < psize; ++p) {
-    ave += m_gains[p];
-    ave2 += m_gains[p] * m_gains[p];
+    ave += _gains[p];
+    ave2 += _gains[p] * _gains[p];
     ++denom;
     
-    if (m_gains[p] < 0.0) {
-      m_fm.m_pos.removePatch(m_fm.m_pos.m_ppatches[p]);
+    if (_gains[p] < 0.0) {
+      _fm._pos.removePatch(_fm._pos._ppatches[p]);
       count++;
     }
   }
@@ -79,67 +79,67 @@ void CFilter::filterOutside(void) {
   cerr << "Gain (ave/var): " << ave << ' ' << ave2 << endl;
   
   time(&tv);
-  cerr << (int)m_fm.m_pos.m_ppatches.size() << " -> "
-       << (int)m_fm.m_pos.m_ppatches.size() - count << " ("
-       << 100 * ((int)m_fm.m_pos.m_ppatches.size() - count) / (float)m_fm.m_pos.m_ppatches.size()
+  cerr << (int)_fm._pos._ppatches.size() << " -> "
+       << (int)_fm._pos._ppatches.size() - count << " ("
+       << 100 * ((int)_fm._pos._ppatches.size() - count) / (float)_fm._pos._ppatches.size()
        << "%)\t" << (tv - curtime) / CLOCKS_PER_SEC << " secs" << endl;
 }
 
 float CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
-  float gain = patch.score2(m_fm.m_nccThreshold);
+  float gain = patch.score2(_fm._nccThreshold);
 
-  const int size = (int)patch.m_images.size();  
+  const int size = (int)patch._images.size();  
   for (int i = 0; i < size; ++i) {
-    const int& index = patch.m_images[i];
-    if (m_fm.m_tnum <= index)
+    const int& index = patch._images[i];
+    if (_fm._tnum <= index)
       continue;
     
-    const int& ix = patch.m_grids[i][0];      const int& iy = patch.m_grids[i][1];
-    const int index2 = iy * m_fm.m_pos.m_gwidths[index] + ix;
+    const int& ix = patch._grids[i][0];      const int& iy = patch._grids[i][1];
+    const int index2 = iy * _fm._pos._gwidths[index] + ix;
     
     float maxpressure = 0.0f;
     if (lock)
-      m_fm.m_imageLocks[index].rdlock();
+      _fm._imageLocks[index].rdlock();
     
-    for (int j = 0; j < (int)m_fm.m_pos.m_pgrids[index][index2].size(); ++j) {
-      if (!m_fm.isNeighbor(patch, *m_fm.m_pos.m_pgrids[index][index2][j],
-                           m_fm.m_neighborThreshold1))
-        maxpressure = max(maxpressure, m_fm.m_pos.m_pgrids[index][index2][j]->m_ncc -
-                          m_fm.m_nccThreshold);
+    for (int j = 0; j < (int)_fm._pos._pgrids[index][index2].size(); ++j) {
+      if (!_fm.isNeighbor(patch, *_fm._pos._pgrids[index][index2][j],
+                           _fm._neighborThreshold1))
+        maxpressure = max(maxpressure, _fm._pos._pgrids[index][index2][j]->_ncc -
+                          _fm._nccThreshold);
     }
     if (lock)
-      m_fm.m_imageLocks[index].unlock();
+      _fm._imageLocks[index].unlock();
     
     gain -= maxpressure;
   }
   
-  const int vsize = (int)patch.m_vimages.size();
+  const int vsize = (int)patch._vimages.size();
   for (int i = 0; i < vsize; ++i) {
-    const int& index = patch.m_vimages[i];
-    if (m_fm.m_tnum <= index)
+    const int& index = patch._vimages[i];
+    if (_fm._tnum <= index)
       continue;
     
-    const float pdepth = m_fm.m_pss.computeDepth(index, patch.m_coord);    
+    const float pdepth = _fm._pss.computeDepth(index, patch._coord);    
     
-    const int& ix = patch.m_vgrids[i][0];      const int& iy = patch.m_vgrids[i][1];
-    const int index2 = iy * m_fm.m_pos.m_gwidths[index] + ix;
+    const int& ix = patch._vgrids[i][0];      const int& iy = patch._vgrids[i][1];
+    const int index2 = iy * _fm._pos._gwidths[index] + ix;
     float maxpressure = 0.0f;      
 
     if (lock)
-      m_fm.m_imageLocks[index].rdlock();
+      _fm._imageLocks[index].rdlock();
     
-    for (int j = 0; j < (int)m_fm.m_pos.m_pgrids[index][index2].size(); ++j) {
-      const float bdepth = m_fm.m_pss.computeDepth(index, m_fm.m_pos.m_pgrids[index][index2][j]->m_coord);
+    for (int j = 0; j < (int)_fm._pos._pgrids[index][index2].size(); ++j) {
+      const float bdepth = _fm._pss.computeDepth(index, _fm._pos._pgrids[index][index2][j]->_coord);
       if (pdepth < bdepth &&
-          !m_fm.isNeighbor(patch, *m_fm.m_pos.m_pgrids[index][index2][j],
-                           m_fm.m_neighborThreshold1)) {
+          !_fm.isNeighbor(patch, *_fm._pos._pgrids[index][index2][j],
+                           _fm._neighborThreshold1)) {
         maxpressure = max(maxpressure,
-                          m_fm.m_pos.m_pgrids[index][index2][j]->m_ncc -
-                          m_fm.m_nccThreshold);
+                          _fm._pos._pgrids[index][index2][j]->_ncc -
+                          _fm._nccThreshold);
       }
     }
     if (lock)
-      m_fm.m_imageLocks[index].unlock();
+      _fm._imageLocks[index].unlock();
     
     gain -= maxpressure;
   }
@@ -147,62 +147,62 @@ float CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
 }
 
 void CFilter::filterOutsideThread(void) {
-  mtx_lock(&m_fm.m_lock);
-  const int id = m_fm.m_count++;
-  mtx_unlock(&m_fm.m_lock);
+  mtx_lock(&_fm._lock);
+  const int id = _fm._count++;
+  mtx_unlock(&_fm._lock);
 
-  const int size = (int)m_fm.m_pos.m_ppatches.size();  
-  const int itmp = (int)ceil(size / (float)m_fm.m_CPU);
+  const int size = (int)_fm._pos._ppatches.size();  
+  const int itmp = (int)ceil(size / (float)_fm._CPU);
   const int begin = id * itmp;
   const int end = min(size, (id + 1) * itmp);
   
   for (int p = begin; p < end; ++p) {
-    PPatch& ppatch = m_fm.m_pos.m_ppatches[p];
-    m_gains[p] = ppatch->score2(m_fm.m_nccThreshold);
+    PPatch& ppatch = _fm._pos._ppatches[p];
+    _gains[p] = ppatch->score2(_fm._nccThreshold);
     
-    const int size = (int)ppatch->m_images.size();  
+    const int size = (int)ppatch->_images.size();  
     for (int i = 0; i < size; ++i) {
-      const int& index = ppatch->m_images[i];
-      if (m_fm.m_tnum <= index)
+      const int& index = ppatch->_images[i];
+      if (_fm._tnum <= index)
         continue;
       
-      const int& ix = ppatch->m_grids[i][0];      const int& iy = ppatch->m_grids[i][1];
-      const int index2 = iy * m_fm.m_pos.m_gwidths[index] + ix;
+      const int& ix = ppatch->_grids[i][0];      const int& iy = ppatch->_grids[i][1];
+      const int index2 = iy * _fm._pos._gwidths[index] + ix;
       
       float maxpressure = 0.0f;
-      for (int j = 0; j < (int)m_fm.m_pos.m_pgrids[index][index2].size(); ++j) {
-	if (!m_fm.isNeighbor(*ppatch, *m_fm.m_pos.m_pgrids[index][index2][j],
-                             m_fm.m_neighborThreshold1))
-	  maxpressure = max(maxpressure, m_fm.m_pos.m_pgrids[index][index2][j]->m_ncc -
-			    m_fm.m_nccThreshold);
+      for (int j = 0; j < (int)_fm._pos._pgrids[index][index2].size(); ++j) {
+	if (!_fm.isNeighbor(*ppatch, *_fm._pos._pgrids[index][index2][j],
+                             _fm._neighborThreshold1))
+	  maxpressure = max(maxpressure, _fm._pos._pgrids[index][index2][j]->_ncc -
+			    _fm._nccThreshold);
       }
       
-      m_gains[p] -= maxpressure;
+      _gains[p] -= maxpressure;
     }
 
-    const int vsize = (int)ppatch->m_vimages.size();
+    const int vsize = (int)ppatch->_vimages.size();
     for (int i = 0; i < vsize; ++i) {
-      const int& index = ppatch->m_vimages[i];
-      if (m_fm.m_tnum <= index)
+      const int& index = ppatch->_vimages[i];
+      if (_fm._tnum <= index)
         continue;
       
-      const float pdepth = m_fm.m_pss.computeDepth(index, ppatch->m_coord);    
+      const float pdepth = _fm._pss.computeDepth(index, ppatch->_coord);    
       
-      const int& ix = ppatch->m_vgrids[i][0];      const int& iy = ppatch->m_vgrids[i][1];
-      const int index2 = iy * m_fm.m_pos.m_gwidths[index] + ix;
+      const int& ix = ppatch->_vgrids[i][0];      const int& iy = ppatch->_vgrids[i][1];
+      const int index2 = iy * _fm._pos._gwidths[index] + ix;
       float maxpressure = 0.0f;      
       
-      for (int j = 0; j < (int)m_fm.m_pos.m_pgrids[index][index2].size(); ++j) {
-        const float bdepth = m_fm.m_pss.computeDepth(index, m_fm.m_pos.m_pgrids[index][index2][j]->m_coord);
+      for (int j = 0; j < (int)_fm._pos._pgrids[index][index2].size(); ++j) {
+        const float bdepth = _fm._pss.computeDepth(index, _fm._pos._pgrids[index][index2][j]->_coord);
 	if (pdepth < bdepth &&
-            !m_fm.isNeighbor(*ppatch, *m_fm.m_pos.m_pgrids[index][index2][j],
-                             m_fm.m_neighborThreshold1)) {
+            !_fm.isNeighbor(*ppatch, *_fm._pos._pgrids[index][index2][j],
+                             _fm._neighborThreshold1)) {
 	  maxpressure = max(maxpressure,
-                            m_fm.m_pos.m_pgrids[index][index2][j]->m_ncc -
-			    m_fm.m_nccThreshold);
+                            _fm._pos._pgrids[index][index2][j]->_ncc -
+			    _fm._nccThreshold);
         }
       }
-      m_gains[p] -= maxpressure;
+      _gains[p] -= maxpressure;
     }
   }
 }
@@ -218,152 +218,152 @@ void CFilter::filterExact(void) {
   time_t curtime = tv;
   cerr << "Filter Exact: " << flush;
 
-  //??? cannot use (1) because we use patch.m_id to set newimages,....
-  m_fm.m_pos.collectPatches();
-  const int psize = (int)m_fm.m_pos.m_ppatches.size();
+  //??? cannot use (1) because we use patch._id to set newimages,....
+  _fm._pos.collectPatches();
+  const int psize = (int)_fm._pos._ppatches.size();
   
   // dis associate images
-  m_newimages.clear();     m_newgrids.clear();
-  m_removeimages.clear();  m_removegrids.clear();
-  m_newimages.resize(psize);     m_newgrids.resize(psize);
-  m_removeimages.resize(psize);  m_removegrids.resize(psize);
+  _newimages.clear();     _newgrids.clear();
+  _removeimages.clear();  _removegrids.clear();
+  _newimages.resize(psize);     _newgrids.resize(psize);
+  _removeimages.resize(psize);  _removegrids.resize(psize);
 
-  m_fm.m_count = 0;
-  vector<thrd_t> threads0(m_fm.m_CPU);
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  _fm._count = 0;
+  vector<thrd_t> threads0(_fm._CPU);
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_create(&threads0[i], &filterExactThreadTmp, (void*)this);  
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_join(threads0[i], NULL);
   cerr << endl;
 
   //----------------------------------------------------------------------
   for (int p = 0; p < psize; ++p) {
-    if (m_fm.m_pos.m_ppatches[p]->m_fix)
+    if (_fm._pos._ppatches[p]->_fix)
       continue;
     
-    for (int i = 0; i < (int)m_removeimages[p].size(); ++i) {
-      const int index = m_removeimages[p][i];
-      if (m_fm.m_tnum <= index) {
+    for (int i = 0; i < (int)_removeimages[p].size(); ++i) {
+      const int index = _removeimages[p][i];
+      if (_fm._tnum <= index) {
 	cerr << "MUST NOT COME HERE" << endl;        exit (1);
       }
-      const int ix = m_removegrids[p][i][0];      const int iy = m_removegrids[p][i][1];
-      const int index2 = iy * m_fm.m_pos.m_gwidths[index] + ix;
+      const int ix = _removegrids[p][i][0];      const int iy = _removegrids[p][i][1];
+      const int index2 = iy * _fm._pos._gwidths[index] + ix;
 
-      m_fm.m_pos.m_pgrids[index][index2].
-	erase(remove(m_fm.m_pos.m_pgrids[index][index2].begin(),
-		     m_fm.m_pos.m_pgrids[index][index2].end(),
-		     m_fm.m_pos.m_ppatches[p]),
-	      m_fm.m_pos.m_pgrids[index][index2].end());
+      _fm._pos._pgrids[index][index2].
+	erase(remove(_fm._pos._pgrids[index][index2].begin(),
+		     _fm._pos._pgrids[index][index2].end(),
+		     _fm._pos._ppatches[p]),
+	      _fm._pos._pgrids[index][index2].end());
     }
   }
   
-  m_fm.m_debug = 1;
+  _fm._debug = 1;
   
   int count = 0;
   for (int p = 0; p < psize; ++p) {
-    if (m_fm.m_pos.m_ppatches[p]->m_fix)
+    if (_fm._pos._ppatches[p]->_fix)
       continue;
     
-    CPatch& patch = *m_fm.m_pos.m_ppatches[p];
+    CPatch& patch = *_fm._pos._ppatches[p];
 
     // This should be images in targetting images. Has to come before the next for-loop.
-    patch.m_timages = (int)m_newimages[p].size();
+    patch._timages = (int)_newimages[p].size();
     
-    for (int i = 0; i < (int)patch.m_images.size(); ++i) {
-      const int& index = patch.m_images[i];
-      if (m_fm.m_tnum <= index) {
-	m_newimages[p].push_back(patch.m_images[i]);
-	m_newgrids[p].push_back(patch.m_grids[i]);
+    for (int i = 0; i < (int)patch._images.size(); ++i) {
+      const int& index = patch._images[i];
+      if (_fm._tnum <= index) {
+	_newimages[p].push_back(patch._images[i]);
+	_newgrids[p].push_back(patch._grids[i]);
       }
     }
 
-    patch.m_images.swap(m_newimages[p]);
-    patch.m_grids.swap(m_newgrids[p]);
+    patch._images.swap(_newimages[p]);
+    patch._grids.swap(_newgrids[p]);
 
-    if (m_fm.m_minImageNumThreshold <= (int)patch.m_images.size()) {
-      m_fm.m_optim.setRefImage(patch, 0);
-      m_fm.m_pos.setGrids(patch);
+    if (_fm._minImageNumThreshold <= (int)patch._images.size()) {
+      _fm._optim.setRefImage(patch, 0);
+      _fm._pos.setGrids(patch);
     }
 
-    if ((int)patch.m_images.size() < m_fm.m_minImageNumThreshold) {
-      m_fm.m_pos.removePatch(m_fm.m_pos.m_ppatches[p]);
+    if ((int)patch._images.size() < _fm._minImageNumThreshold) {
+      _fm._pos.removePatch(_fm._pos._ppatches[p]);
       count++;
     }
   }
   time(&tv); 
-  cerr << (int)m_fm.m_pos.m_ppatches.size() << " -> "
-       << (int)m_fm.m_pos.m_ppatches.size() - count << " ("
-       << 100 * ((int)m_fm.m_pos.m_ppatches.size() - count) / (float)m_fm.m_pos.m_ppatches.size()
+  cerr << (int)_fm._pos._ppatches.size() << " -> "
+       << (int)_fm._pos._ppatches.size() - count << " ("
+       << 100 * ((int)_fm._pos._ppatches.size() - count) / (float)_fm._pos._ppatches.size()
        << "%)\t" << (tv - curtime) / CLOCKS_PER_SEC << " secs" << endl;
 }
 
 void CFilter::filterExactThread(void) {
-  const int psize = (int)m_fm.m_pos.m_ppatches.size();
+  const int psize = (int)_fm._pos._ppatches.size();
   vector<vector<int> > newimages, removeimages;
   vector<vector<TVec2<int> > > newgrids, removegrids;
   newimages.resize(psize);  removeimages.resize(psize);
   newgrids.resize(psize);   removegrids.resize(psize);
 
   while (1) {
-    mtx_lock(&m_fm.m_lock);
-    const int image = m_fm.m_count++;
-    mtx_unlock(&m_fm.m_lock);
+    mtx_lock(&_fm._lock);
+    const int image = _fm._count++;
+    mtx_unlock(&_fm._lock);
 
-    if (m_fm.m_tnum <= image)
+    if (_fm._tnum <= image)
       break;
     
     cerr << '*' << flush;
     
-    const int& w = m_fm.m_pos.m_gwidths[image];
-    const int& h = m_fm.m_pos.m_gheights[image];
+    const int& w = _fm._pos._gwidths[image];
+    const int& h = _fm._pos._gheights[image];
     int index = -1;
     for (int y = 0; y < h; ++y) {
       for (int x = 0; x < w; ++x) {
         ++index;
-	for (int i = 0; i < (int)m_fm.m_pos.m_pgrids[image][index].size(); ++i) {
-	  const CPatch& patch = *m_fm.m_pos.m_pgrids[image][index][i];
-          if (patch.m_fix)
+	for (int i = 0; i < (int)_fm._pos._pgrids[image][index].size(); ++i) {
+	  const CPatch& patch = *_fm._pos._pgrids[image][index][i];
+          if (patch._fix)
             continue;
           
 	  int safe = 0;
 
-	  if (m_fm.m_pos.isVisible(patch, image, x, y, m_fm.m_neighborThreshold1, 0))
+	  if (_fm._pos.isVisible(patch, image, x, y, _fm._neighborThreshold1, 0))
 	    safe = 1;
 	  // use 4 neighbors?
-	  else if (0 < x && m_fm.m_pos.isVisible(patch, image, x - 1, y, m_fm.m_neighborThreshold1, 0))
+	  else if (0 < x && _fm._pos.isVisible(patch, image, x - 1, y, _fm._neighborThreshold1, 0))
 	    safe = 1;
-	  else if (x < w - 1 && m_fm.m_pos.isVisible(patch, image, x + 1, y, m_fm.m_neighborThreshold1, 0))
+	  else if (x < w - 1 && _fm._pos.isVisible(patch, image, x + 1, y, _fm._neighborThreshold1, 0))
 	    safe = 1;
-	  else if (0 < y && m_fm.m_pos.isVisible(patch, image, x, y - 1, m_fm.m_neighborThreshold1, 0))
+	  else if (0 < y && _fm._pos.isVisible(patch, image, x, y - 1, _fm._neighborThreshold1, 0))
 	    safe = 1;
-	  else if (y < h - 1 && m_fm.m_pos.isVisible(patch, image, x, y + 1, m_fm.m_neighborThreshold1, 0))
+	  else if (y < h - 1 && _fm._pos.isVisible(patch, image, x, y + 1, _fm._neighborThreshold1, 0))
 	    safe = 1;
 	
 	  if (safe) {
-	    newimages[patch.m_id].push_back(image);
-	    newgrids[patch.m_id].push_back(TVec2<int>(x, y));
+	    newimages[patch._id].push_back(image);
+	    newgrids[patch._id].push_back(TVec2<int>(x, y));
 	  }
 	  else {
-	    removeimages[patch.m_id].push_back(image);
-	    removegrids[patch.m_id].push_back(TVec2<int>(x, y));
+	    removeimages[patch._id].push_back(image);
+	    removegrids[patch._id].push_back(TVec2<int>(x, y));
 	  }
 	}
       }
     }
   }
 
-  mtx_lock(&m_fm.m_lock);
+  mtx_lock(&_fm._lock);
   for (int p = 0; p < psize; ++p) {
-    m_newimages[p].insert(m_newimages[p].end(),
+    _newimages[p].insert(_newimages[p].end(),
 			  newimages[p].begin(), newimages[p].end());
-    m_newgrids[p].insert(m_newgrids[p].end(),
+    _newgrids[p].insert(_newgrids[p].end(),
 			  newgrids[p].begin(), newgrids[p].end());
-    m_removeimages[p].insert(m_removeimages[p].end(),
+    _removeimages[p].insert(_removeimages[p].end(),
 			  removeimages[p].begin(), removeimages[p].end());
-    m_removegrids[p].insert(m_removegrids[p].end(),
+    _removegrids[p].insert(_removegrids[p].end(),
 			  removegrids[p].begin(), removegrids[p].end());
   }
-  mtx_unlock(&m_fm.m_lock);
+  mtx_unlock(&_fm._lock);
 }
 
 int CFilter::filterExactThreadTmp(void* arg) {
@@ -372,68 +372,68 @@ int CFilter::filterExactThreadTmp(void* arg) {
 }
 
 void CFilter::filterNeighborThread(void) {
-  const int size = (int)m_fm.m_pos.m_ppatches.size();  
+  const int size = (int)_fm._pos._ppatches.size();  
   while (1) {
     int jtmp = -1;
-    mtx_lock(&m_fm.m_lock);
-    if (!m_fm.m_jobs.empty()) {
-      jtmp = m_fm.m_jobs.front();
-      m_fm.m_jobs.pop_front();
+    mtx_lock(&_fm._lock);
+    if (!_fm._jobs.empty()) {
+      jtmp = _fm._jobs.front();
+      _fm._jobs.pop_front();
     }
-    mtx_unlock(&m_fm.m_lock);
+    mtx_unlock(&_fm._lock);
     if (jtmp == -1)
       break;
 
-    const int begin = m_fm.m_junit * jtmp;
-    const int end = min(size, m_fm.m_junit * (jtmp + 1));
+    const int begin = _fm._junit * jtmp;
+    const int end = min(size, _fm._junit * (jtmp + 1));
 
     for (int p = begin; p < end; ++p) {
-      PPatch& ppatch = m_fm.m_pos.m_ppatches[p];
-      if (m_rejects[p])
+      PPatch& ppatch = _fm._pos._ppatches[p];
+      if (_rejects[p])
         continue;
       
       vector<PPatch> neighbors;
-      //m_fm.m_pos.findNeighbors(*ppatch, neighbors, 0, 4, 2);
-      m_fm.m_pos.findNeighbors(*ppatch, neighbors, 0, 4, 2, 1);
+      //_fm._pos.findNeighbors(*ppatch, neighbors, 0, 4, 2);
+      _fm._pos.findNeighbors(*ppatch, neighbors, 0, 4, 2, 1);
       
       //?? new filter
       if ((int)neighbors.size() < 6)
         //if ((int)neighbors.size() < 8)
-        m_rejects[p] = m_time + 1;
+        _rejects[p] = _time + 1;
       else {
         // Fit a quadratic surface
         if (filterQuad(*ppatch, neighbors))
-          m_rejects[p] = m_time + 1;
+          _rejects[p] = _time + 1;
       }
     }
   }
 
   /*
-  mtx_lock(&m_fm.m_lock);
-  const int id = m_fm.m_count++;
-  mtx_unlock(&m_fm.m_lock);
+  mtx_lock(&_fm._lock);
+  const int id = _fm._count++;
+  mtx_unlock(&_fm._lock);
 
-  const int size = (int)m_fm.m_pos.m_ppatches.size();  
-  const int itmp = (int)ceil(size / (float)m_fm.m_CPU);
+  const int size = (int)_fm._pos._ppatches.size();  
+  const int itmp = (int)ceil(size / (float)_fm._CPU);
   const int begin = id * itmp;
   const int end = min(size, (id + 1) * itmp);
 
   for (int p = begin; p < end; ++p) {
-    PPatch& ppatch = m_fm.m_pos.m_ppatches[p];
-    if (m_rejects[p])
+    PPatch& ppatch = _fm._pos._ppatches[p];
+    if (_rejects[p])
       continue;
 
     vector<PPatch> neighbors;
-    m_fm.m_pos.findNeighbors(*ppatch, neighbors, 0, 4, 2);
+    _fm._pos.findNeighbors(*ppatch, neighbors, 0, 4, 2);
 
     //?? new filter
     if ((int)neighbors.size() < 6)
     //if ((int)neighbors.size() < 8)
-      m_rejects[p] = m_time + 1;
+      _rejects[p] = _time + 1;
     else {
       // Fit a quadratic surface
       if (filterQuad(*ppatch, neighbors))
-        m_rejects[p] = m_time + 1;
+        _rejects[p] = _time + 1;
     }
   }
   */
@@ -445,13 +445,13 @@ int CFilter::filterQuad(const Patch::CPatch& patch,
   vector<float> b, x;
 
   Vec4f xdir, ydir;
-  ortho(patch.m_normal, xdir, ydir);
+  ortho(patch._normal, xdir, ydir);
 
   const int nsize = (int)neighbors.size();
 
   float h = 0.0f;
   for (int n = 0; n < nsize; ++n)
-    h += norm(neighbors[n]->m_coord - patch.m_coord);
+    h += norm(neighbors[n]->_coord - patch._coord);
   h /= nsize;
   
   A.resize(nsize);
@@ -463,10 +463,10 @@ int CFilter::filterQuad(const Patch::CPatch& patch,
   fzs.resize(nsize);
   for (int n = 0; n < nsize; ++n) {
     A[n].resize(5);
-    Vec4f diff = neighbors[n]->m_coord - patch.m_coord;
+    Vec4f diff = neighbors[n]->_coord - patch._coord;
     fxs[n] = diff * xdir / h;
     fys[n] = diff * ydir / h;
-    fzs[n] = diff * patch.m_normal;
+    fzs[n] = diff * patch._normal;
 
     A[n][0] = fxs[n] * fxs[n];
     A[n][1] = fys[n] * fys[n];
@@ -478,13 +478,13 @@ int CFilter::filterQuad(const Patch::CPatch& patch,
   x.resize(5);
   Cmylapack::lls(A, b, x);
   
-  // Compute residual divided by m_dscale
-  const int inum = min(m_fm.m_tau, (int)patch.m_images.size());
+  // Compute residual divided by _dscale
+  const int inum = min(_fm._tau, (int)patch._images.size());
   float unit = 0.0;
-  //for (int i = 0; i < (int)patch.m_images.size(); ++i)
+  //for (int i = 0; i < (int)patch._images.size(); ++i)
   for (int i = 0; i < inum; ++i)
-    unit += m_fm.m_optim.getUnit(patch.m_images[i], patch.m_coord);
-  //unit /= (int)patch.m_images.size();
+    unit += _fm._optim.getUnit(patch._images[i], patch._coord);
+  //unit /= (int)patch._images.size();
   unit /= inum;
   
   float residual = 0.0f;
@@ -495,13 +495,13 @@ int CFilter::filterQuad(const Patch::CPatch& patch,
       x[2] * (fxs[n] * fys[n]) +
       x[3] * fxs[n] +
       x[4] * fys[n] - fzs[n];
-    //residual += fabs(res) / neighbors[n]->m_dscale;
+    //residual += fabs(res) / neighbors[n]->_dscale;
     residual += fabs(res) / unit;
   }
   
   residual /= (nsize - 5);
 
-  if (residual < m_fm.m_quadThreshold)
+  if (residual < _fm._quadThreshold)
     return 0;
   else
     return 1;
@@ -518,39 +518,39 @@ void CFilter::filterNeighbor(const int times) {
   time_t curtime = tv;
   cerr << "FilterNeighbor:\t" << flush;
 
-  //??? notice (1) to avoid removing m_fix=1
-  m_fm.m_pos.collectPatches(1);
-  if (m_fm.m_pos.m_ppatches.empty())
+  //??? notice (1) to avoid removing _fix=1
+  _fm._pos.collectPatches(1);
+  if (_fm._pos._ppatches.empty())
     return;
   
-  m_rejects.resize((int)m_fm.m_pos.m_ppatches.size());
-  fill(m_rejects.begin(), m_rejects.end(), 0);
+  _rejects.resize((int)_fm._pos._ppatches.size());
+  fill(_rejects.begin(), _rejects.end(), 0);
 
   // Lapack is not thread-safe? Sometimes, the code gets stuck here.
   int count = 0;
-  for (m_time = 0; m_time < times; ++m_time) {
-    m_fm.m_count = 0;
+  for (_time = 0; _time < times; ++_time) {
+    _fm._count = 0;
 
-    m_fm.m_jobs.clear();
-    const int jtmp = (int)ceil(m_fm.m_pos.m_ppatches.size() /
-                               (float)m_fm.m_junit);
+    _fm._jobs.clear();
+    const int jtmp = (int)ceil(_fm._pos._ppatches.size() /
+                               (float)_fm._junit);
     for (int j = 0; j < jtmp; ++j)
-      m_fm.m_jobs.push_back(j);
+      _fm._jobs.push_back(j);
     
-    vector<thrd_t> threads(m_fm.m_CPU);
-    for (int i = 0; i < m_fm.m_CPU; ++i)
+    vector<thrd_t> threads(_fm._CPU);
+    for (int i = 0; i < _fm._CPU; ++i)
       thrd_create(&threads[i], &filterNeighborThreadTmp, (void*)this);
-    for (int i = 0; i < m_fm.m_CPU; ++i)
+    for (int i = 0; i < _fm._CPU; ++i)
       thrd_join(threads[i], NULL);
     
-    vector<PPatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
-    vector<PPatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
-    vector<int>::iterator breject = m_rejects.begin();
+    vector<PPatch>::iterator bpatch = _fm._pos._ppatches.begin();
+    vector<PPatch>::iterator epatch = _fm._pos._ppatches.end();
+    vector<int>::iterator breject = _rejects.begin();
     
     while (bpatch != epatch) {
-      if ((*breject) == m_time + 1) {
+      if ((*breject) == _time + 1) {
         count++;
-        m_fm.m_pos.removePatch(*bpatch);;
+        _fm._pos.removePatch(*bpatch);;
       }
 
       ++bpatch;
@@ -558,9 +558,9 @@ void CFilter::filterNeighbor(const int times) {
     }
   }
   time(&tv);
-  cerr << (int)m_fm.m_pos.m_ppatches.size() << " -> "
-       << (int)m_fm.m_pos.m_ppatches.size() - count << " ("
-       << 100 * ((int)m_fm.m_pos.m_ppatches.size() - count) / (float)m_fm.m_pos.m_ppatches.size()
+  cerr << (int)_fm._pos._ppatches.size() << " -> "
+       << (int)_fm._pos._ppatches.size() - count << " ("
+       << 100 * ((int)_fm._pos._ppatches.size() - count) / (float)_fm._pos._ppatches.size()
        << "%)\t" << (tv - curtime) / CLOCKS_PER_SEC << " secs" << endl;
 }
 
@@ -572,20 +572,20 @@ void CFilter::filterSmallGroups(void) {
   time(&tv); 
   time_t curtime = tv;
   cerr << "FilterGroups:\t" << flush;
-  m_fm.m_pos.collectPatches();
-  if (m_fm.m_pos.m_ppatches.empty())
+  _fm._pos.collectPatches();
+  if (_fm._pos._ppatches.empty())
     return;
   
-  const int psize = (int)m_fm.m_pos.m_ppatches.size();
+  const int psize = (int)_fm._pos._ppatches.size();
   vector<int> label;
   label.resize(psize);
   fill(label.begin(), label.end(), -1);
 
   list<int> untouch;
-  vector<PPatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
+  vector<PPatch>::iterator bpatch = _fm._pos._ppatches.begin();
   for (int p = 0; p < psize; ++p, ++bpatch) {
     untouch.push_back(p);
-    (*bpatch)->m_flag = p;
+    (*bpatch)->_flag = p;
   }
   
   int id = -1;
@@ -635,25 +635,25 @@ void CFilter::filterSmallGroups(void) {
 
   bite = label.begin();
   eite = label.end();
-  bpatch = m_fm.m_pos.m_ppatches.begin();
+  bpatch = _fm._pos._ppatches.begin();
   while (bite != eite) {
-    if ((*bpatch)->m_fix) {
+    if ((*bpatch)->_fix) {
       ++bite;
       ++bpatch;
       continue;
     }
     
     if (size[*bite] == 0) {
-      m_fm.m_pos.removePatch(*bpatch);
+      _fm._pos.removePatch(*bpatch);
       count++;
     }
     ++bite;
     ++bpatch;
   }
   time(&tv);
-  cerr << (int)m_fm.m_pos.m_ppatches.size() << " -> "
-       << (int)m_fm.m_pos.m_ppatches.size() - count << " ("
-       << 100 * ((int)m_fm.m_pos.m_ppatches.size() - count) / (float)m_fm.m_pos.m_ppatches.size()
+  cerr << (int)_fm._pos._ppatches.size() << " -> "
+       << (int)_fm._pos._ppatches.size() - count << " ("
+       << 100 * ((int)_fm._pos._ppatches.size() - count) / (float)_fm._pos._ppatches.size()
        << "%)\t" << (tv - curtime)/CLOCKS_PER_SEC << " secs" << endl;
 }
 
@@ -661,13 +661,13 @@ void CFilter::filterSmallGroupsSub(const int pid, const int id,
                                    std::vector<int>& label,
                                    std::list<int>& ltmp) const {  
   // find neighbors of ptmp and set their ids
-  const CPatch& patch = *m_fm.m_pos.m_ppatches[pid];
+  const CPatch& patch = *_fm._pos._ppatches[pid];
   
-  const int index = patch.m_images[0];
-  const int ix = patch.m_grids[0][0];
-  const int iy = patch.m_grids[0][1];
-  const int gwidth = m_fm.m_pos.m_gwidths[index];
-  const int gheight = m_fm.m_pos.m_gheights[index];
+  const int index = patch._images[0];
+  const int ix = patch._grids[0][0];
+  const int iy = patch._grids[0][1];
+  const int gwidth = _fm._pos._gwidths[index];
+  const int gheight = _fm._pos._gheights[index];
   
   for (int y = -1; y <= 1; ++y) {
     const int iytmp = iy + y;
@@ -682,33 +682,33 @@ void CFilter::filterSmallGroupsSub(const int pid, const int id,
       //continue;
 
       const int index2 = iytmp * gwidth + ixtmp;
-      vector<PPatch>::iterator bgrid = m_fm.m_pos.m_pgrids[index][index2].begin();
-      vector<PPatch>::iterator egrid = m_fm.m_pos.m_pgrids[index][index2].end();
+      vector<PPatch>::iterator bgrid = _fm._pos._pgrids[index][index2].begin();
+      vector<PPatch>::iterator egrid = _fm._pos._pgrids[index][index2].end();
       while (bgrid != egrid) {
-        const int itmp = (*bgrid)->m_flag;
+        const int itmp = (*bgrid)->_flag;
 	if (label[itmp] != -1) {
           ++bgrid;
 	  continue;
         }
 	
-	if (m_fm.isNeighbor(patch, **bgrid,
-			    m_fm.m_neighborThreshold2)) {
+	if (_fm.isNeighbor(patch, **bgrid,
+			    _fm._neighborThreshold2)) {
 	  label[itmp] = id;
 	  ltmp.push_back(itmp);
 	}
         ++bgrid;
       }
-      bgrid = m_fm.m_pos.m_vpgrids[index][index2].begin();
-      egrid = m_fm.m_pos.m_vpgrids[index][index2].end();
+      bgrid = _fm._pos._vpgrids[index][index2].begin();
+      egrid = _fm._pos._vpgrids[index][index2].end();
       while (bgrid != egrid) {
-        const int itmp = (*bgrid)->m_flag;
+        const int itmp = (*bgrid)->_flag;
 	if (label[itmp] != -1) {
           ++bgrid;
 	  continue;
         }
 	
-	if (m_fm.isNeighbor(patch, **bgrid,
-			    m_fm.m_neighborThreshold2)) {
+	if (_fm.isNeighbor(patch, **bgrid,
+			    _fm._neighborThreshold2)) {
 	  label[itmp] = id;
 	  ltmp.push_back(itmp);
 	}
@@ -720,16 +720,16 @@ void CFilter::filterSmallGroupsSub(const int pid, const int id,
 
 void CFilter::setDepthMaps(void) {
   // initialize
-  for (int index = 0; index < m_fm.m_tnum; ++index) {
-    fill(m_fm.m_pos.m_dpgrids[index].begin(), m_fm.m_pos.m_dpgrids[index].end(),
-         m_fm.m_pos.m_MAXDEPTH);
+  for (int index = 0; index < _fm._tnum; ++index) {
+    fill(_fm._pos._dpgrids[index].begin(), _fm._pos._dpgrids[index].end(),
+         _fm._pos._MAXDEPTH);
   }
   
-  m_fm.m_count = 0;
-  vector<thrd_t> threads(m_fm.m_CPU);
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  _fm._count = 0;
+  vector<thrd_t> threads(_fm._CPU);
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_create(&threads[i], &setDepthMapsThreadTmp, (void*)this);
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_join(threads[i], NULL);
 }
 
@@ -740,31 +740,31 @@ int CFilter::setDepthMapsThreadTmp(void* arg) {
 
 void CFilter::setDepthMapsThread(void) {
   while (1) {
-    mtx_lock(&m_fm.m_lock);
-    const int index = m_fm.m_count++;
-    mtx_unlock(&m_fm.m_lock);
+    mtx_lock(&_fm._lock);
+    const int index = _fm._count++;
+    mtx_unlock(&_fm._lock);
 
-    if (m_fm.m_tnum <= index)
+    if (_fm._tnum <= index)
       break;
 
-    const int gwidth = m_fm.m_pos.m_gwidths[index];
-    const int gheight = m_fm.m_pos.m_gheights[index];
+    const int gwidth = _fm._pos._gwidths[index];
+    const int gheight = _fm._pos._gheights[index];
 
-    vector<PPatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
-    vector<PPatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
+    vector<PPatch>::iterator bpatch = _fm._pos._ppatches.begin();
+    vector<PPatch>::iterator epatch = _fm._pos._ppatches.end();
 
     while (bpatch != epatch) {
       PPatch& ppatch = *bpatch;
       const Vec3f icoord =
-        m_fm.m_pss.project(index, ppatch->m_coord, m_fm.m_level);
+        _fm._pss.project(index, ppatch->_coord, _fm._level);
       
-      const float fx = icoord[0] / m_fm.m_csize;
+      const float fx = icoord[0] / _fm._csize;
       const int xs[2] = {(int)floor(fx), (int)ceil(fx)};
-      const float fy = icoord[1] / m_fm.m_csize;
+      const float fy = icoord[1] / _fm._csize;
       const int ys[2] = {(int)floor(fy), (int)ceil(fy)};
     
       const float depth =
-        m_fm.m_pss.m_photos[index].m_oaxis * ppatch->m_coord;
+        _fm._pss._photos[index]._oaxis * ppatch->_coord;
 
       for (int j = 0; j < 2; ++j) {
 	for (int i = 0; i < 2; ++i) {
@@ -772,14 +772,14 @@ void CFilter::setDepthMapsThread(void) {
 	    continue;
           const int index2 = ys[j] * gwidth + xs[i];
 	
-	  if (m_fm.m_pos.m_dpgrids[index][index2] == m_fm.m_pos.m_MAXDEPTH)
-	    m_fm.m_pos.m_dpgrids[index][index2] = ppatch;
+	  if (_fm._pos._dpgrids[index][index2] == _fm._pos._MAXDEPTH)
+	    _fm._pos._dpgrids[index][index2] = ppatch;
 	  else {
-	    const float dtmp = m_fm.m_pss.m_photos[index].m_oaxis *
-	      m_fm.m_pos.m_dpgrids[index][index2]->m_coord;
+	    const float dtmp = _fm._pss._photos[index]._oaxis *
+	      _fm._pos._dpgrids[index][index2]->_coord;
 	    
 	    if (depth < dtmp)
-	      m_fm.m_pos.m_dpgrids[index][index2] = ppatch;
+	      _fm._pos._dpgrids[index][index2] = ppatch;
 	  }
 	}
       }
@@ -789,13 +789,13 @@ void CFilter::setDepthMapsThread(void) {
 }  
 
 void CFilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
-  m_fm.m_pos.collectPatches();
+  _fm._pos.collectPatches();
   setDepthMaps();
 
-  // clear m_vpgrids
-  for (int index = 0; index < m_fm.m_tnum; ++index) {
-    vector<vector<PPatch> >::iterator bvvp = m_fm.m_pos.m_vpgrids[index].begin();
-    vector<vector<PPatch> >::iterator evvp = m_fm.m_pos.m_vpgrids[index].end();
+  // clear _vpgrids
+  for (int index = 0; index < _fm._tnum; ++index) {
+    vector<vector<PPatch> >::iterator bvvp = _fm._pos._vpgrids[index].begin();
+    vector<vector<PPatch> >::iterator evvp = _fm._pos._vpgrids[index].end();
     while (bvvp != evvp) {
       (*bvvp).clear();
       ++bvvp;
@@ -804,27 +804,27 @@ void CFilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
 
   if (additive == 0) {
     // initialization
-    vector<PPatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
-    vector<PPatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
+    vector<PPatch>::iterator bpatch = _fm._pos._ppatches.begin();
+    vector<PPatch>::iterator epatch = _fm._pos._ppatches.end();
     while (bpatch != epatch) {
-      (*bpatch)->m_vimages.clear();
-      (*bpatch)->m_vgrids.clear();
+      (*bpatch)->_vimages.clear();
+      (*bpatch)->_vgrids.clear();
       ++bpatch;
     }
   }
     
-  m_fm.m_count = 0;
-  vector<thrd_t> threads0(m_fm.m_CPU);
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  _fm._count = 0;
+  vector<thrd_t> threads0(_fm._CPU);
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_create(&threads0[i], &setVGridsVPGridsThreadTmp, (void*)this);  
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_join(threads0[i], NULL);
   
-  m_fm.m_count = 0;
-  vector<thrd_t> threads1(m_fm.m_CPU);
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  _fm._count = 0;
+  vector<thrd_t> threads1(_fm._CPU);
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_create(&threads1[i], &addPatchVThreadTmp, (void*)this);
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_join(threads1[i], NULL);
 }
 
@@ -840,13 +840,13 @@ int CFilter::addPatchVThreadTmp(void* arg) {
 
 void CFilter::setVGridsVPGridsThread(void) {
   const int noj = 1000;
-  const int size = (int)m_fm.m_pos.m_ppatches.size();    
+  const int size = (int)_fm._pos._ppatches.size();    
   const int job = max(1, size / (noj - 1));
   
   while (1) {
-    mtx_lock(&m_fm.m_lock);
-    const int id = m_fm.m_count++;
-    mtx_unlock(&m_fm.m_lock);
+    mtx_lock(&_fm._lock);
+    const int id = _fm._count++;
+    mtx_unlock(&_fm._lock);
 
     const int begin = id * job;
     const int end = min(size, (id + 1) * job);
@@ -854,36 +854,36 @@ void CFilter::setVGridsVPGridsThread(void) {
     if (size <= begin)
       break;
     
-    // add patches to m_vpgrids
+    // add patches to _vpgrids
     for (int p = begin; p < end; ++p) {
-      PPatch& ppatch = m_fm.m_pos.m_ppatches[p];
-      m_fm.m_pos.setVImagesVGrids(ppatch);
+      PPatch& ppatch = _fm._pos._ppatches[p];
+      _fm._pos.setVImagesVGrids(ppatch);
     }
   }
 }
 
 void CFilter::addPatchVThread(void) {
   while (1) {
-    mtx_lock(&m_fm.m_lock);
-    const int index = m_fm.m_count++;
-    mtx_unlock(&m_fm.m_lock);
+    mtx_lock(&_fm._lock);
+    const int index = _fm._count++;
+    mtx_unlock(&_fm._lock);
     
-    if (m_fm.m_tnum <= index)
+    if (_fm._tnum <= index)
       break;
     
-    vector<PPatch>::iterator bpatch = m_fm.m_pos.m_ppatches.begin();
-    vector<PPatch>::iterator epatch = m_fm.m_pos.m_ppatches.end();
+    vector<PPatch>::iterator bpatch = _fm._pos._ppatches.begin();
+    vector<PPatch>::iterator epatch = _fm._pos._ppatches.end();
     while (bpatch != epatch) {
       PPatch& ppatch = *bpatch;
-      vector<int>::iterator bimage = ppatch->m_vimages.begin();
-      vector<int>::iterator eimage = ppatch->m_vimages.end();
-      vector<Vec2i>::iterator bgrid = ppatch->m_vgrids.begin();
+      vector<int>::iterator bimage = ppatch->_vimages.begin();
+      vector<int>::iterator eimage = ppatch->_vimages.end();
+      vector<Vec2i>::iterator bgrid = ppatch->_vgrids.begin();
       while (bimage != eimage) {
 	if (*bimage == index) {
 	  const int& ix = (*bgrid)[0];
 	  const int& iy = (*bgrid)[1];
-          const int index2 = iy * m_fm.m_pos.m_gwidths[index] + ix;
-          m_fm.m_pos.m_vpgrids[index][index2].push_back(ppatch);
+          const int index2 = iy * _fm._pos._gwidths[index] + ix;
+          _fm._pos._vpgrids[index][index2].push_back(ppatch);
 	  break;
 	}
         ++bimage;

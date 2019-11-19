@@ -11,23 +11,23 @@ using namespace std;
 using namespace PMVS3;
 
 SOption::SOption(void) {
-  m_level = 1;          m_csize = 2;
-  m_threshold = 0.7;    m_wsize = 7;
-  m_minImageNum = 3;    m_CPU = 4;
-  m_setEdge = 0.0f;     m_useBound = 0;
-  m_useVisData = 0;     m_sequence = -1;
-  m_tflag = -10;
-  m_oflag = -10;
+  _level = 1;          _csize = 2;
+  _threshold = 0.7;    _wsize = 7;
+  _minImageNum = 3;    _CPU = 4;
+  _setEdge = 0.0f;     _useBound = 0;
+  _useVisData = 0;     _sequence = -1;
+  _tflag = -10;
+  _oflag = -10;
 
   // Max angle must be at least this big
-  m_maxAngleThreshold = 10.0f * M_PI / 180.0f;
+  _maxAngleThreshold = 10.0f * M_PI / 180.0f;
   // The smaller the tighter
-  m_quadThreshold = 2.5f;
+  _quadThreshold = 2.5f;
 }  
 
 void SOption::init(const std::string prefix, const std::string option) {
-  m_prefix = prefix;
-  m_option = option;
+  _prefix = prefix;
+  _option = option;
   std::ifstream ifstr;
   string optionfile = prefix + option;
   ifstr.open(optionfile.c_str());
@@ -42,56 +42,56 @@ void SOption::init(const std::string prefix, const std::string option) {
       ifstr.getline(buffer, 1024);
       continue;
     }
-    if (name == "level")             ifstr >> m_level;
-    else if (name == "csize")        ifstr >> m_csize;
-    else if (name == "threshold")    ifstr >> m_threshold;
-    else if (name == "wsize")        ifstr >> m_wsize;
-    else if (name == "minImageNum")  ifstr >> m_minImageNum;
-    else if (name == "CPU")          ifstr >> m_CPU;
-    else if (name == "setEdge")      ifstr >> m_setEdge;
-    else if (name == "useBound")     ifstr >> m_useBound;
-    else if (name == "useVisData")   ifstr >> m_useVisData;
-    else if (name == "sequence")     ifstr >> m_sequence;
+    if (name == "level")             ifstr >> _level;
+    else if (name == "csize")        ifstr >> _csize;
+    else if (name == "threshold")    ifstr >> _threshold;
+    else if (name == "wsize")        ifstr >> _wsize;
+    else if (name == "minImageNum")  ifstr >> _minImageNum;
+    else if (name == "CPU")          ifstr >> _CPU;
+    else if (name == "setEdge")      ifstr >> _setEdge;
+    else if (name == "useBound")     ifstr >> _useBound;
+    else if (name == "useVisData")   ifstr >> _useVisData;
+    else if (name == "sequence")     ifstr >> _sequence;
     else if (name == "timages") {
-      ifstr >> m_tflag;
-      if (m_tflag == -1) {
+      ifstr >> _tflag;
+      if (_tflag == -1) {
         int firstimage, lastimage;
         ifstr >> firstimage >> lastimage;
         for (int i = firstimage; i < lastimage; ++i)
-          m_timages.push_back(i);
+          _timages.push_back(i);
       }
-      else if (0 < m_tflag) {
-        for (int i = 0; i < m_tflag; ++i) {
+      else if (0 < _tflag) {
+        for (int i = 0; i < _tflag; ++i) {
           int itmp;          ifstr >> itmp;
-          m_timages.push_back(itmp);
+          _timages.push_back(itmp);
         }
       }
       else {
-        cerr << "tflag is not valid: " << m_tflag << endl;   exit (1);
+        cerr << "tflag is not valid: " << _tflag << endl;   exit (1);
       }
     }
     else if (name == "oimages") {
-      ifstr >> m_oflag;
-      if (m_oflag == -1) {
+      ifstr >> _oflag;
+      if (_oflag == -1) {
         int firstimage, lastimage;
         ifstr >> firstimage >> lastimage;
         for (int i = firstimage; i < lastimage; ++i)
-          m_oimages.push_back(i);
+          _oimages.push_back(i);
       }
-      else if (0 <= m_oflag) {
-        for (int i = 0; i < m_oflag; ++i) {
+      else if (0 <= _oflag) {
+        for (int i = 0; i < _oflag; ++i) {
           int itmp;          ifstr >> itmp;
-          m_oimages.push_back(itmp);
+          _oimages.push_back(itmp);
         }
       }
-      else if (m_oflag != -2 && m_oflag != -3) {
-        cerr << "oflag is not valid: " << m_oflag << endl;   exit (1);
+      else if (_oflag != -2 && _oflag != -3) {
+        cerr << "oflag is not valid: " << _oflag << endl;   exit (1);
       }
     }
-    else if (name == "quad")      ifstr >> m_quadThreshold;
+    else if (name == "quad")      ifstr >> _quadThreshold;
     else if (name == "maxAngle") {
-      ifstr >> m_maxAngleThreshold;
-      m_maxAngleThreshold *= M_PI / 180.0f;
+      ifstr >> _maxAngleThreshold;
+      _maxAngleThreshold *= M_PI / 180.0f;
     }
     else {
       cerr << "Unrecognizable option: " << name << endl;   exit (1);
@@ -99,53 +99,53 @@ void SOption::init(const std::string prefix, const std::string option) {
   }
   ifstr.close();
 
-  if (m_tflag == -10 || m_oflag == -10) {
-    cerr << "m_tflag and m_oflag not specified: "
-         << m_tflag << ' ' << m_oflag << endl;
+  if (_tflag == -10 || _oflag == -10) {
+    cerr << "_tflag and _oflag not specified: "
+         << _tflag << ' ' << _oflag << endl;
     exit (1);
   }
   
   //----------------------------------------------------------------------
   string sbimages = prefix + string("bimages.dat");
 
-  for (int i = 0; i < (int)m_timages.size(); ++i)
-    m_dict[m_timages[i]] = i;
+  for (int i = 0; i < (int)_timages.size(); ++i)
+    _dict[_timages[i]] = i;
 
   initOimages();
   initVisdata();
   
-  if (m_useBound)
+  if (_useBound)
     initBindexes(sbimages);
 
   cerr << "--------------------------------------------------" << endl  
        << "--- Summary of specified options ---" << endl;
-  cerr << "# of timages: " << (int)m_timages.size();
-  if (m_tflag == -1)
+  cerr << "# of timages: " << (int)_timages.size();
+  if (_tflag == -1)
     cerr << " (range specification)" << endl;
   else
     cerr << " (enumeration)" << endl;
-  cerr << "# of oimages: " << (int)m_oimages.size();
-  if (m_oflag == -1)
+  cerr << "# of oimages: " << (int)_oimages.size();
+  if (_oflag == -1)
     cerr << " (range specification)" << endl;
-  else if (0 <= m_oflag)
+  else if (0 <= _oflag)
     cerr << " (enumeration)" << endl;
-  else if (m_oflag == -2)
+  else if (_oflag == -2)
     cerr << " (vis.dat is used)" << endl;
-  else if (m_oflag == -3)
+  else if (_oflag == -3)
     cerr << " (not used)" << endl;
 
-  cerr << "level: " << m_level << "  csize: " << m_csize << endl
-       << "threshold: " << m_threshold << "  wsize: " << m_wsize << endl
-       << "minImageNum: " << m_minImageNum << "  CPU: " << m_CPU << endl
-       << "useVisData: " << m_useVisData << "  sequence: " << m_sequence << endl;
+  cerr << "level: " << _level << "  csize: " << _csize << endl
+       << "threshold: " << _threshold << "  wsize: " << _wsize << endl
+       << "minImageNum: " << _minImageNum << "  CPU: " << _CPU << endl
+       << "useVisData: " << _useVisData << "  sequence: " << _sequence << endl;
   cerr << "--------------------------------------------------" << endl;
 }
 
 void SOption::initOimages(void) {
-  if (m_oflag != -2)
+  if (_oflag != -2)
     return;
 
-  string svisdata = m_prefix + string("vis.dat");
+  string svisdata = _prefix + string("vis.dat");
   ifstream ifstr;
   ifstr.open(svisdata.c_str());
   if (!ifstr.is_open()) {
@@ -157,11 +157,11 @@ void SOption::initOimages(void) {
   string header;  int num2;
   ifstr >> header >> num2;
 
-  m_oimages.clear();
+  _oimages.clear();
   for (int c = 0; c < num2; ++c) {
     int index0;
-    map<int, int>::iterator ite0 = m_dict.find(c);
-    if (ite0 == m_dict.end())
+    map<int, int>::iterator ite0 = _dict.find(c);
+    if (ite0 == _dict.end())
       index0 = -1;
     else
       index0 = ite0->second;
@@ -170,33 +170,33 @@ void SOption::initOimages(void) {
     for (int i = 0; i < itmp; ++i) {
       int itmp2;
       ifstr >> itmp2;
-      if (index0 != -1 && m_dict.find(itmp2) == m_dict.end())
-        m_oimages.push_back(itmp2);
+      if (index0 != -1 && _dict.find(itmp2) == _dict.end())
+        _oimages.push_back(itmp2);
     }
   }
   ifstr.close();
   
-  sort(m_oimages.begin(), m_oimages.end());
-  m_oimages.erase(unique(m_oimages.begin(), m_oimages.end()), m_oimages.end());
+  sort(_oimages.begin(), _oimages.end());
+  _oimages.erase(unique(_oimages.begin(), _oimages.end()), _oimages.end());
 }
 
 // When do not use vis.dat
 void SOption::initVisdata(void) {
-  // Case classifications. Set m_visdata by using vis.dat or not.
-  if (m_useVisData == 0) {
-    const int tnum = (int)m_timages.size();
-    const int onum = (int)m_oimages.size();
+  // Case classifications. Set _visdata by using vis.dat or not.
+  if (_useVisData == 0) {
+    const int tnum = (int)_timages.size();
+    const int onum = (int)_oimages.size();
     const int num = tnum + onum;
-    m_visdata.resize(num);
-    m_visdata2.resize(num);
+    _visdata.resize(num);
+    _visdata2.resize(num);
     for (int y = 0; y < num; ++y) {
-      m_visdata[y].resize(num);
+      _visdata[y].resize(num);
       for (int x = 0; x < num; ++x)
         if (x == y)
-          m_visdata[y][x] = 0;
+          _visdata[y][x] = 0;
         else {
-          m_visdata[y][x] = 1;
-          m_visdata2[y].push_back(x);
+          _visdata[y][x] = 1;
+          _visdata2[y].push_back(x);
         }
     }
   }
@@ -204,13 +204,13 @@ void SOption::initVisdata(void) {
     initVisdata2();
 }
 
-// Given m_timages and m_oimages, set m_visdata, m_visdata2
+// Given _timages and _oimages, set _visdata, _visdata2
 void SOption::initVisdata2(void) {
-  string svisdata = m_prefix + string("vis.dat");
+  string svisdata = _prefix + string("vis.dat");
   
   vector<int> images;
-  images.insert(images.end(), m_timages.begin(), m_timages.end());
-  images.insert(images.end(), m_oimages.begin(), m_oimages.end());
+  images.insert(images.end(), _timages.begin(), _timages.end());
+  images.insert(images.end(), _oimages.begin(), _oimages.end());
   map<int, int> dict2;
   for (int i = 0; i < (int)images.size(); ++i)
     dict2[images[i]] = i;
@@ -226,7 +226,7 @@ void SOption::initVisdata2(void) {
   string header;  int num2;
   ifstr >> header >> num2;
 
-  m_visdata2.resize((int)images.size());
+  _visdata2.resize((int)images.size());
   for (int c = 0; c < num2; ++c) {
     int index0;
     map<int, int>::iterator ite0 = dict2.find(c);
@@ -247,26 +247,26 @@ void SOption::initVisdata2(void) {
         index1 = ite1->second;
 
       if (index0 != -1 && index1 != -1)
-        m_visdata2[index0].push_back(index1);
+        _visdata2[index0].push_back(index1);
     }
   }
   ifstr.close();
 
   const int num = (int)images.size();
-  m_visdata.clear();  
-  m_visdata.resize(num);
+  _visdata.clear();  
+  _visdata.resize(num);
   for (int y = 0; y < num; ++y) {
-    m_visdata[y].resize(num);
-    fill(m_visdata[y].begin(), m_visdata[y].end(), 0);
-    for (int x = 0; x < (int)m_visdata2[y].size(); ++x)
-      m_visdata[y][m_visdata2[y][x]] = 1;
+    _visdata[y].resize(num);
+    fill(_visdata[y].begin(), _visdata[y].end(), 0);
+    for (int x = 0; x < (int)_visdata2[y].size(); ++x)
+      _visdata[y][_visdata2[y][x]] = 1;
   }
 
   // check symmetry
-  for (int i = 0; i < (int)m_visdata.size(); ++i) {
-    for (int j = i+1; j < (int)m_visdata.size(); ++j) {
-      if (m_visdata[i][j] != m_visdata[j][i]) {
-        m_visdata[i][j] = m_visdata[j][i] = 1;
+  for (int i = 0; i < (int)_visdata.size(); ++i) {
+    for (int j = i+1; j < (int)_visdata.size(); ++j) {
+      if (_visdata[i][j] != _visdata[j][i]) {
+        _visdata[i][j] = _visdata[j][i] = 1;
       }
     }
   }
@@ -276,7 +276,7 @@ void SOption::initBindexes(const std::string sbimages) {
   if (sbimages.empty())
     return;
   
-  m_bindexes.clear();
+  _bindexes.clear();
   ifstream ifstr;
   ifstr.open(sbimages.c_str());
   if (!ifstr.is_open()) {
@@ -291,8 +291,8 @@ void SOption::initBindexes(const std::string sbimages) {
     int itmp0;
     ifstr >> itmp0;
 
-    if (m_dict.find(itmp0) != m_dict.end())
-      m_bindexes.push_back(m_dict[itmp0]);
+    if (_dict.find(itmp0) != _dict.end())
+      _bindexes.push_back(_dict[itmp0]);
   }
   ifstr.close();
 }

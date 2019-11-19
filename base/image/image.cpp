@@ -34,7 +34,7 @@ using namespace Image;
 #define max3(a, b, c) ((a)>(b) ? ((a)>(c) ? (a) : (c)) : ((b)>(c) ? (b) : (c)))
 
 CImage::CImage(void) {
-  m_alloc = 0;
+  _alloc = 0;
 }
 
 CImage::~CImage() {
@@ -82,18 +82,18 @@ void CImage::completeName(const std::string& lhs, std::string& rhs,
 
 void CImage::init(const std::string name, const std::string mname,
 		  const int maxLevel) {
-  m_alloc = 0;
+  _alloc = 0;
 
   if (!name.empty())
-    completeName(name, m_name, 1);
+    completeName(name, _name, 1);
   if (!mname.empty())
-    completeName(mname, m_mname, 0);
-  m_maxLevel = maxLevel;
-  //m_color = 1;
+    completeName(mname, _mname, 0);
+  _maxLevel = maxLevel;
+  //_color = 1;
 
-  if (m_maxLevel == 0) {
+  if (_maxLevel == 0) {
     cerr << "Number of level 0, set it to 1." << endl;
-    m_maxLevel = 1;
+    _maxLevel = 1;
   }
 }
 
@@ -101,79 +101,79 @@ void CImage::init(const std::string name, const std::string mname,
 		  const std::string ename, const int maxLevel) {
   init(name, mname, maxLevel);
   if (!ename.empty())
-    completeName(ename, m_ename, 0);
+    completeName(ename, _ename, 0);
 }
 
 void CImage::alloc(const int fast, const int filter) {
-  if (m_alloc == 1 && fast == 1)
+  if (_alloc == 1 && fast == 1)
     return;
-  if (m_alloc == 2)
+  if (_alloc == 2)
     return;
 
-  if (m_name.length() < 3) {
+  if (_name.length() < 3) {
     cerr << "Image file name has less than 3 characters." << endl
-	 << "Cannot allocate: " << m_name << endl;
+	 << "Cannot allocate: " << _name << endl;
     exit (1);
   }
 
-  m_images.resize(m_maxLevel);  m_masks.resize(m_maxLevel);
-  m_edges.resize(m_maxLevel);   m_widths.resize(m_maxLevel);
-  m_heights.resize(m_maxLevel);
+  _images.resize(_maxLevel);  _masks.resize(_maxLevel);
+  _edges.resize(_maxLevel);   _widths.resize(_maxLevel);
+  _heights.resize(_maxLevel);
 
-  if (readAnyImage(m_name, m_images[0], m_widths[0], m_heights[0], fast) == 0) {
+  if (readAnyImage(_name, _images[0], _widths[0], _heights[0], fast) == 0) {
     cerr << "Unsupported iamge format found. Stop allocation: "
-	 << m_name << endl;
+	 << _name << endl;
     return;
   }
 
 #ifdef FURUKAWA_IMAGE_GAMMA
-  m_dimages.resize(m_maxLevel);
+  _dimages.resize(_maxLevel);
   decodeGamma();
 #endif
 
   // set widths, heights
-  for (int level = 1; level < m_maxLevel; ++level) {
-    m_widths[level] = m_widths[level - 1] / 2;
-    m_heights[level] = m_heights[level - 1] / 2;
+  for (int level = 1; level < _maxLevel; ++level) {
+    _widths[level] = _widths[level - 1] / 2;
+    _heights[level] = _heights[level - 1] / 2;
   }
 
   //setColor();
-  m_alloc = 1;
+  _alloc = 1;
 
   if (fast)
     return;
   //----------------------------------------------------------------------
-  if (!m_mname.empty()) {
-    if (readPGMImage(m_mname, m_masks[0], m_widths[0], m_heights[0], 0) ||
-        readPBMImage(m_mname, m_masks[0], m_widths[0], m_heights[0], 0)) {
+  if (!_mname.empty()) {
+    if (readPGMImage(_mname, _masks[0], _widths[0], _heights[0], 0) ||
+        readPBMImage(_mname, _masks[0], _widths[0], _heights[0], 0)) {
       // 255: in, 0 : out
-      cerr << "Read mask: " << m_mname << endl;
-      for (int i = 0; i < (int)m_masks[0].size(); ++i) {
-        if (127 < (int)m_masks[0][i])
-          m_masks[0][i] = (unsigned char)255;
+      cerr << "Read mask: " << _mname << endl;
+      for (int i = 0; i < (int)_masks[0].size(); ++i) {
+        if (127 < (int)_masks[0][i])
+          _masks[0][i] = (unsigned char)255;
         else
-          m_masks[0][i] = (unsigned char)0;
+          _masks[0][i] = (unsigned char)0;
       }
     }
     else {
-      m_mname = "";
+      _mname = "";
     }
   }
   //----------------------------------------------------------------------
-  if (!m_ename.empty()) {
-    if (readPGMImage(m_ename, m_edges[0], m_widths[0], m_heights[0], 0) ||
-        readPBMImage(m_ename, m_edges[0], m_widths[0], m_heights[0], 0)) {
-      cerr << "Read edge: " << m_ename << endl;
+  if (!_ename.empty()) {
+    if (readPGMImage(_ename, _edges[0], _widths[0], _heights[0], 0) ||
+        readPBMImage(_ename, _edges[0], _widths[0], _heights[0], 0)) {
+      cerr << "Read edge: " << _ename << endl;
       // 255: in, 0 : out
-      for (int i = 0; i < (int)m_edges[0].size(); ++i) {
-        if (1 < (unsigned char)m_edges[0][i])
-          m_edges[0][i] = (unsigned char)255;
+      for (int i = 0; i < (int)_edges[0].size(); ++i) {
+        if (1 < (unsigned char)_edges[0][i])
+          _edges[0][i] = (unsigned char)255;
         else
-          m_edges[0][i] = (unsigned char)0;
+          _edges[0][i] = (unsigned char)0;
       }
     }
     else {
-      m_ename = "";
+      _ename = "";
     }
   }
 
@@ -181,36 +181,36 @@ void CImage::alloc(const int fast, const int filter) {
   // build image/mask/edge pyramids
   buildImageMaskEdge(filter);
 
-  m_alloc = 2;
+  _alloc = 2;
 }
 
 #ifdef FURUKAWA_IMAGE_GAMMA
 void CImage::decodeGamma(void) {
-  m_dimages[0].resize((int)m_images[0].size());
-  for (int i = 0; i < (int)m_images[0].size(); ++i) {
-    float ftmp = (float)m_images[0][i] / 255.0;
+  _dimages[0].resize((int)_images[0].size());
+  for (int i = 0; i < (int)_images[0].size(); ++i) {
+    float ftmp = (float)_images[0][i] / 255.0;
     ftmp = pow(ftmp, 2.2f);
-    m_dimages[0][i] = ftmp;
+    _dimages[0][i] = ftmp;
   }
 
-  vector<vector<unsigned char> >().swap(m_images);
+  vector<vector<unsigned char> >().swap(_images);
 }
 #endif
 
 /*
 void CImage::setColor(void) {
-  m_color = 0;
+  _color = 0;
   int index = 0;
-  for (int y = 0; y < m_heights[0]; ++y) {
-    if (m_color == 1)
+  for (int y = 0; y < _heights[0]; ++y) {
+    if (_color == 1)
       break;
-    for (int x = 0; x < m_widths[0]; ++x) {
-      const unsigned char r = m_images[0][index++];
-      const unsigned char g = m_images[0][index++];
-      const unsigned char b = m_images[0][index++];
+    for (int x = 0; x < _widths[0]; ++x) {
+      const unsigned char r = _images[0][index++];
+      const unsigned char g = _images[0][index++];
+      const unsigned char b = _images[0][index++];
 
       if (r != g || g != b || b != r) {
-	m_color = 1;
+	_color = 1;
 	break;
       }
     }
@@ -221,37 +221,37 @@ void CImage::setColor(void) {
 void CImage::free(const int freeLevel) {
   for (int l = 0; l < freeLevel; ++l) {
 #ifdef FURUKAWA_IMAGE_GAMMA
-    vector<float>().swap(m_dimages[l]);
+    vector<float>().swap(_dimages[l]);
 #else
-    vector<unsigned char>().swap(m_images[l]);
+    vector<unsigned char>().swap(_images[l]);
 #endif
-    if (!m_masks.empty())
-      vector<unsigned char>().swap(m_masks[l]);
-    if (!m_edges.empty())
-      vector<unsigned char>().swap(m_edges[l]);
+    if (!_masks.empty())
+      vector<unsigned char>().swap(_masks[l]);
+    if (!_edges.empty())
+      vector<unsigned char>().swap(_edges[l]);
   }
 }
 
 void CImage::free(void) {
-  if (m_alloc != 0)
-    m_alloc = 1;
+  if (_alloc != 0)
+    _alloc = 1;
   else
-    m_alloc = 0;
+    _alloc = 0;
 
-  vector<vector<unsigned char> >().swap(m_images);
-  vector<vector<unsigned char> >().swap(m_masks);
-  vector<vector<unsigned char> >().swap(m_edges);
-  //vector<int>().swap(m_widths);
-  //vector<int>().swap(m_heights);
+  vector<vector<unsigned char> >().swap(_images);
+  vector<vector<unsigned char> >().swap(_masks);
+  vector<vector<unsigned char> >().swap(_edges);
+  //vector<int>().swap(_widths);
+  //vector<int>().swap(_heights);
 }
 
 void CImage::buildImageMaskEdge(const int filter) {
   buildImage(filter);
 
-  if (!m_mname.empty())
+  if (!_mname.empty())
     buildMask();
 
-  if (!m_ename.empty())
+  if (!_ename.empty())
     buildEdge();
 }
 
@@ -267,15 +267,15 @@ void CImage::buildImage(const int filter) {
 
   //----------------------------------------------------------------------
   // image
-  for (int level = 1; level < m_maxLevel; ++level) {
-    const int size = m_widths[level] * m_heights[level] * 3;
+  for (int level = 1; level < _maxLevel; ++level) {
+    const int size = _widths[level] * _heights[level] * 3;
 #ifdef FURUKAWA_IMAGE_GAMMA
-    m_dimages[level].resize(size);
+    _dimages[level].resize(size);
 #else
-    m_images[level].resize(size);
+    _images[level].resize(size);
 #endif
-    for (int y = 0; y < m_heights[level]; ++y) {
-      for (int x = 0; x < m_widths[level]; ++x) {
+    for (int y = 0; y < _heights[level]; ++y) {
+      for (int x = 0; x < _widths[level]; ++x) {
 
 	Vec3 color;
         if (filter == 2)
@@ -285,63 +285,63 @@ void CImage::buildImage(const int filter) {
 
 	for (int j = -1; j < 3; ++j) {
 	  const int ytmp = 2 * y + j;
-	  if (ytmp < 0 || m_heights[level - 1] - 1 < ytmp)
+	  if (ytmp < 0 || _heights[level - 1] - 1 < ytmp)
 	    continue;
 
 	  for (int i = -1; i < 3; ++i) {
 	    const int xtmp = 2 * x + i;
-	    if (xtmp < 0 || m_widths[level - 1] - 1 < xtmp)
+	    if (xtmp < 0 || _widths[level - 1] - 1 < xtmp)
 	      continue;
 
-	    const int index = (ytmp * m_widths[level - 1] + xtmp) * 3;
+	    const int index = (ytmp * _widths[level - 1] + xtmp) * 3;
 #ifdef FURUKAWA_IMAGE_GAMMA
             if (filter == 0) {
-              color[0] += mask[j+1][i+1] * (double)m_dimages[level - 1][index];
-              color[1] += mask[j+1][i+1] * (double)m_dimages[level - 1][index+1];
-              color[2] += mask[j+1][i+1] * (double)m_dimages[level - 1][index+2];
+              color[0] += mask[j+1][i+1] * (double)_dimages[level - 1][index];
+              color[1] += mask[j+1][i+1] * (double)_dimages[level - 1][index+1];
+              color[2] += mask[j+1][i+1] * (double)_dimages[level - 1][index+2];
               denom += mask[j+1][i+1];
             }
             else if (filter == 1) {
-              color[0] = max(color[0], (double)m_dimages[level - 1][index]);
-              color[1] = max(color[1], (double)m_dimages[level - 1][index+1]);
-              color[2] = max(color[2], (double)m_dimages[level - 1][index+2]);
+              color[0] = max(color[0], (double)_dimages[level - 1][index]);
+              color[1] = max(color[1], (double)_dimages[level - 1][index+1]);
+              color[2] = max(color[2], (double)_dimages[level - 1][index+2]);
             }
             else {
-              color[0] = min(color[0], (double)m_dimages[level - 1][index]);
-              color[1] = min(color[1], (double)m_dimages[level - 1][index+1]);
-              color[2] = min(color[2], (double)m_dimages[level - 1][index+2]);
+              color[0] = min(color[0], (double)_dimages[level - 1][index]);
+              color[1] = min(color[1], (double)_dimages[level - 1][index+1]);
+              color[2] = min(color[2], (double)_dimages[level - 1][index+2]);
             }
 #else
             if (filter == 0) {
-              color[0] += mask[j+1][i+1] * (double)m_images[level - 1][index];
-              color[1] += mask[j+1][i+1] * (double)m_images[level - 1][index+1];
-              color[2] += mask[j+1][i+1] * (double)m_images[level - 1][index+2];
+              color[0] += mask[j+1][i+1] * (double)_images[level - 1][index];
+              color[1] += mask[j+1][i+1] * (double)_images[level - 1][index+1];
+              color[2] += mask[j+1][i+1] * (double)_images[level - 1][index+2];
               denom += mask[j+1][i+1];
             }
             else if (filter == 1) {
-              color[0] = max(color[0], (double)m_images[level - 1][index]);
-              color[1] = max(color[1], (double)m_images[level - 1][index+1]);
-              color[2] = max(color[2], (double)m_images[level - 1][index+2]);
+              color[0] = max(color[0], (double)_images[level - 1][index]);
+              color[1] = max(color[1], (double)_images[level - 1][index+1]);
+              color[2] = max(color[2], (double)_images[level - 1][index+2]);
             }
             else {
-              color[0] = min(color[0], (double)m_images[level - 1][index]);
-              color[1] = min(color[1], (double)m_images[level - 1][index+1]);
-              color[2] = min(color[2], (double)m_images[level - 1][index+2]);
+              color[0] = min(color[0], (double)_images[level - 1][index]);
+              color[1] = min(color[1], (double)_images[level - 1][index+1]);
+              color[2] = min(color[2], (double)_images[level - 1][index+2]);
             }
 #endif
           }
 	}
         if (filter == 0)
           color /= denom;
-	const int index = (y * m_widths[level] + x) * 3;
+	const int index = (y * _widths[level] + x) * 3;
 #ifdef FURUKAWA_IMAGE_GAMMA
-	m_dimages[level][index] = color[0];
-	m_dimages[level][index + 1] = color[1];
-	m_dimages[level][index + 2] = color[2];
+	_dimages[level][index] = color[0];
+	_dimages[level][index + 1] = color[1];
+	_dimages[level][index + 2] = color[2];
 #else
-	m_images[level][index] = (unsigned char)((int)floor(color[0] + 0.5f));
-	m_images[level][index + 1] = (unsigned char)((int)floor(color[1] + 0.5f));
-	m_images[level][index + 2] = (unsigned char)((int)floor(color[2] + 0.5f));
+	_images[level][index] = (unsigned char)((int)floor(color[0] + 0.5f));
+	_images[level][index + 1] = (unsigned char)((int)floor(color[1] + 0.5f));
+	_images[level][index + 2] = (unsigned char)((int)floor(color[2] + 0.5f));
 #endif
       }
     }
@@ -351,32 +351,32 @@ void CImage::buildImage(const int filter) {
 void CImage::buildMask(void) {
   //----------------------------------------------------------------------
   // mask
-  for (int level = 1; level < m_maxLevel; ++level) {
-    const int size = m_widths[level] * m_heights[level];
+  for (int level = 1; level < _maxLevel; ++level) {
+    const int size = _widths[level] * _heights[level];
 
-    m_masks[level].resize(size);
-    for (int y = 0; y < m_heights[level]; ++y) {
-      const int ys[2] = {2 * y, min(m_heights[level - 1] - 1, 2 * y + 1)};
-      for (int x = 0; x < m_widths[level]; ++x) {
-        const int xs[2] = {2 * x, min(m_widths[level - 1] - 1, 2 * x + 1)};
+    _masks[level].resize(size);
+    for (int y = 0; y < _heights[level]; ++y) {
+      const int ys[2] = {2 * y, min(_heights[level - 1] - 1, 2 * y + 1)};
+      for (int x = 0; x < _widths[level]; ++x) {
+        const int xs[2] = {2 * x, min(_widths[level - 1] - 1, 2 * x + 1)};
         int in = 0;	int out = 0;
 
         for (int j = 0; j < 2; ++j) {
           for (int i = 0; i < 2; ++i) {
-            const int index = ys[j] * m_widths[level - 1] + xs[i];
-            if (m_masks[level - 1][index])
+            const int index = ys[j] * _widths[level - 1] + xs[i];
+            if (_masks[level - 1][index])
               in++;
             else
               out++;
           }
         }
 
-        const int index = y * m_widths[level] + x;
+        const int index = y * _widths[level] + x;
         //if (out <= in)
         if (0 < in)
-          m_masks[level][index] = (unsigned char)255;
+          _masks[level][index] = (unsigned char)255;
         else
-          m_masks[level][index] = (unsigned char)0;
+          _masks[level][index] = (unsigned char)0;
       }
     }
   }
@@ -385,68 +385,68 @@ void CImage::buildMask(void) {
 void CImage::buildEdge(void) {
   //----------------------------------------------------------------------
   // edge
-  for (int level = 1; level < m_maxLevel; ++level) {
-    const int size = m_widths[level] * m_heights[level];
+  for (int level = 1; level < _maxLevel; ++level) {
+    const int size = _widths[level] * _heights[level];
 
-    m_edges[level].resize(size);
-    for (int y = 0; y < m_heights[level]; ++y) {
-      const int ys[2] = {2 * y, min(m_heights[level - 1] - 1, 2 * y + 1)};
-      for (int x = 0; x < m_widths[level]; ++x) {
-        const int xs[2] = {2 * x, min(m_widths[level - 1] - 1, 2 * x + 1)};
+    _edges[level].resize(size);
+    for (int y = 0; y < _heights[level]; ++y) {
+      const int ys[2] = {2 * y, min(_heights[level - 1] - 1, 2 * y + 1)};
+      for (int x = 0; x < _widths[level]; ++x) {
+        const int xs[2] = {2 * x, min(_widths[level - 1] - 1, 2 * x + 1)};
         int in = 0;	int out = 0;
 
         for (int j = 0; j < 2; ++j) {
           for (int i = 0; i < 2; ++i) {
-            const int index = ys[j] * m_widths[level - 1] + xs[i];
-            if (m_edges[level - 1][index])
+            const int index = ys[j] * _widths[level - 1] + xs[i];
+            if (_edges[level - 1][index])
               in++;
             else
               out++;
           }
         }
 
-        const int index = y * m_widths[level] + x;
+        const int index = y * _widths[level] + x;
         //if (out <= in)
         if (0 < in)
-          m_edges[level][index] = (unsigned char)255;
+          _edges[level][index] = (unsigned char)255;
         else
-          m_edges[level][index] = (unsigned char)0;
+          _edges[level][index] = (unsigned char)0;
       }
     }
   }
 }
 
 void CImage::setEdge(const float threshold) {
-  const int size = m_widths[0] * m_heights[0];
-  m_edges[0].resize(size);
+  const int size = _widths[0] * _heights[0];
+  _edges[0].resize(size);
   for (int i = 0; i < size; ++i)
-    m_edges[0][i] = (unsigned char)0;
+    _edges[0][i] = (unsigned char)0;
 
   vector<vector<float> > vvitmp, vvitmp2;
-  vvitmp.resize(m_heights[0]);
-  vvitmp2.resize(m_heights[0]);
-  for (int y = 0; y < m_heights[0]; ++y) {
-    vvitmp[y].resize(m_widths[0]);
-    vvitmp2[y].resize(m_widths[0]);
-    for (int x = 0; x < m_widths[0]; ++x) {
+  vvitmp.resize(_heights[0]);
+  vvitmp2.resize(_heights[0]);
+  for (int y = 0; y < _heights[0]; ++y) {
+    vvitmp[y].resize(_widths[0]);
+    vvitmp2[y].resize(_widths[0]);
+    for (int x = 0; x < _widths[0]; ++x) {
       vvitmp[y][x] = 0;
       vvitmp2[y][x] = 0;
     }
   }
 
-  for (int y = 1; y < m_heights[0] - 1; ++y)
-    for (int x = 1; x < m_widths[0] - 1; ++x) {
-      const int index = 3 * (y * m_widths[0] + x);
+  for (int y = 1; y < _heights[0] - 1; ++y)
+    for (int x = 1; x < _widths[0] - 1; ++x) {
+      const int index = 3 * (y * _widths[0] + x);
       const int rindex = index + 3;
       const int lindex = index - 3;
-      const int tindex = index - 3 * m_widths[0];
-      const int bindex = index + 3 * m_widths[0];
+      const int tindex = index - 3 * _widths[0];
+      const int bindex = index + 3 * _widths[0];
       for (int i = 0; i < 3; ++i) {
-        const int itmp0 = abs(m_images[0][rindex + i] -
-                              m_images[0][lindex + i]);
+        const int itmp0 = abs(_images[0][rindex + i] -
+                              _images[0][lindex + i]);
         vvitmp[y][x] += itmp0 * itmp0;
-        const int itmp1 = abs(m_images[0][bindex + i] -
-                              m_images[0][tindex + i]);
+        const int itmp1 = abs(_images[0][bindex + i] -
+                              _images[0][tindex + i]);
         vvitmp[y][x] += itmp1 * itmp1;
       }
     }
@@ -472,19 +472,19 @@ void CImage::setEdge(const float threshold) {
   ofstream ofstr;
   ofstr.open(buffer);
   ofstr << "P2" << endl
-        << m_widths[0] << ' ' << m_heights[0] << endl
+        << _widths[0] << ' ' << _heights[0] << endl
         << 255 << endl;
   */
 
-  for (int y = 0; y < m_heights[0]; ++y) {
-    for (int x = 0; x < m_widths[0]; ++x) {
+  for (int y = 0; y < _heights[0]; ++y) {
+    for (int x = 0; x < _widths[0]; ++x) {
       count++;
       if (newThreshold < vvitmp[y][x])
-        m_edges[0][count] = (unsigned char)255;
+        _edges[0][count] = (unsigned char)255;
       else
-        m_edges[0][count] = (unsigned char)0;
+        _edges[0][count] = (unsigned char)0;
 
-      //ofstr << (int)m_edges[0][count] << ' ';
+      //ofstr << (int)_edges[0][count] << ' ';
     }
   }
   //ofstr.close();
@@ -1170,7 +1170,7 @@ void CImage::sift(const Vec3f& center,
                   const Vec3f& xaxis, const Vec3f& yaxis,
                   std::vector<float>& descriptor) const {
   const float step = (norm(xaxis) + norm(yaxis)) / 2.0f;
-  const int level = max(0, min(m_maxLevel - 1,
+  const int level = max(0, min(_maxLevel - 1,
                                (int)floor(log(step) / log(2.0f) + 0.5f)));
 
   if (level != 0) {

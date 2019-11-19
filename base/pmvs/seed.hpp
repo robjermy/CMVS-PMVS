@@ -40,9 +40,9 @@ class CSeed {
                  Vec4f& coord) const;
 
   //----------------------------------------------------------------------
-  CFindMatch& m_fm;
+  CFindMatch& _fm;
   // points in a grid. For each index, grid
-  std::vector<std::vector<std::vector<PPoint> > > m_ppoints;
+  std::vector<std::vector<std::vector<PPoint> > > _ppoints;
 
   //----------------------------------------------------------------------
   // thread related
@@ -51,13 +51,13 @@ class CSeed {
   static int initialMatchThreadTmp(void* arg);
 
   // Number of trials
-  std::vector<int> m_scounts;
+  std::vector<int> _scounts;
   // Number of failures in the prep
-  std::vector<int> m_fcounts0;
+  std::vector<int> _fcounts0;
   // Number of failures in the post processing
-  std::vector<int> m_fcounts1;
+  std::vector<int> _fcounts1;
   // Number passes
-  std::vector<int> m_pcounts;
+  std::vector<int> _pcounts;
 };
 };
 

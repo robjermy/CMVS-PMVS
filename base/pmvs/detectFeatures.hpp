@@ -26,20 +26,20 @@ class CDetectFeatures {
            const int num, const int csize, const int level,
            const int CPU = 1);
 
-  std::vector<std::vector<CPoint> > m_points;
+  std::vector<std::vector<CPoint> > _points;
   
  protected:
-  const Image::CPhotoSetS* m_ppss;
-  int m_csize;
-  int m_level;
+  const Image::CPhotoSetS* _ppss;
+  int _csize;
+  int _level;
   
   //----------------------------------------------------------------------
   // thread related
   //----------------------------------------------------------------------  
-  mtx_t m_rwlock;
-  int m_CPU;
+  mtx_t _rwlock;
+  int _CPU;
 
-  std::list<int> m_jobs;
+  std::list<int> _jobs;
   
   void runThread(void);
   static int runThreadTmp(void*arg);

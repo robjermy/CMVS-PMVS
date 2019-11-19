@@ -23,8 +23,8 @@ class CDifferenceOfGaussians: public CDetector {
   }
   
  protected:
-  float m_firstScale;
-  float m_lastScale;
+  float _firstScale;
+  float _lastScale;
   
   void init(const std::vector<unsigned char>& image,
 	    const std::vector<unsigned char>& mask,

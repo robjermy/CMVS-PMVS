@@ -9,32 +9,32 @@ namespace PMVS3 {
   
 struct SOption{
   public:
-  int m_level;
-  int m_csize;
-  float m_threshold;
-  int m_wsize;
-  int m_minImageNum;
-  int m_CPU;
-  float m_setEdge;
-  int m_useBound;
-  int m_useVisData;
-  int m_sequence;
+  int _level;
+  int _csize;
+  float _threshold;
+  int _wsize;
+  int _minImageNum;
+  int _CPU;
+  float _setEdge;
+  int _useBound;
+  int _useVisData;
+  int _sequence;
   
-  float m_maxAngleThreshold;
-  float m_quadThreshold;
+  float _maxAngleThreshold;
+  float _quadThreshold;
   
-  std::string m_prefix;
-  std::string m_option;
-  int m_tflag;
-  std::vector<int> m_timages;
-  int m_oflag;
-  std::vector<int> m_oimages;
+  std::string _prefix;
+  std::string _option;
+  int _tflag;
+  std::vector<int> _timages;
+  int _oflag;
+  std::vector<int> _oimages;
 
-  std::map<int, int> m_dict;
+  std::map<int, int> _dict;
   
-  std::vector<int> m_bindexes;
-  std::vector<std::vector<int> > m_visdata;
-  std::vector<std::vector<int> > m_visdata2;
+  std::vector<int> _bindexes;
+  std::vector<std::vector<int> > _visdata;
+  std::vector<std::vector<int> > _visdata2;
   
   SOption(void);
   

@@ -7,25 +7,25 @@
 template<class T>
 class TVec3 {
 private:
-  T m_elt[3];
+  T _elt[3];
   
  public:
   // Standard constructors
   //
   TVec3(T s=0) { *this = s; }
-  TVec3(T x, T y, T z) { m_elt[0]=x; m_elt[1]=y; m_elt[2]=z; }
+  TVec3(T x, T y, T z) { _elt[0]=x; _elt[1]=y; _elt[2]=z; }
   
   // Copy constructors & assignment operators
   template<class U> TVec3(const TVec3<U>& v) { *this = v; }
   template<class U> TVec3(const TVec2<U>& v,T w)
-    { m_elt[0]=v[0];  m_elt[1]=v[1];  m_elt[2]=w; }
+    { _elt[0]=v[0];  _elt[1]=v[1];  _elt[2]=w; }
 
   template<class U> TVec3(const U v[3])
-    { m_elt[0]=v[0]; m_elt[1]=v[1]; m_elt[2]=v[2]; }
+    { _elt[0]=v[0]; _elt[1]=v[1]; _elt[2]=v[2]; }
   
   template<class U> TVec3& operator=(const TVec3<U>& v)
-  { m_elt[0]=v[0];  m_elt[1]=v[1];  m_elt[2]=v[2];  return *this; }
-  TVec3& operator=(T s) { m_elt[0]=m_elt[1]=m_elt[2]=s; return *this; }
+  { _elt[0]=v[0];  _elt[1]=v[1];  _elt[2]=v[2];  return *this; }
+  TVec3& operator=(T s) { _elt[0]=_elt[1]=_elt[2]=s; return *this; }
   
   // Descriptive interface
   //
@@ -34,12 +34,12 @@ private:
   
   // Access methods
   //
-  operator       T*()       { return m_elt; }
-  operator const T*() const { return m_elt; }
+  operator       T*()       { return _elt; }
+  operator const T*() const { return _elt; }
   
-  T& operator[](int i)       { return m_elt[i]; }
-  T  operator[](int i) const { return m_elt[i]; }
-  operator const T*()       { return m_elt; }
+  T& operator[](int i)       { return _elt[i]; }
+  T  operator[](int i) const { return _elt[i]; }
+  operator const T*()       { return _elt; }
   
   // Assignment and in-place arithmetic methods
   //
@@ -62,13 +62,13 @@ private:
     
     if(denom2 != 1.0 && denom2 != 0.0 ) {
       const T denom = sqrt(denom2);
-      m_elt[0] /= denom;
-      m_elt[1] /= denom;
-      m_elt[2] /= denom;
+      _elt[0] /= denom;
+      _elt[1] /= denom;
+      _elt[2] /= denom;
     }
   }
   inline T sum(void) const {
-    return m_elt[0] + m_elt[1] + m_elt[2];
+    return _elt[0] + _elt[1] + _elt[2];
   }
   
 };
@@ -79,19 +79,19 @@ private:
 //
 
 template<class T> inline TVec3<T>& TVec3<T>::operator+=(const TVec3<T>& v)
-{ m_elt[0] += v[0];   m_elt[1] += v[1];   m_elt[2] += v[2];  return *this; };
+{ _elt[0] += v[0];   _elt[1] += v[1];   _elt[2] += v[2];  return *this; };
 
 template<class T> inline TVec3<T>& TVec3<T>::operator-=(const TVec3<T>& v)
-{ m_elt[0] -= v[0];   m_elt[1] -= v[1];   m_elt[2] -= v[2];  return *this; };
+{ _elt[0] -= v[0];   _elt[1] -= v[1];   _elt[2] -= v[2];  return *this; };
 
 template<class T> inline TVec3<T>& TVec3<T>::operator*=(T s)
-{ m_elt[0] *= s;   m_elt[1] *= s;   m_elt[2] *= s;  return *this; };
+{ _elt[0] *= s;   _elt[1] *= s;   _elt[2] *= s;  return *this; };
 
 template<class T> inline TVec3<T>& TVec3<T>::operator/=(T s)
-{ m_elt[0] /= s;   m_elt[1] /= s;   m_elt[2] /= s;  return *this; };
+{ _elt[0] /= s;   _elt[1] /= s;   _elt[2] /= s;  return *this; };
 
 template<class T> inline bool TVec3<T>::operator==(const TVec3<T>& v) const{
-    if (m_elt[0] == v.m_elt[0] && m_elt[1] == v.m_elt[1] && m_elt[2] == v.m_elt[2])
+    if (_elt[0] == v._elt[0] && _elt[1] == v._elt[1] && _elt[2] == v._elt[2])
 	return true;
     else
 	return false;

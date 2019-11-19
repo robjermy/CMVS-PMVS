@@ -11,31 +11,31 @@ using namespace PMVS3;
 using namespace Patch;
 using namespace std;
 
-CSeed::CSeed(CFindMatch& findMatch) : m_fm(findMatch) {
+CSeed::CSeed(CFindMatch& findMatch) : _fm(findMatch) {
 }
 
 void CSeed::init(const std::vector<std::vector<CPoint> >& points) {
-  m_ppoints.clear();
-  m_ppoints.resize(m_fm.m_num);
+  _ppoints.clear();
+  _ppoints.resize(_fm._num);
 
-  for (int index = 0; index < m_fm.m_num; ++index) {
-    const int gheight = m_fm.m_pos.m_gheights[index];
-    const int gwidth = m_fm.m_pos.m_gwidths[index];
-    m_ppoints[index].resize(gwidth * gheight);
+  for (int index = 0; index < _fm._num; ++index) {
+    const int gheight = _fm._pos._gheights[index];
+    const int gwidth = _fm._pos._gwidths[index];
+    _ppoints[index].resize(gwidth * gheight);
   }
   
   readPoints(points);
 }
 
 void CSeed::readPoints(const std::vector<std::vector<CPoint> >& points) {
-  for (int index = 0; index < m_fm.m_num; ++index) {
+  for (int index = 0; index < _fm._num; ++index) {
     for (int i = 0; i < (int)points[index].size(); ++i) {
       PPoint ppoint(new CPoint(points[index][i]));
-      ppoint->m_itmp = index;
-      const int ix = ((int)floor(ppoint->m_icoord[0] + 0.5f)) / m_fm.m_csize;
-      const int iy = ((int)floor(ppoint->m_icoord[1] + 0.5f)) / m_fm.m_csize;
-      const int index2 = iy * m_fm.m_pos.m_gwidths[index] + ix;
-      m_ppoints[index][index2].push_back(ppoint);
+      ppoint->_itmp = index;
+      const int ix = ((int)floor(ppoint->_icoord[0] + 0.5f)) / _fm._csize;
+      const int iy = ((int)floor(ppoint->_icoord[1] + 0.5f)) / _fm._csize;
+      const int index2 = iy * _fm._pos._gwidths[index] + ix;
+      _ppoints[index][index2].push_back(ppoint);
     }
   }
 }
@@ -44,54 +44,54 @@ void CSeed::readPoints(const std::vector<std::vector<CPoint> >& points) {
 static const unsigned int RANDOM_SEED = 42;
 
 void CSeed::run(void) {
-  m_fm.m_count = 0;
-  m_fm.m_jobs.clear();
-  m_scounts.resize(m_fm.m_CPU);
-  m_fcounts0.resize(m_fm.m_CPU);
-  m_fcounts1.resize(m_fm.m_CPU);
-  m_pcounts.resize(m_fm.m_CPU);
-  fill(m_scounts.begin(), m_scounts.end(), 0);
-  fill(m_fcounts0.begin(), m_fcounts0.end(), 0);
-  fill(m_fcounts1.begin(), m_fcounts1.end(), 0);
-  fill(m_pcounts.begin(), m_pcounts.end(), 0);
+  _fm._count = 0;
+  _fm._jobs.clear();
+  _scounts.resize(_fm._CPU);
+  _fcounts0.resize(_fm._CPU);
+  _fcounts1.resize(_fm._CPU);
+  _pcounts.resize(_fm._CPU);
+  fill(_scounts.begin(), _scounts.end(), 0);
+  fill(_fcounts0.begin(), _fcounts0.end(), 0);
+  fill(_fcounts1.begin(), _fcounts1.end(), 0);
+  fill(_pcounts.begin(), _pcounts.end(), 0);
   
   vector<int> vitmp;
-  for (int i = 0; i < m_fm.m_tnum; ++i)
+  for (int i = 0; i < _fm._tnum; ++i)
     vitmp.push_back(i);
 
   std::mt19937 gen(RANDOM_SEED);
   shuffle(vitmp.begin(), vitmp.end(), gen);
-  m_fm.m_jobs.insert(m_fm.m_jobs.end(), vitmp.begin(), vitmp.end());
+  _fm._jobs.insert(_fm._jobs.end(), vitmp.begin(), vitmp.end());
 
   cerr << "adding seeds " << endl;
   
-  m_fm.m_pos.clearCounts();
+  _fm._pos.clearCounts();
 
   // If there already exists a patch, don't use
-  for (int index = 0; index < (int)m_fm.m_tnum; ++index) {
-    for (int j = 0; j < (int)m_fm.m_pos.m_pgrids[index].size(); ++j) {
-      if (!m_fm.m_pos.m_pgrids[index][j].empty())
-        m_fm.m_pos.m_counts[index][j] = m_fm.m_countThreshold2;
+  for (int index = 0; index < (int)_fm._tnum; ++index) {
+    for (int j = 0; j < (int)_fm._pos._pgrids[index].size(); ++j) {
+      if (!_fm._pos._pgrids[index][j].empty())
+        _fm._pos._counts[index][j] = _fm._countThreshold2;
     }
   }
 
   time_t tv;
   time(&tv);
   time_t curtime = tv;
-  vector<thrd_t> threads(m_fm.m_CPU);
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  vector<thrd_t> threads(_fm._CPU);
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_create(&threads[i], &initialMatchThreadTmp, (void*)this);
-  for (int i = 0; i < m_fm.m_CPU; ++i)
+  for (int i = 0; i < _fm._CPU; ++i)
     thrd_join(threads[i], NULL);
   //----------------------------------------------------------------------
   cerr << "done" << endl;
   time(&tv);
   cerr << "---- Initial: " << (tv - curtime)/CLOCKS_PER_SEC << " secs ----" << endl;
 
-  const int trial = accumulate(m_scounts.begin(), m_scounts.end(), 0);
-  const int fail0 = accumulate(m_fcounts0.begin(), m_fcounts0.end(), 0);
-  const int fail1 = accumulate(m_fcounts1.begin(), m_fcounts1.end(), 0);
-  const int pass = accumulate(m_pcounts.begin(), m_pcounts.end(), 0);
+  const int trial = accumulate(_scounts.begin(), _scounts.end(), 0);
+  const int fail0 = accumulate(_fcounts0.begin(), _fcounts0.end(), 0);
+  const int fail1 = accumulate(_fcounts1.begin(), _fcounts1.end(), 0);
+  const int pass = accumulate(_pcounts.begin(), _pcounts.end(), 0);
   cerr << "Total pass fail0 fail1 refinepatch: "
        << trial << ' ' << pass << ' '
        << fail0 << ' ' << fail1 << ' ' << pass + fail1 << endl;
@@ -104,18 +104,18 @@ void CSeed::run(void) {
 }
 
 void CSeed::initialMatchThread(void) {
-  mtx_lock(&m_fm.m_lock);
-  const int id = m_fm.m_count++;
-  mtx_unlock(&m_fm.m_lock);
+  mtx_lock(&_fm._lock);
+  const int id = _fm._count++;
+  mtx_unlock(&_fm._lock);
 
   while (1) {
     int index = -1;
-    mtx_lock(&m_fm.m_lock);
-    if (!m_fm.m_jobs.empty()) {
-      index = m_fm.m_jobs.front();
-      m_fm.m_jobs.pop_front();
+    mtx_lock(&_fm._lock);
+    if (!_fm._jobs.empty()) {
+      index = _fm._jobs.front();
+      _fm._jobs.pop_front();
     }
-    mtx_unlock(&m_fm.m_lock);
+    mtx_unlock(&_fm._lock);
     if (index == -1)
       break;
 
@@ -129,15 +129,15 @@ int CSeed::initialMatchThreadTmp(void* arg) {
 }
 
 void CSeed::clear(void) {
-  vector<vector<vector<PPoint> > >().swap(m_ppoints);
+  vector<vector<vector<PPoint> > >().swap(_ppoints);
 }
 
 void CSeed::initialMatch(const int index, const int id) {
   vector<int> indexes;
-  m_fm.m_optim.collectImages(index, indexes);
+  _fm._optim.collectImages(index, indexes);
 
-  if (m_fm.m_tau < (int)indexes.size())
-    indexes.resize(m_fm.m_tau);
+  if (_fm._tau < (int)indexes.size())
+    indexes.resize(_fm._tau);
   
   if (indexes.empty())
     return;  
@@ -146,8 +146,8 @@ void CSeed::initialMatch(const int index, const int id) {
   //======================================================================
   // for each feature point, starting from the optical center, keep on
   // matching until we find candidateThreshold patches
-  const int gheight = m_fm.m_pos.m_gheights[index];
-  const int gwidth = m_fm.m_pos.m_gwidths[index];
+  const int gheight = _fm._pos._gheights[index];
+  const int gwidth = _fm._pos._gwidths[index];
 
   int index2 = -1;
   for (int y = 0; y < gheight; ++y) {
@@ -156,47 +156,47 @@ void CSeed::initialMatch(const int index, const int id) {
       if (!canAdd(index, x, y))
 	continue;
 
-      for (int p = 0; p < (int)m_ppoints[index][index2].size(); ++p) {
+      for (int p = 0; p < (int)_ppoints[index][index2].size(); ++p) {
 	// collect features that satisfies epipolar geometry
 	// constraints and sort them according to the differences of
 	// distances between two cameras.
 	vector<PPoint> vcp;
 	collectCandidates(index, indexes,
-                          *m_ppoints[index][index2][p], vcp);
+                          *_ppoints[index][index2][p], vcp);
         
 	int count = 0;
 	CPatch bestpatch;
 	//======================================================================
 	for (int i = 0; i < (int)vcp.size(); ++i) {
 	  CPatch patch;
-	  patch.m_coord = vcp[i]->m_coord;
-	  patch.m_normal =
-            m_fm.m_pss.m_photos[index].m_center - patch.m_coord;
+	  patch._coord = vcp[i]->_coord;
+	  patch._normal =
+            _fm._pss._photos[index]._center - patch._coord;
 
-	  unitize(patch.m_normal);
-	  patch.m_normal[3] = 0.0;
-	  patch.m_flag = 0;
+	  unitize(patch._normal);
+	  patch._normal[3] = 0.0;
+	  patch._flag = 0;
 
-          ++m_fm.m_pos.m_counts[index][index2];
-          const int ix = ((int)floor(vcp[i]->m_icoord[0] + 0.5f)) / m_fm.m_csize;
-          const int iy = ((int)floor(vcp[i]->m_icoord[1] + 0.5f)) / m_fm.m_csize;
-          const int index3 = iy * m_fm.m_pos.m_gwidths[vcp[i]->m_itmp] + ix;
-          if (vcp[i]->m_itmp < m_fm.m_tnum)
-            ++m_fm.m_pos.m_counts[vcp[i]->m_itmp][index3];
+          ++_fm._pos._counts[index][index2];
+          const int ix = ((int)floor(vcp[i]->_icoord[0] + 0.5f)) / _fm._csize;
+          const int iy = ((int)floor(vcp[i]->_icoord[1] + 0.5f)) / _fm._csize;
+          const int index3 = iy * _fm._pos._gwidths[vcp[i]->_itmp] + ix;
+          if (vcp[i]->_itmp < _fm._tnum)
+            ++_fm._pos._counts[vcp[i]->_itmp][index3];
           
-	  const int flag = initialMatchSub(index, vcp[i]->m_itmp, id, patch);
+	  const int flag = initialMatchSub(index, vcp[i]->_itmp, id, patch);
 	  if (flag == 0) {
 	    ++count;
-	    if (bestpatch.score(m_fm.m_nccThreshold) <
-                patch.score(m_fm.m_nccThreshold))
+	    if (bestpatch.score(_fm._nccThreshold) <
+                patch.score(_fm._nccThreshold))
 	      bestpatch = patch;
-	    if (m_fm.m_countThreshold0 <= count)
+	    if (_fm._countThreshold0 <= count)
 	      break;
 	  }
       	}
 	if (count != 0) {
 	  PPatch ppatch(new CPatch(bestpatch));
-	  m_fm.m_pos.addPatch(ppatch);
+	  _fm._pos.addPatch(ppatch);
 	  ++totalcount;
           break;
 	}
@@ -208,18 +208,18 @@ void CSeed::initialMatch(const int index, const int id) {
 
 void CSeed::collectCells(const int index0, const int index1,
                          const CPoint& p0, std::vector<Vec2i>& cells) {
-  Vec3 point(p0.m_icoord[0], p0.m_icoord[1], p0.m_icoord[2]);
+  Vec3 point(p0._icoord[0], p0._icoord[1], p0._icoord[2]);
 #ifdef DEBUG
-  if (p0.m_icoord[2] != 1.0f) {
+  if (p0._icoord[2] != 1.0f) {
     cerr << "Impossible in collectCells" << endl;    exit (1);
   }
 #endif
   
   Mat3 F;
-  Image::setF(m_fm.m_pss.m_photos[index0], m_fm.m_pss.m_photos[index1],
-              F, m_fm.m_level);
-  const int gwidth = m_fm.m_pos.m_gwidths[index1];
-  const int gheight = m_fm.m_pos.m_gheights[index1];
+  Image::setF(_fm._pss._photos[index0], _fm._pss._photos[index1],
+              F, _fm._level);
+  const int gwidth = _fm._pos._gwidths[index1];
+  const int gheight = _fm._pos._gheights[index1];
   
   Vec3 line = transpose(F) * point;
   if (line[0] == 0.0 && line[1] == 0.0) {
@@ -230,11 +230,11 @@ void CSeed::collectCells(const int index0, const int index1,
   // vertical
   if (fabs(line[0]) > fabs(line[1])) {
     for (int y = 0; y < gheight; ++y) {
-      const float fy = (y + 0.5) * m_fm.m_csize - 0.5f;
+      const float fy = (y + 0.5) * _fm._csize - 0.5f;
       float fx = (- line[1] * fy - line[2]) / line[0];
       fx = max((float)(INT_MIN + 3.0f), std::min((float)(INT_MAX - 3.0f), fx));
       
-      const int ix = ((int)floor(fx + 0.5f)) / m_fm.m_csize;
+      const int ix = ((int)floor(fx + 0.5f)) / _fm._csize;
       if (0 <= ix && ix < gwidth)
         cells.push_back(TVec2<int>(ix, y));
       if (0 <= ix - 1 && ix - 1 < gwidth)
@@ -245,11 +245,11 @@ void CSeed::collectCells(const int index0, const int index1,
   }
   else {
     for (int x = 0; x < gwidth; ++x) {
-      const float fx = (x + 0.5) * m_fm.m_csize - 0.5f;
+      const float fx = (x + 0.5) * _fm._csize - 0.5f;
       float fy = (- line[0] * fx - line[2]) / line[1];
       fy = max((float)(INT_MIN + 3.0f), std::min((float)(INT_MAX - 3.0f), fy));
       
-      const int iy = ((int)floor(fy + 0.5f)) / m_fm.m_csize;
+      const int iy = ((int)floor(fy + 0.5f)) / _fm._csize;
       if (0 <= iy && iy < gheight)
         cells.push_back(TVec2<int>(x, iy));
       if (0 <= iy - 1 && iy - 1 < gheight)
@@ -264,34 +264,34 @@ void CSeed::collectCells(const int index0, const int index1,
 // epipolar geometry coming from point in image
 void CSeed::collectCandidates(const int index, const std::vector<int>& indexes,
                               const CPoint& point, std::vector<PPoint>& vcp) {
-  const Vec3 p0(point.m_icoord[0], point.m_icoord[1], 1.0);
+  const Vec3 p0(point._icoord[0], point._icoord[1], 1.0);
   for (int i = 0; i < (int)indexes.size(); ++i) {        
     const int indexid = indexes[i];
     
     vector<TVec2<int> > cells;
     collectCells(index, indexid, point, cells);
     Mat3 F;
-    Image::setF(m_fm.m_pss.m_photos[index], m_fm.m_pss.m_photos[indexid],
-                F, m_fm.m_level);
+    Image::setF(_fm._pss._photos[index], _fm._pss._photos[indexid],
+                F, _fm._level);
     
     for (int i = 0; i < (int)cells.size(); ++i) {
       const int x = cells[i][0];      const int y = cells[i][1];
       if (!canAdd(indexid, x, y))
 	continue;
-      const int index2 = y * m_fm.m_pos.m_gwidths[indexid] + x;
+      const int index2 = y * _fm._pos._gwidths[indexid] + x;
 
-      vector<PPoint>::iterator begin = m_ppoints[indexid][index2].begin();
-      vector<PPoint>::iterator end = m_ppoints[indexid][index2].end();
+      vector<PPoint>::iterator begin = _ppoints[indexid][index2].begin();
+      vector<PPoint>::iterator end = _ppoints[indexid][index2].end();
       while (begin != end) {
         CPoint& rhs = **begin;
         // ? use type to reject candidates?
-        if (point.m_type != rhs.m_type) {
+        if (point._type != rhs._type) {
           ++begin;
           continue;
         }
           
-        const Vec3 p1(rhs.m_icoord[0], rhs.m_icoord[1], 1.0);
-        if (m_fm.m_epThreshold <= Image::computeEPD(F, p0, p1)) {
+        const Vec3 p1(rhs._icoord[0], rhs._icoord[1], 1.0);
+        if (_fm._epThreshold <= Image::computeEPD(F, p0, p1)) {
           ++begin;          
           continue;
         }
@@ -301,23 +301,23 @@ void CSeed::collectCandidates(const int index, const std::vector<int>& indexes,
     }
   }
   
-  // set distances to m_response
+  // set distances to _response
   vector<PPoint> vcptmp;
   for (int i = 0; i < (int)vcp.size(); ++i) {
-    unproject(index, vcp[i]->m_itmp, point, *vcp[i], vcp[i]->m_coord);
+    unproject(index, vcp[i]->_itmp, point, *vcp[i], vcp[i]->_coord);
     
-    if (m_fm.m_pss.m_photos[index].m_projection[m_fm.m_level][2] *
-        vcp[i]->m_coord <= 0.0)
+    if (_fm._pss._photos[index]._projection[_fm._level][2] *
+        vcp[i]->_coord <= 0.0)
       continue;
 
-    if (m_fm.m_pss.getMask(vcp[i]->m_coord, m_fm.m_level) == 0 ||
-        m_fm.insideBimages(vcp[i]->m_coord) == 0)
+    if (_fm._pss.getMask(vcp[i]->_coord, _fm._level) == 0 ||
+        _fm.insideBimages(vcp[i]->_coord) == 0)
       continue;
 
     //??? from the closest
-    vcp[i]->m_response =
-      fabs(norm(vcp[i]->m_coord - m_fm.m_pss.m_photos[index].m_center) -
-           norm(vcp[i]->m_coord - m_fm.m_pss.m_photos[vcp[i]->m_itmp].m_center));
+    vcp[i]->_response =
+      fabs(norm(vcp[i]->_coord - _fm._pss._photos[index]._center) -
+           norm(vcp[i]->_coord - _fm._pss._photos[vcp[i]->_itmp]._center));
     
     vcptmp.push_back(vcp[i]);
   }
@@ -326,20 +326,20 @@ void CSeed::collectCandidates(const int index, const std::vector<int>& indexes,
 }
 
 int CSeed::canAdd(const int index, const int x, const int y) {
-  if (!m_fm.m_pss.getMask(index, m_fm.m_csize * x, m_fm.m_csize * y, m_fm.m_level))
+  if (!_fm._pss.getMask(index, _fm._csize * x, _fm._csize * y, _fm._level))
     return 0;
 
-  const int index2 = y * m_fm.m_pos.m_gwidths[index] + x;
+  const int index2 = y * _fm._pos._gwidths[index] + x;
 
-  if (m_fm.m_tnum <= index)
+  if (_fm._tnum <= index)
     return 1;
   
-  // Check if m_pgrids already contains something
-  if (!m_fm.m_pos.m_pgrids[index][index2].empty())
+  // Check if _pgrids already contains something
+  if (!_fm._pos._pgrids[index][index2].empty())
     return 0;
 
   //??? critical
-  if (m_fm.m_countThreshold2 <= m_fm.m_pos.m_counts[index][index2])
+  if (_fm._countThreshold2 <= _fm._pos._counts[index][index2])
     return 0;
   
   return 1;
@@ -350,55 +350,55 @@ void CSeed::unproject(const int index0, const int index1,
                       Vec4f& coord) const{
   Mat4 A;
   A[0][0] =
-    m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][0][0] -
-    p0.m_icoord[0] * m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][2][0];
+    _fm._pss._photos[index0]._projection[_fm._level][0][0] -
+    p0._icoord[0] * _fm._pss._photos[index0]._projection[_fm._level][2][0];
   A[0][1] =
-    m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][0][1] -
-    p0.m_icoord[0] * m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][2][1];
+    _fm._pss._photos[index0]._projection[_fm._level][0][1] -
+    p0._icoord[0] * _fm._pss._photos[index0]._projection[_fm._level][2][1];
   A[0][2] =
-    m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][0][2] -
-    p0.m_icoord[0] * m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][2][2];
+    _fm._pss._photos[index0]._projection[_fm._level][0][2] -
+    p0._icoord[0] * _fm._pss._photos[index0]._projection[_fm._level][2][2];
   A[1][0] =
-    m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][1][0] -
-    p0.m_icoord[1] * m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][2][0];
+    _fm._pss._photos[index0]._projection[_fm._level][1][0] -
+    p0._icoord[1] * _fm._pss._photos[index0]._projection[_fm._level][2][0];
   A[1][1] =
-    m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][1][1] -
-    p0.m_icoord[1] * m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][2][1];
+    _fm._pss._photos[index0]._projection[_fm._level][1][1] -
+    p0._icoord[1] * _fm._pss._photos[index0]._projection[_fm._level][2][1];
   A[1][2] =
-    m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][1][2] -
-    p0.m_icoord[1] * m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][2][2];
+    _fm._pss._photos[index0]._projection[_fm._level][1][2] -
+    p0._icoord[1] * _fm._pss._photos[index0]._projection[_fm._level][2][2];
   A[2][0] =
-    m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][0][0] -
-    p1.m_icoord[0] * m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][2][0];
+    _fm._pss._photos[index1]._projection[_fm._level][0][0] -
+    p1._icoord[0] * _fm._pss._photos[index1]._projection[_fm._level][2][0];
   A[2][1] =
-    m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][0][1] -
-    p1.m_icoord[0] * m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][2][1];
+    _fm._pss._photos[index1]._projection[_fm._level][0][1] -
+    p1._icoord[0] * _fm._pss._photos[index1]._projection[_fm._level][2][1];
   A[2][2] =
-    m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][0][2] -
-    p1.m_icoord[0] * m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][2][2];
+    _fm._pss._photos[index1]._projection[_fm._level][0][2] -
+    p1._icoord[0] * _fm._pss._photos[index1]._projection[_fm._level][2][2];
   A[3][0] =
-    m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][1][0] -
-    p1.m_icoord[1] * m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][2][0];
+    _fm._pss._photos[index1]._projection[_fm._level][1][0] -
+    p1._icoord[1] * _fm._pss._photos[index1]._projection[_fm._level][2][0];
   A[3][1] =
-    m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][1][1] -
-    p1.m_icoord[1] * m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][2][1];
+    _fm._pss._photos[index1]._projection[_fm._level][1][1] -
+    p1._icoord[1] * _fm._pss._photos[index1]._projection[_fm._level][2][1];
   A[3][2] =
-    m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][1][2] -
-    p1.m_icoord[1] * m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][2][2];
+    _fm._pss._photos[index1]._projection[_fm._level][1][2] -
+    p1._icoord[1] * _fm._pss._photos[index1]._projection[_fm._level][2][2];
 
   Vec4 b;
   b[0] =
-    p0.m_icoord[0] * m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][2][3] -
-    m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][0][3];
+    p0._icoord[0] * _fm._pss._photos[index0]._projection[_fm._level][2][3] -
+    _fm._pss._photos[index0]._projection[_fm._level][0][3];
   b[1] =
-    p0.m_icoord[1] * m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][2][3] -
-    m_fm.m_pss.m_photos[index0].m_projection[m_fm.m_level][1][3];
+    p0._icoord[1] * _fm._pss._photos[index0]._projection[_fm._level][2][3] -
+    _fm._pss._photos[index0]._projection[_fm._level][1][3];
   b[2] =
-    p1.m_icoord[0] * m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][2][3] -
-    m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][0][3];
+    p1._icoord[0] * _fm._pss._photos[index1]._projection[_fm._level][2][3] -
+    _fm._pss._photos[index1]._projection[_fm._level][0][3];
   b[3] =
-    p1.m_icoord[1] * m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][2][3] -
-    m_fm.m_pss.m_photos[index1].m_projection[m_fm.m_level][1][3];
+    p1._icoord[1] * _fm._pss._photos[index1]._projection[_fm._level][2][3] -
+    _fm._pss._photos[index1]._projection[_fm._level][1][3];
 
   Mat4 AT = transpose(A);
   Mat4 ATA = AT * A;
@@ -424,29 +424,29 @@ void CSeed::unproject(const int index0, const int index1,
 int CSeed::initialMatchSub(const int index0, const int index1,
                            const int id, CPatch& patch) {
   //----------------------------------------------------------------------
-  patch.m_images.clear();
-  patch.m_images.push_back(index0);
-  patch.m_images.push_back(index1);
+  patch._images.clear();
+  patch._images.push_back(index0);
+  patch._images.push_back(index1);
 
-  ++m_scounts[id];
+  ++_scounts[id];
 
   //----------------------------------------------------------------------
-  // We know that patch.m_coord is inside bimages and inside mask
-  if (m_fm.m_optim.preProcess(patch, id, 1)) {
-    ++m_fcounts0[id];
+  // We know that patch._coord is inside bimages and inside mask
+  if (_fm._optim.preProcess(patch, id, 1)) {
+    ++_fcounts0[id];
     return 1;
   }
   
   //----------------------------------------------------------------------  
-  m_fm.m_optim.refinePatch(patch, id, 100);
+  _fm._optim.refinePatch(patch, id, 100);
 
   //----------------------------------------------------------------------
-  if (m_fm.m_optim.postProcess(patch, id, 1)) {
-    ++m_fcounts1[id];
+  if (_fm._optim.postProcess(patch, id, 1)) {
+    ++_fcounts1[id];
     return 1;
   }
   
-  ++m_pcounts[id];
+  ++_pcounts[id];
   //----------------------------------------------------------------------
   return 0;
 }

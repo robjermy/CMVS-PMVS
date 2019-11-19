@@ -9,14 +9,14 @@ template <class T>
 class TMat4
 {
 private:
-    TVec4<T> m_row[4];
+    TVec4<T> _row[4];
 
 public:
     // Standard constructors
     //
     TMat4() { *this = 0.0; }
     TMat4(const TVec4<T>& r0,const TVec4<T>& r1,const TVec4<T>& r2,const TVec4<T>& r3)
-    	{ m_row[0]=r0; m_row[1]=r1; m_row[2]=r2; m_row[3]=r3; }
+    	{ _row[0]=r0; _row[1]=r1; _row[2]=r2; _row[3]=r3; }
     TMat4(const TMat4& m) { *this = m; }
 
     // Descriptive interface
@@ -28,16 +28,16 @@ public:
 
     // Access methods
     //
-    T& operator()(int i, int j)       { return m_row[i][j]; }
-    T  operator()(int i, int j) const { return m_row[i][j]; }
-    TVec4<T>&       operator[](int i)       { return m_row[i]; }
-    const TVec4<T>& operator[](int i) const { return m_row[i]; }
+    T& operator()(int i, int j)       { return _row[i][j]; }
+    T  operator()(int i, int j) const { return _row[i][j]; }
+    TVec4<T>&       operator[](int i)       { return _row[i]; }
+    const TVec4<T>& operator[](int i) const { return _row[i]; }
     inline TVec4<T> col(int i) const
-        { return TVec4<T>(m_row[0][i],m_row[1][i],m_row[2][i],m_row[3][i]); }
+        { return TVec4<T>(_row[0][i],_row[1][i],_row[2][i],_row[3][i]); }
 
-    operator       T*()       { return m_row[0]; }
-    operator const T*()       { return m_row[0]; }
-    operator const T*() const { return m_row[0]; }
+    operator       T*()       { return _row[0]; }
+    operator const T*()       { return _row[0]; }
+    operator const T*() const { return _row[0]; }
 
     // Assignment methods
     //
@@ -62,49 +62,49 @@ public:
 template <class T>
 inline TMat4<T>& TMat4<T>::operator=(const TMat4<T>& m)
 {
-    m_row[0] = m[0]; m_row[1] = m[1]; m_row[2] = m[2]; m_row[3] = m[3];
+    _row[0] = m[0]; _row[1] = m[1]; _row[2] = m[2]; _row[3] = m[3];
     return *this;
 };
 
 template <class T>
 inline TMat4<T>& TMat4<T>::operator=(T s)
 {
-    m_row[0]=s;  m_row[1]=s;  m_row[2]=s;  m_row[3]=s;
+    _row[0]=s;  _row[1]=s;  _row[2]=s;  _row[3]=s;
     return *this;
 };
 
 template <class T>
 inline TMat4<T>& TMat4<T>::operator+=(const TMat4<T>& m)
 {
-    m_row[0] += m[0]; m_row[1] += m[1]; m_row[2] += m[2]; m_row[3] += m[3];
+    _row[0] += m[0]; _row[1] += m[1]; _row[2] += m[2]; _row[3] += m[3];
     return *this;
 };
 
 template <class T>
 inline TMat4<T>& TMat4<T>::operator-=(const TMat4<T>& m)
 {
-    m_row[0] -= m[0]; m_row[1] -= m[1]; m_row[2] -= m[2]; m_row[3] -= m[3];
+    _row[0] -= m[0]; _row[1] -= m[1]; _row[2] -= m[2]; _row[3] -= m[3];
     return *this;
 };
 
 template <class T>
 inline TMat4<T>& TMat4<T>::operator*=(T s)
 {
-    m_row[0] *= s; m_row[1] *= s; m_row[2] *= s; m_row[3] *= s;
+    _row[0] *= s; _row[1] *= s; _row[2] *= s; _row[3] *= s;
     return *this;
 };
 
 template <class T>
 inline TMat4<T>& TMat4<T>::operator/=(T s)
 {
-    m_row[0] /= s; m_row[1] /= s; m_row[2] /= s; m_row[3] /= s;
+    _row[0] /= s; _row[1] /= s; _row[2] /= s; _row[3] /= s;
     return *this;
 };
 
 template <class T>
 inline bool TMat4<T>::operator==(const TMat4<T>& m) const {
-    if (m_row[0] == m.m_row[0] && m_row[1] == m.m_row[1] &&
-	m_row[2] == m.m_row[2] && m_row[3] == m.m_row[3])
+    if (_row[0] == m._row[0] && _row[1] == m._row[1] &&
+	_row[2] == m._row[2] && _row[3] == m._row[3])
 	return true;
     else
 	return false;

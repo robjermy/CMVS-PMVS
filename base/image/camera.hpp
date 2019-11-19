@@ -55,7 +55,7 @@ class CCamera {
   // Computer a 3D coordinate that projects to a given image
   // coordinate. You can specify a different depth by the third
   // component of icoord.
-  Vec4f unproject(const Vec3f& icoord, const int m_level) const;
+  Vec4f unproject(const Vec3f& icoord, const int _level) const;
   
   void setK(Mat3f& K) const;
   void setRT(Mat4f& RT) const;
@@ -64,28 +64,28 @@ class CCamera {
   
   //----------------------------------------------------------------------
   // txt file name
-  std::string m_cname;  
+  std::string _cname;  
   // Optical center
-  Vec4f m_center;
+  Vec4f _center;
   // Optical axis
-  Vec4f m_oaxis;
+  Vec4f _oaxis;
   
-  float m_ipscale;
+  float _ipscale;
   // 3x4 projection matrix
-  std::vector<std::vector<Vec4f> > m_projection;
-  Vec3f m_xaxis;
-  Vec3f m_yaxis;
-  Vec3f m_zaxis;
+  std::vector<std::vector<Vec4f> > _projection;
+  Vec3f _xaxis;
+  Vec3f _yaxis;
+  Vec3f _zaxis;
 
   // intrinsic and extrinsic camera parameters. Compact form.
-  std::vector<float> m_intrinsics;
-  std::vector<float> m_extrinsics;
+  std::vector<float> _intrinsics;
+  std::vector<float> _extrinsics;
   // camera parameter type
-  int m_txtType;
+  int _txtType;
  protected:
-  int m_maxLevel;
+  int _maxLevel;
 
-  float m_axesScale;
+  float _axesScale;
 
   Vec4f getOpticalCenter(void) const;
 };
@@ -94,7 +94,7 @@ inline Vec3f CCamera::project(const Vec4f& coord,
 			      const int level) const {
   Vec3f vtmp;    
   for (int i = 0; i < 3; ++i)
-    vtmp[i] = m_projection[level][i] * coord;
+    vtmp[i] = _projection[level][i] * coord;
 
   if (vtmp[2] <= 0.0) {
     vtmp[0] = -0xffff;
@@ -119,7 +119,7 @@ inline Vec3f CCamera::mult(const Vec4f& coord,
 			      const int level) const {
   Vec3f vtmp;    
   for (int i = 0; i < 3; ++i)
-    vtmp[i] = m_projection[level][i] * coord;
+    vtmp[i] = _projection[level][i] * coord;
   
   return vtmp;
 };
@@ -138,13 +138,13 @@ float computeEPD(const TMat3<T>& F, const TVec3<T>& p0, const TVec3<T>& p1) {
 template<class T>
 void setF(const Image::CCamera& lhs, const Image::CCamera& rhs,
 	  TMat3<T>& F, const int level = 0) {
-  const TVec4<T>& p00 = lhs.m_projection[level][0];
-  const TVec4<T>& p01 = lhs.m_projection[level][1];
-  const TVec4<T>& p02 = lhs.m_projection[level][2];
+  const TVec4<T>& p00 = lhs._projection[level][0];
+  const TVec4<T>& p01 = lhs._projection[level][1];
+  const TVec4<T>& p02 = lhs._projection[level][2];
 
-  const TVec4<T>& p10 = rhs.m_projection[level][0];
-  const TVec4<T>& p11 = rhs.m_projection[level][1];
-  const TVec4<T>& p12 = rhs.m_projection[level][2];
+  const TVec4<T>& p10 = rhs._projection[level][0];
+  const TVec4<T>& p11 = rhs._projection[level][1];
+  const TVec4<T>& p12 = rhs._projection[level][2];
 
   F[0][0] = det(TMat4<T>(p01, p02, p11, p12));
   F[0][1] = det(TMat4<T>(p01, p02, p12, p10));

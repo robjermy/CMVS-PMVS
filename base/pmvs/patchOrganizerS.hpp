@@ -11,7 +11,7 @@ class CFindMatch;
 class P_compare {
 public:
   bool operator()(const Patch::PPatch& lhs, const Patch::PPatch& rhs) const {
-    return lhs->m_tmp < rhs->m_tmp;
+    return lhs->_tmp < rhs->_tmp;
   }
 };
  
@@ -70,34 +70,34 @@ class CPatchOrganizerS {
   
   float computeUnit(const Patch::CPatch& patch) const;
 
-  // change the contents of m_images from images to indexes
+  // change the contents of _images from images to indexes
   void image2index(Patch::CPatch& patch);
-  // change the contents of m_images from indexes to images
+  // change the contents of _images from indexes to images
   void index2image(Patch::CPatch& patch);
   
   //----------------------------------------------------------------------
   // Widths of grids
-  std::vector<int> m_gwidths;
-  std::vector<int> m_gheights;
+  std::vector<int> _gwidths;
+  std::vector<int> _gheights;
   //----------------------------------------------------------------------
   // image, grid
-  std::vector<std::vector<std::vector<Patch::PPatch> > > m_pgrids;  
+  std::vector<std::vector<std::vector<Patch::PPatch> > > _pgrids;  
   // image, grid
-  std::vector<std::vector<std::vector<Patch::PPatch> > > m_vpgrids;
+  std::vector<std::vector<std::vector<Patch::PPatch> > > _vpgrids;
   // Closest patch
-  std::vector<std::vector<Patch::PPatch> > m_dpgrids;
+  std::vector<std::vector<Patch::PPatch> > _dpgrids;
 
-  // all the patches in the current level of m_pgrids 
-  std::vector<Patch::PPatch> m_ppatches;
+  // all the patches in the current level of _pgrids 
+  std::vector<Patch::PPatch> _ppatches;
 
   // Check how many times patch optimization was performed for expansion
-  std::vector<std::vector<unsigned char> > m_counts;
+  std::vector<std::vector<unsigned char> > _counts;
 
-  static Patch::PPatch m_MAXDEPTH;
-  static Patch::PPatch m_BACKGROUND;
+  static Patch::PPatch _MAXDEPTH;
+  static Patch::PPatch _BACKGROUND;
   
  protected:
-  CFindMatch& m_fm;
+  CFindMatch& _fm;
 };
 };
 

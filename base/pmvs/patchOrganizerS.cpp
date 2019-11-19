@@ -11,68 +11,68 @@ using namespace PMVS3;
 using namespace Patch;
 using namespace std;
 
-PPatch CPatchOrganizerS::m_MAXDEPTH(new CPatch());
-PPatch CPatchOrganizerS::m_BACKGROUND(new CPatch());
+PPatch CPatchOrganizerS::_MAXDEPTH(new CPatch());
+PPatch CPatchOrganizerS::_BACKGROUND(new CPatch());
 
-CPatchOrganizerS::CPatchOrganizerS(CFindMatch& findMatch) : m_fm(findMatch) {
+CPatchOrganizerS::CPatchOrganizerS(CFindMatch& findMatch) : _fm(findMatch) {
 }
 
-// change the contents of m_images from images to indexes
+// change the contents of _images from images to indexes
 void CPatchOrganizerS::image2index(CPatch& patch) {
   // first image has to be target image
   vector<int> newimages;
-  for (int i = 0; i < (int)patch.m_images.size(); ++i) {
-    const int index = m_fm.m_pss.image2index(patch.m_images[i]);
+  for (int i = 0; i < (int)patch._images.size(); ++i) {
+    const int index = _fm._pss.image2index(patch._images[i]);
     if (index != -1)
       newimages.push_back(index);
   }
   
-  patch.m_images.swap(newimages);  
+  patch._images.swap(newimages);  
 
   // make sure that the reference image is the targeting image
   int exist = -1;
-  for (int j = 0; j < (int)patch.m_images.size(); ++j) {
-    if (patch.m_images[j] < m_fm.m_tnum) {
+  for (int j = 0; j < (int)patch._images.size(); ++j) {
+    if (patch._images[j] < _fm._tnum) {
       exist = j;
       break;
     }
   }
   if (exist == -1)
-    patch.m_images.clear();
+    patch._images.clear();
   else if (exist != 0)
-    swap(patch.m_images[0], patch.m_images[exist]);
+    swap(patch._images[0], patch._images[exist]);
 }
 
-// change the contents of m_images from indexes to images
+// change the contents of _images from indexes to images
 void CPatchOrganizerS::index2image(CPatch& patch) {
-  for (int i = 0; i < (int)patch.m_images.size(); ++i)
-    patch.m_images[i] = m_fm.m_pss.m_images[patch.m_images[i]];
-  for (int i = 0; i < (int)patch.m_vimages.size(); ++i)
-    patch.m_vimages[i] = m_fm.m_pss.m_images[patch.m_vimages[i]];
+  for (int i = 0; i < (int)patch._images.size(); ++i)
+    patch._images[i] = _fm._pss._images[patch._images[i]];
+  for (int i = 0; i < (int)patch._vimages.size(); ++i)
+    patch._vimages[i] = _fm._pss._images[patch._vimages[i]];
 }
 
 void CPatchOrganizerS::init(void) {
-  m_pgrids.clear();   m_pgrids.resize(m_fm.m_tnum);
-  m_vpgrids.clear();  m_vpgrids.resize(m_fm.m_tnum);
-  m_dpgrids.clear();  m_dpgrids.resize(m_fm.m_tnum);
-  m_counts.clear();   m_counts.resize(m_fm.m_tnum);
+  _pgrids.clear();   _pgrids.resize(_fm._tnum);
+  _vpgrids.clear();  _vpgrids.resize(_fm._tnum);
+  _dpgrids.clear();  _dpgrids.resize(_fm._tnum);
+  _counts.clear();   _counts.resize(_fm._tnum);
   
-  m_gwidths.clear();  m_gwidths.resize(m_fm.m_num);
-  m_gheights.clear(); m_gheights.resize(m_fm.m_num);
-  for (int index = 0; index < m_fm.m_num; ++index) {
-    const int gwidth = (m_fm.m_pss.getWidth(index, m_fm.m_level)
-                        + m_fm.m_csize - 1) / m_fm.m_csize;
-    const int gheight = (m_fm.m_pss.getHeight(index, m_fm.m_level)
-                         + m_fm.m_csize - 1) / m_fm.m_csize;
-    m_gwidths[index] = gwidth;
-    m_gheights[index] = gheight;
+  _gwidths.clear();  _gwidths.resize(_fm._num);
+  _gheights.clear(); _gheights.resize(_fm._num);
+  for (int index = 0; index < _fm._num; ++index) {
+    const int gwidth = (_fm._pss.getWidth(index, _fm._level)
+                        + _fm._csize - 1) / _fm._csize;
+    const int gheight = (_fm._pss.getHeight(index, _fm._level)
+                         + _fm._csize - 1) / _fm._csize;
+    _gwidths[index] = gwidth;
+    _gheights[index] = gheight;
 
-    if (index < m_fm.m_tnum) {
-      m_pgrids[index].resize(gwidth * gheight);
-      m_vpgrids[index].resize(gwidth * gheight);
-      m_dpgrids[index].resize(gwidth * gheight);
-      m_counts[index].resize(gwidth * gheight);
-      fill(m_dpgrids[index].begin(), m_dpgrids[index].end(), m_MAXDEPTH);
+    if (index < _fm._tnum) {
+      _pgrids[index].resize(gwidth * gheight);
+      _vpgrids[index].resize(gwidth * gheight);
+      _dpgrids[index].resize(gwidth * gheight);
+      _counts[index].resize(gwidth * gheight);
+      fill(_dpgrids[index].begin(), _dpgrids[index].end(), _MAXDEPTH);
     }
   }
 }
@@ -84,7 +84,7 @@ void CPatchOrganizerS::writePatches2(const std::string prefix, bool bExportPLY, 
   {
     char buffer[1024];
     sprintf(buffer, "%s.ply", prefix.c_str());
-    writePLY(m_ppatches, buffer);
+    writePLY(_ppatches, buffer);
   }
 
   if (bExportPatch)
@@ -99,9 +99,9 @@ void CPatchOrganizerS::writePatches2(const std::string prefix, bool bExportPLY, 
     ofstr << std::setprecision(std::numeric_limits<double>::max_digits10);
 
     ofstr << "PATCHES" << endl
-          << (int)m_ppatches.size() << endl;
-    for (int p = 0; p < (int)m_ppatches.size(); ++p) {
-      CPatch patch = *m_ppatches[p];
+          << (int)_ppatches.size() << endl;
+    for (int p = 0; p < (int)_ppatches.size(); ++p) {
+      CPatch patch = *_ppatches[p];
       index2image(patch);
       ofstr << patch << "\n";
     }
@@ -114,24 +114,24 @@ void CPatchOrganizerS::writePatches2(const std::string prefix, bool bExportPLY, 
     sprintf(buffer, "%s.pset", prefix.c_str());
     ofstream ofstr;
     ofstr.open(buffer);
-    for (int p = 0; p < (int)m_ppatches.size(); ++p)
-      ofstr << m_ppatches[p]->m_coord[0] << ' '
-            << m_ppatches[p]->m_coord[1] << ' '
-            << m_ppatches[p]->m_coord[2] << ' '
-            << m_ppatches[p]->m_normal[0] << ' '
-            << m_ppatches[p]->m_normal[1] << ' '
-            << m_ppatches[p]->m_normal[2] << "\n";
+    for (int p = 0; p < (int)_ppatches.size(); ++p)
+      ofstr << _ppatches[p]->_coord[0] << ' '
+            << _ppatches[p]->_coord[1] << ' '
+            << _ppatches[p]->_coord[2] << ' '
+            << _ppatches[p]->_normal[0] << ' '
+            << _ppatches[p]->_normal[1] << ' '
+            << _ppatches[p]->_normal[2] << "\n";
     ofstr.close();
   }
 }
 
 void CPatchOrganizerS::readPatches(void) {
-  // Read-in existing reconstructed points. set m_fix to one for non-targeting images
-  for (int i = 0; i < m_fm.m_tnum; ++i) {
-    const int image = m_fm.m_images[i];
+  // Read-in existing reconstructed points. set _fix to one for non-targeting images
+  for (int i = 0; i < _fm._tnum; ++i) {
+    const int image = _fm._images[i];
     char buffer[1024];
     sprintf(buffer, "%smodels/%08d.patc%d",
-            m_fm.m_prefix.c_str(), image, m_fm.m_level);
+            _fm._prefix.c_str(), image, _fm._level);
     ifstream ifstr;
     ifstr.open(buffer);
     if (!ifstr.is_open())
@@ -143,18 +143,18 @@ void CPatchOrganizerS::readPatches(void) {
     for (int p = 0; p < pnum; ++p) {
       PPatch ppatch(new CPatch());
       ifstr >> *ppatch;
-      ppatch->m_fix = 0;
-      ppatch->m_vimages.clear();
+      ppatch->_fix = 0;
+      ppatch->_vimages.clear();
 
       image2index(*ppatch);
-      if (ppatch->m_images.empty())
+      if (ppatch->_images.empty())
         continue;
       
-      // m_vimages must be targeting images
+      // _vimages must be targeting images
 #ifdef DEBUG
-      for (int j = 0; j < (int)ppatch->m_vimages.size(); ++j)
-        if (m_fm.m_tnum <= ppatch->m_vimages[j]) {
-          cerr << "Impossible in readPatches. m_vimages must be targeting images" << endl
+      for (int j = 0; j < (int)ppatch->_vimages.size(); ++j)
+        if (_fm._tnum <= ppatch->_vimages[j]) {
+          cerr << "Impossible in readPatches. _vimages must be targeting images" << endl
                << "for patches stored in targeting images, if visdata2 have been consistent" << endl;
           exit (1);
         }
@@ -167,10 +167,10 @@ void CPatchOrganizerS::readPatches(void) {
   }
 
   // For patches in non-targeting images
-  for (int i = m_fm.m_tnum; i < m_fm.m_num; ++i) {
-    const int image = m_fm.m_images[i];
+  for (int i = _fm._tnum; i < _fm._num; ++i) {
+    const int image = _fm._images[i];
     char buffer[1024];
-    sprintf(buffer, "%smodels/%08d.patc%d", m_fm.m_prefix.c_str(), image, m_fm.m_level);
+    sprintf(buffer, "%smodels/%08d.patc%d", _fm._prefix.c_str(), image, _fm._level);
     ifstream ifstr;
     ifstr.open(buffer);
     if (!ifstr.is_open())
@@ -183,11 +183,11 @@ void CPatchOrganizerS::readPatches(void) {
     for (int p = 0; p < pnum; ++p) {
       PPatch ppatch(new CPatch());
       ifstr >> *ppatch;      
-      ppatch->m_fix = 1;
-      ppatch->m_vimages.clear();
+      ppatch->_fix = 1;
+      ppatch->_vimages.clear();
       
       image2index(*ppatch);
-      if (ppatch->m_images.empty())
+      if (ppatch->_images.empty())
         continue;
       
       setGrids(*ppatch);
@@ -199,28 +199,28 @@ void CPatchOrganizerS::readPatches(void) {
 }
 
 void CPatchOrganizerS::collectPatches(const int target) {
-  m_ppatches.clear();
+  _ppatches.clear();
 
-  for (int index = 0; index < m_fm.m_tnum; ++index) {
-    for (int i = 0; i < (int)m_pgrids[index].size(); ++i) {
-      vector<PPatch>::iterator begin = m_pgrids[index][i].begin();
-      while (begin != m_pgrids[index][i].end()) {
-        (*begin)->m_id = -1;
+  for (int index = 0; index < _fm._tnum; ++index) {
+    for (int i = 0; i < (int)_pgrids[index].size(); ++i) {
+      vector<PPatch>::iterator begin = _pgrids[index][i].begin();
+      while (begin != _pgrids[index][i].end()) {
+        (*begin)->_id = -1;
         begin++;
       }
     }
   }
   
   int count = 0;
-  for (int index = 0; index < m_fm.m_tnum; ++index) {
-    for (int i = 0; i < (int)m_pgrids[index].size(); ++i) {
-      vector<PPatch>::iterator begin = m_pgrids[index][i].begin();
-      while (begin != m_pgrids[index][i].end()) {
-        if ((*begin)->m_id == -1) {
-          (*begin)->m_id = count++;
+  for (int index = 0; index < _fm._tnum; ++index) {
+    for (int i = 0; i < (int)_pgrids[index].size(); ++i) {
+      vector<PPatch>::iterator begin = _pgrids[index][i].begin();
+      while (begin != _pgrids[index][i].end()) {
+        if ((*begin)->_id == -1) {
+          (*begin)->_id = count++;
 
-          if (target == 0 || (*begin)->m_fix == 0)
-            m_ppatches.push_back(*begin);
+          if (target == 0 || (*begin)->_fix == 0)
+            _ppatches.push_back(*begin);
         }
         ++begin;
       }
@@ -231,12 +231,12 @@ void CPatchOrganizerS::collectPatches(const int target) {
 void CPatchOrganizerS::collectPatches(std::priority_queue<Patch::PPatch,
                                       std::vector<Patch::PPatch>,
                                       P_compare>& pqpatches) {
-  for (int index = 0; index < m_fm.m_tnum; ++index) {
-    for (int i = 0; i < (int)m_pgrids[index].size(); ++i) {
-      vector<PPatch>::iterator begin = m_pgrids[index][i].begin();
-      while (begin != m_pgrids[index][i].end()) {
-        if ((*begin)->m_flag == 0) {
-          (*begin)->m_flag = 1;
+  for (int index = 0; index < _fm._tnum; ++index) {
+    for (int i = 0; i < (int)_pgrids[index].size(); ++i) {
+      vector<PPatch>::iterator begin = _pgrids[index][i].begin();
+      while (begin != _pgrids[index][i].end()) {
+        if ((*begin)->_flag == 0) {
+          (*begin)->_flag = 1;
           pqpatches.push(*begin);
         }
         ++begin;
@@ -248,54 +248,54 @@ void CPatchOrganizerS::collectPatches(std::priority_queue<Patch::PPatch,
 void CPatchOrganizerS::collectPatches(const int index,
                                      std::priority_queue<Patch::PPatch, std::vector<Patch::PPatch>,
                                       P_compare>& pqpatches) {
-  m_fm.m_imageLocks[index].wrlock();
-  for (int i = 0; i < (int)m_pgrids[index].size(); ++i) {
-    vector<PPatch>::iterator begin = m_pgrids[index][i].begin();
-    vector<PPatch>::iterator end = m_pgrids[index][i].end();
+  _fm._imageLocks[index].wrlock();
+  for (int i = 0; i < (int)_pgrids[index].size(); ++i) {
+    vector<PPatch>::iterator begin = _pgrids[index][i].begin();
+    vector<PPatch>::iterator end = _pgrids[index][i].end();
     
     while (begin != end) {
-      if ((*begin)->m_images[0] == index && (*begin)->m_flag == 0) {
-        (*begin)->m_flag = 1;
+      if ((*begin)->_images[0] == index && (*begin)->_flag == 0) {
+        (*begin)->_flag = 1;
         pqpatches.push(*begin);
       }
       ++begin;
     }
   }
-  m_fm.m_imageLocks[index].unlock();
+  _fm._imageLocks[index].unlock();
 }
 
 // Should be used only for writing
 void CPatchOrganizerS::collectNonFixPatches(const int index,
                                       std::vector<Patch::PPatch>& ppatches) {
-  m_fm.m_imageLocks[index].wrlock();;
-  for (int i = 0; i < (int)m_pgrids[index].size(); ++i) {
-    vector<PPatch>::iterator begin = m_pgrids[index][i].begin();
-    vector<PPatch>::iterator end = m_pgrids[index][i].end();
+  _fm._imageLocks[index].wrlock();;
+  for (int i = 0; i < (int)_pgrids[index].size(); ++i) {
+    vector<PPatch>::iterator begin = _pgrids[index][i].begin();
+    vector<PPatch>::iterator end = _pgrids[index][i].end();
     
     while (begin != end) {
-      if ((*begin)->m_images[0] == index && (*begin)->m_fix == 0) {
+      if ((*begin)->_images[0] == index && (*begin)->_fix == 0) {
         ppatches.push_back(*begin);
       }
       ++begin;
     }
   }
-  m_fm.m_imageLocks[index].unlock();
+  _fm._imageLocks[index].unlock();
 }
 
 void CPatchOrganizerS::clearFlags(void) {
-  vector<PPatch>::iterator bppatch = m_ppatches.begin();
-  vector<PPatch>::iterator eppatch = m_ppatches.end();
+  vector<PPatch>::iterator bppatch = _ppatches.begin();
+  vector<PPatch>::iterator eppatch = _ppatches.end();
 
   while (bppatch != eppatch) {
-    (*bppatch)->m_flag = 0;
+    (*bppatch)->_flag = 0;
     ++bppatch;
   }
 }
 
 void CPatchOrganizerS::clearCounts(void) {
-  for (int index = 0; index < m_fm.m_tnum; ++index) {
-    vector<unsigned char>::iterator begin = m_counts[index].begin();
-    vector<unsigned char>::iterator end = m_counts[index].end();
+  for (int index = 0; index < _fm._tnum; ++index) {
+    vector<unsigned char>::iterator begin = _counts[index].begin();
+    vector<unsigned char>::iterator end = _counts[index].end();
     while (begin != end) {
       *begin = (unsigned char)0;
       ++begin;
@@ -304,39 +304,39 @@ void CPatchOrganizerS::clearCounts(void) {
 }
 
 void CPatchOrganizerS::addPatch(Patch::PPatch& ppatch) {
-  // First handle m_vimages
-  vector<int>::iterator bimage = ppatch->m_images.begin();
-  vector<int>::iterator eimage = ppatch->m_images.end();
-  vector<Vec2i>::iterator bgrid = ppatch->m_grids.begin();
+  // First handle _vimages
+  vector<int>::iterator bimage = ppatch->_images.begin();
+  vector<int>::iterator eimage = ppatch->_images.end();
+  vector<Vec2i>::iterator bgrid = ppatch->_grids.begin();
   while (bimage != eimage) {
     const int index = *bimage;
-    if (m_fm.m_tnum <= index) {
+    if (_fm._tnum <= index) {
       ++bimage;      ++bgrid;
       continue;
     }
     
-    const int index2 = (*bgrid)[1] * m_gwidths[index] + (*bgrid)[0];
-    m_fm.m_imageLocks[index].wrlock();
-    m_pgrids[index][index2].push_back(ppatch);
-	m_fm.m_imageLocks[index].unlock();
+    const int index2 = (*bgrid)[1] * _gwidths[index] + (*bgrid)[0];
+    _fm._imageLocks[index].wrlock();
+    _pgrids[index][index2].push_back(ppatch);
+	_fm._imageLocks[index].unlock();
     ++bimage;
     ++bgrid;
   }
 
   // If depth, set vimages
-  if (m_fm.m_depth == 0)
+  if (_fm._depth == 0)
     return;
       
-  bimage = ppatch->m_vimages.begin();
-  eimage = ppatch->m_vimages.end();
-  bgrid = ppatch->m_vgrids.begin();
+  bimage = ppatch->_vimages.begin();
+  eimage = ppatch->_vimages.end();
+  bgrid = ppatch->_vgrids.begin();
   
   while (bimage != eimage) {
     const int index = *bimage;
-    const int index2 = (*bgrid)[1] * m_gwidths[index] + (*bgrid)[0];
-	m_fm.m_imageLocks[index].wrlock();
-    m_vpgrids[index][index2].push_back(ppatch);
-	m_fm.m_imageLocks[index].unlock();
+    const int index2 = (*bgrid)[1] * _gwidths[index] + (*bgrid)[0];
+	_fm._imageLocks[index].wrlock();
+    _vpgrids[index][index2].push_back(ppatch);
+	_fm._imageLocks[index].unlock();
     ++bimage;
     ++bgrid;
   }
@@ -345,53 +345,53 @@ void CPatchOrganizerS::addPatch(Patch::PPatch& ppatch) {
 }
 
 void CPatchOrganizerS::updateDepthMaps(PPatch& ppatch) {
-  for (int image = 0; image < m_fm.m_tnum; ++image) {
-    const Vec3f icoord = m_fm.m_pss.project(image, ppatch->m_coord, m_fm.m_level);
+  for (int image = 0; image < _fm._tnum; ++image) {
+    const Vec3f icoord = _fm._pss.project(image, ppatch->_coord, _fm._level);
 
-    const float fx = icoord[0] / m_fm.m_csize;
+    const float fx = icoord[0] / _fm._csize;
     const int xs[2] = {(int)floor(fx), (int)ceil(fx)};
-    const float fy = icoord[1] / m_fm.m_csize;
+    const float fy = icoord[1] / _fm._csize;
     const int ys[2] = {(int)floor(fy), (int)ceil(fy)};
     
-    const float depth = m_fm.m_pss.m_photos[image].m_oaxis * ppatch->m_coord;
+    const float depth = _fm._pss._photos[image]._oaxis * ppatch->_coord;
 
-	m_fm.m_imageLocks[image].wrlock();
+	_fm._imageLocks[image].wrlock();
     for (int j = 0; j < 2; ++j) {
       for (int i = 0; i < 2; ++i) {
-	if (xs[i] < 0 || m_gwidths[image] <= xs[i] ||
-            ys[j] < 0 || m_gheights[image] <= ys[j])
+	if (xs[i] < 0 || _gwidths[image] <= xs[i] ||
+            ys[j] < 0 || _gheights[image] <= ys[j])
 	  continue;
 
-        const int index = ys[j] * m_gwidths[image] + xs[i];
-	if (m_dpgrids[image][index] == m_MAXDEPTH)
-	  m_dpgrids[image][index] = ppatch;
+        const int index = ys[j] * _gwidths[image] + xs[i];
+	if (_dpgrids[image][index] == _MAXDEPTH)
+	  _dpgrids[image][index] = ppatch;
 	else {
-	  const float dtmp = m_fm.m_pss.m_photos[image].m_oaxis *
-	    m_dpgrids[image][index]->m_coord;
+	  const float dtmp = _fm._pss._photos[image]._oaxis *
+	    _dpgrids[image][index]->_coord;
 	  
 	  if (depth < dtmp)
-	    m_dpgrids[image][index] = ppatch;
+	    _dpgrids[image][index] = ppatch;
 	}
       }
     }
-    m_fm.m_imageLocks[image].unlock();
+    _fm._imageLocks[image].unlock();
   }
 }
 
 void CPatchOrganizerS::setGridsImages(Patch::CPatch& patch,
                                      const std::vector<int>& images) const {
-  patch.m_images.clear();
-  patch.m_grids.clear();
+  patch._images.clear();
+  patch._grids.clear();
   vector<int>::const_iterator bimage = images.begin();
   vector<int>::const_iterator eimage = images.end();
   while (bimage != eimage) {
-    const Vec3f icoord = m_fm.m_pss.project(*bimage, patch.m_coord, m_fm.m_level);
-    const int ix = ((int)floor(icoord[0] + 0.5f)) / m_fm.m_csize;
-    const int iy = ((int)floor(icoord[1] + 0.5f)) / m_fm.m_csize;
-    if (0 <= ix && ix < m_gwidths[*bimage] &&
-        0 <= iy && iy < m_gheights[*bimage]) {
-      patch.m_images.push_back(*bimage);
-      patch.m_grids.push_back(Vec2i(ix, iy));
+    const Vec3f icoord = _fm._pss.project(*bimage, patch._coord, _fm._level);
+    const int ix = ((int)floor(icoord[0] + 0.5f)) / _fm._csize;
+    const int iy = ((int)floor(icoord[1] + 0.5f)) / _fm._csize;
+    if (0 <= ix && ix < _gwidths[*bimage] &&
+        0 <= iy && iy < _gheights[*bimage]) {
+      patch._images.push_back(*bimage);
+      patch._grids.push_back(Vec2i(ix, iy));
     }
     ++bimage;
   }
@@ -402,13 +402,13 @@ void CPatchOrganizerS::setGrids(PPatch& ppatch) const{
 }
 
 void CPatchOrganizerS::setGrids(CPatch& patch) const{
-  patch.m_grids.clear();
-  for (int i = 0; i < (int)patch.m_images.size(); ++i) {
-    const int image = patch.m_images[i];
-    Vec3f icoord = m_fm.m_pss.project(image, patch.m_coord, m_fm.m_level);
-    const int ix = ((int)floor(icoord[0] + 0.5f)) / m_fm.m_csize;
-    const int iy = ((int)floor(icoord[1] + 0.5f)) / m_fm.m_csize;
-    patch.m_grids.push_back(TVec2<int>(ix, iy));
+  patch._grids.clear();
+  for (int i = 0; i < (int)patch._images.size(); ++i) {
+    const int image = patch._images[i];
+    Vec3f icoord = _fm._pss.project(image, patch._coord, _fm._level);
+    const int ix = ((int)floor(icoord[0] + 0.5f)) / _fm._csize;
+    const int iy = ((int)floor(icoord[1] + 0.5f)) / _fm._csize;
+    patch._grids.push_back(TVec2<int>(ix, iy));
   }
 }
 
@@ -418,71 +418,71 @@ void CPatchOrganizerS::setVImagesVGrids(PPatch& ppatch) {
 
 void CPatchOrganizerS::setVImagesVGrids(CPatch& patch) {
   vector<int> used;
-  used.resize(m_fm.m_tnum);
+  used.resize(_fm._tnum);
   fill(used.begin(), used.end(), 0);
   
-  vector<int>::iterator bimage = patch.m_images.begin();
-  vector<int>::iterator eimage = patch.m_images.end();
+  vector<int>::iterator bimage = patch._images.begin();
+  vector<int>::iterator eimage = patch._images.end();
   while (bimage != eimage) {
-    if ((*bimage) < m_fm.m_tnum)
+    if ((*bimage) < _fm._tnum)
       used[*(bimage)] = 1;
     ++bimage;
   }
   
-  bimage = patch.m_vimages.begin();
-  eimage = patch.m_vimages.end();
+  bimage = patch._vimages.begin();
+  eimage = patch._vimages.end();
   while (bimage != eimage)
     used[*(bimage++)] = 1;
 
-  for (int image = 0; image < m_fm.m_tnum; ++image) {
+  for (int image = 0; image < _fm._tnum; ++image) {
     if (used[image])
       continue;
 
     int ix, iy;
     if (isVisible0(patch, image, ix, iy,
-                   m_fm.m_neighborThreshold, 1) == 0) {
+                   _fm._neighborThreshold, 1) == 0) {
       continue;
     }
     
-    if (m_fm.m_pss.getEdge(patch.m_coord, image, m_fm.m_level) == 0)
+    if (_fm._pss.getEdge(patch._coord, image, _fm._level) == 0)
       continue;
     
-    patch.m_vimages.push_back(image);
-    patch.m_vgrids.push_back(TVec2<int>(ix, iy));
+    patch._vimages.push_back(image);
+    patch._vgrids.push_back(TVec2<int>(ix, iy));
   }
 }
 
 void CPatchOrganizerS::removePatch(const PPatch& ppatch) {
-  for (int i = 0; i < (int)ppatch->m_images.size(); ++i) {
-    const int image = ppatch->m_images[i];
-    if (m_fm.m_tnum <= image)
+  for (int i = 0; i < (int)ppatch->_images.size(); ++i) {
+    const int image = ppatch->_images[i];
+    if (_fm._tnum <= image)
       continue;
     
-    const int& ix = ppatch->m_grids[i][0];
-    const int& iy = ppatch->m_grids[i][1];
-    const int index = iy * m_gwidths[image] + ix;
-    m_pgrids[image][index].erase(remove(m_pgrids[image][index].begin(),
-                                        m_pgrids[image][index].end(),
+    const int& ix = ppatch->_grids[i][0];
+    const int& iy = ppatch->_grids[i][1];
+    const int index = iy * _gwidths[image] + ix;
+    _pgrids[image][index].erase(remove(_pgrids[image][index].begin(),
+                                        _pgrids[image][index].end(),
                                         ppatch),
-                                 m_pgrids[image][index].end());
+                                 _pgrids[image][index].end());
   }
 
-  for (int i = 0; i < (int)ppatch->m_vimages.size(); ++i) {
-    const int image = ppatch->m_vimages[i];
+  for (int i = 0; i < (int)ppatch->_vimages.size(); ++i) {
+    const int image = ppatch->_vimages[i];
 #ifdef DEBUG
-    if (m_fm.m_tnum <= image) {
-      cerr << "Impossible in removePatch. m_vimages must be targetting images" << endl;
+    if (_fm._tnum <= image) {
+      cerr << "Impossible in removePatch. _vimages must be targetting images" << endl;
       exit (1);
     }
 #endif
 
-    const int& ix = ppatch->m_vgrids[i][0];
-    const int& iy = ppatch->m_vgrids[i][1];
-    const int index = iy * m_gwidths[image] + ix;
-    m_vpgrids[image][index].erase(remove(m_vpgrids[image][index].begin(),
-                                         m_vpgrids[image][index].end(),
+    const int& ix = ppatch->_vgrids[i][0];
+    const int& iy = ppatch->_vgrids[i][1];
+    const int index = iy * _gwidths[image] + ix;
+    _vpgrids[image][index].erase(remove(_vpgrids[image][index].begin(),
+                                         _vpgrids[image][index].end(),
                                          ppatch),
-                                  m_vpgrids[image][index].end());
+                                  _vpgrids[image][index].end());
   }
 }
 
@@ -490,9 +490,9 @@ int CPatchOrganizerS::isVisible0(const CPatch& patch, const int image,
                                 int& ix, int& iy,
                                 const float strict, const int lock) {
   const Vec3f icoord =
-    m_fm.m_pss.project(image, patch.m_coord, m_fm.m_level);
-  ix = ((int)floor(icoord[0] + 0.5f)) / m_fm.m_csize;
-  iy = ((int)floor(icoord[1] + 0.5f)) / m_fm.m_csize;
+    _fm._pss.project(image, patch._coord, _fm._level);
+  ix = ((int)floor(icoord[0] + 0.5f)) / _fm._csize;
+  iy = ((int)floor(icoord[1] + 0.5f)) / _fm._csize;
 
   return isVisible(patch, image, ix, iy, strict, lock);
 }  
@@ -500,40 +500,40 @@ int CPatchOrganizerS::isVisible0(const CPatch& patch, const int image,
 int CPatchOrganizerS::isVisible(const CPatch& patch, const int image,
                                const int& ix, const int& iy,
                                const float strict, const int lock) {
-  const int& gwidth = m_gwidths[image];
-  const int& gheight = m_gheights[image];
+  const int& gwidth = _gwidths[image];
+  const int& gheight = _gheights[image];
   
   if (ix < 0 || gwidth <= ix || iy < 0 || gheight <= iy)
     return 0;
 
-  if (m_fm.m_depth == 0)
+  if (_fm._depth == 0)
     return 1;
 
   int ans = 0;
-  PPatch dppatch = m_MAXDEPTH;
+  PPatch dppatch = _MAXDEPTH;
   const int index = iy * gwidth + ix;
   
   if (lock)
-    m_fm.m_imageLocks[image].rdlock();
+    _fm._imageLocks[image].rdlock();
 
-  if (m_dpgrids[image][index] == m_MAXDEPTH)
+  if (_dpgrids[image][index] == _MAXDEPTH)
     ans = 1;
   else
-    dppatch = m_dpgrids[image][index];
+    dppatch = _dpgrids[image][index];
   
   if (lock)
-    m_fm.m_imageLocks[image].unlock();
+    _fm._imageLocks[image].unlock();
 
   if (ans == 1)
     return 1;
   
 
-  Vec4f ray = patch.m_coord - m_fm.m_pss.m_photos[image].m_center;
+  Vec4f ray = patch._coord - _fm._pss._photos[image]._center;
   unitize(ray);
-  const float diff = ray * (patch.m_coord - dppatch->m_coord);
-  const float factor = min(2.0, 2.0 + ray * patch.m_normal);
+  const float diff = ray * (patch._coord - dppatch->_coord);
+  const float factor = min(2.0, 2.0 + ray * patch._normal);
   
-  if (diff < m_fm.m_optim.getUnit(image, patch.m_coord) * m_fm.m_csize * strict * factor)
+  if (diff < _fm._optim.getUnit(image, patch._coord) * _fm._csize * strict * factor)
     return 1;
   else
     return 0;
@@ -544,26 +544,26 @@ void CPatchOrganizerS::findNeighbors(const Patch::CPatch& patch,
                                      const int lock, const float scale,
                                      const int margin,
                                      const int skipvis) {
-  const float radius = 1.5 * margin * m_fm.m_expand.computeRadius(patch);
+  const float radius = 1.5 * margin * _fm._expand.computeRadius(patch);
   
-  vector<int>::const_iterator bimage = patch.m_images.begin();
-  vector<int>::const_iterator eimage = patch.m_images.end();
-  vector<Vec2i>::const_iterator bgrid = patch.m_grids.begin();
+  vector<int>::const_iterator bimage = patch._images.begin();
+  vector<int>::const_iterator eimage = patch._images.end();
+  vector<Vec2i>::const_iterator bgrid = patch._grids.begin();
 
 #ifdef DEBUG
-  if (patch.m_images.empty()) {
+  if (patch._images.empty()) {
     cerr << "Empty patches in findCloses" << endl;
     exit (1);
   }
 #endif
   float unit = 0.0f;
-  for (int i = 0; i < (int)patch.m_images.size(); ++i)
-    unit += m_fm.m_optim.getUnit(patch.m_images[i], patch.m_coord);
-  unit /= (int)patch.m_images.size();
-  unit *= m_fm.m_csize;
+  for (int i = 0; i < (int)patch._images.size(); ++i)
+    unit += _fm._optim.getUnit(patch._images[i], patch._coord);
+  unit /= (int)patch._images.size();
+  unit *= _fm._csize;
   
   while (bimage != eimage) {
-    if (m_fm.m_tnum <= *bimage) {
+    if (_fm._tnum <= *bimage) {
       ++bimage;
       ++bgrid;
       continue;
@@ -572,32 +572,32 @@ void CPatchOrganizerS::findNeighbors(const Patch::CPatch& patch,
     const int& ix = (*bgrid)[0];
     const int& iy = (*bgrid)[1];
     if (lock)
-      m_fm.m_imageLocks[image].rdlock();
+      _fm._imageLocks[image].rdlock();
     for (int j = -margin; j <= margin; ++j) {
       const int ytmp = iy + j;
-      if (ytmp < 0 || m_fm.m_pos.m_gheights[image] <= ytmp)
+      if (ytmp < 0 || _fm._pos._gheights[image] <= ytmp)
         continue;
       for (int i = -margin; i <= margin; ++i) {
         const int xtmp = ix + i;
-        if (xtmp < 0 || m_fm.m_pos.m_gwidths[image] <= xtmp)
+        if (xtmp < 0 || _fm._pos._gwidths[image] <= xtmp)
           continue;
-        const int index = ytmp * m_fm.m_pos.m_gwidths[image] + xtmp;
+        const int index = ytmp * _fm._pos._gwidths[image] + xtmp;
         vector<PPatch>::const_iterator bpatch =
-          m_fm.m_pos.m_pgrids[image][index].begin();
+          _fm._pos._pgrids[image][index].begin();
         vector<PPatch>::const_iterator epatch =
-          m_fm.m_pos.m_pgrids[image][index].end();
+          _fm._pos._pgrids[image][index].end();
         while (bpatch != epatch) {
-          if (m_fm.isNeighborRadius(patch, **bpatch, unit,
-                                          m_fm.m_neighborThreshold * scale,
+          if (_fm.isNeighborRadius(patch, **bpatch, unit,
+                                          _fm._neighborThreshold * scale,
                                           radius))
             neighbors.push_back(*bpatch);
           ++bpatch;
         }
-        bpatch = m_fm.m_pos.m_vpgrids[image][index].begin();
-        epatch = m_fm.m_pos.m_vpgrids[image][index].end();
+        bpatch = _fm._pos._vpgrids[image][index].begin();
+        epatch = _fm._pos._vpgrids[image][index].end();
         while (bpatch != epatch) {
-          if (m_fm.isNeighborRadius(patch, **bpatch, unit,
-                                    m_fm.m_neighborThreshold * scale,
+          if (_fm.isNeighborRadius(patch, **bpatch, unit,
+                                    _fm._neighborThreshold * scale,
                                     radius))
             neighbors.push_back(*bpatch);
           ++bpatch;
@@ -605,48 +605,48 @@ void CPatchOrganizerS::findNeighbors(const Patch::CPatch& patch,
       }
     }
     if (lock)
-      m_fm.m_imageLocks[image].unlock();
+      _fm._imageLocks[image].unlock();
 
     ++bimage;
     ++bgrid;
   }
 
   if (skipvis == 0) {
-    bimage = patch.m_vimages.begin();
-    eimage = patch.m_vimages.end();
-    bgrid = patch.m_vgrids.begin();
+    bimage = patch._vimages.begin();
+    eimage = patch._vimages.end();
+    bgrid = patch._vgrids.begin();
     
     while (bimage != eimage) {
       const int image = *bimage;
       const int& ix = (*bgrid)[0];
       const int& iy = (*bgrid)[1];
       if (lock)
-        m_fm.m_imageLocks[image].rdlock();
+        _fm._imageLocks[image].rdlock();
       for (int j = -margin; j <= margin; ++j) {
         const int ytmp = iy + j;
-        if (ytmp < 0 || m_fm.m_pos.m_gheights[image] <= ytmp)
+        if (ytmp < 0 || _fm._pos._gheights[image] <= ytmp)
           continue;
         for (int i = -margin; i <= margin; ++i) {
           const int xtmp = ix + i;
-          if (xtmp < 0 || m_fm.m_pos.m_gwidths[image] <= xtmp)
+          if (xtmp < 0 || _fm._pos._gwidths[image] <= xtmp)
             continue;
-          const int index = ytmp * m_fm.m_pos.m_gwidths[image] + xtmp;
+          const int index = ytmp * _fm._pos._gwidths[image] + xtmp;
           vector<PPatch>::const_iterator bpatch =
-            m_fm.m_pos.m_pgrids[image][index].begin();
+            _fm._pos._pgrids[image][index].begin();
           vector<PPatch>::const_iterator epatch =
-            m_fm.m_pos.m_pgrids[image][index].end();
+            _fm._pos._pgrids[image][index].end();
           while (bpatch != epatch) {
-            if (m_fm.isNeighborRadius(patch, **bpatch, unit,
-                                      m_fm.m_neighborThreshold * scale,
+            if (_fm.isNeighborRadius(patch, **bpatch, unit,
+                                      _fm._neighborThreshold * scale,
                                       radius))
               neighbors.push_back(*bpatch);
             ++bpatch;
           }
-          bpatch = m_fm.m_pos.m_vpgrids[image][index].begin();
-          epatch = m_fm.m_pos.m_vpgrids[image][index].end();
+          bpatch = _fm._pos._vpgrids[image][index].begin();
+          epatch = _fm._pos._vpgrids[image][index].end();
           while (bpatch != epatch) {
-            if (m_fm.isNeighborRadius(patch, **bpatch, unit,
-                                      m_fm.m_neighborThreshold * scale,
+            if (_fm.isNeighborRadius(patch, **bpatch, unit,
+                                      _fm._neighborThreshold * scale,
                                       radius))
               neighbors.push_back(*bpatch);
             ++bpatch;
@@ -654,7 +654,7 @@ void CPatchOrganizerS::findNeighbors(const Patch::CPatch& patch,
         }
       }
       if (lock)
-        m_fm.m_imageLocks[image].unlock();
+        _fm._imageLocks[image].unlock();
       
       ++bimage;
       ++bgrid;
@@ -667,35 +667,35 @@ void CPatchOrganizerS::findNeighbors(const Patch::CPatch& patch,
 
 float CPatchOrganizerS::computeUnit(const Patch::CPatch& patch) const{
   float unit = 0.0f;
-  for (int i = 0; i < (int)patch.m_images.size(); ++i)
-    unit += m_fm.m_optim.getUnit(patch.m_images[i], patch.m_coord);
-  unit /= (int)patch.m_images.size();
-  unit *= m_fm.m_csize;
+  for (int i = 0; i < (int)patch._images.size(); ++i)
+    unit += _fm._optim.getUnit(patch._images[i], patch._coord);
+  unit /= (int)patch._images.size();
+  unit *= _fm._csize;
   return unit;
 }  
 
 void CPatchOrganizerS::setScales(Patch::CPatch& patch) const {
-  const float unit = m_fm.m_optim.getUnit(patch.m_images[0], patch.m_coord);
+  const float unit = _fm._optim.getUnit(patch._images[0], patch._coord);
   const float unit2 = 2.0f * unit;
-  Vec4f ray = patch.m_coord - m_fm.m_pss.m_photos[patch.m_images[0]].m_center;
+  Vec4f ray = patch._coord - _fm._pss._photos[patch._images[0]]._center;
   unitize(ray);
 
-  const int inum = min(m_fm.m_tau, (int)patch.m_images.size());
+  const int inum = min(_fm._tau, (int)patch._images.size());
   
   // First compute, how many pixel difference per unit along vertical
-  //for (int i = 1; i < (int)patch.m_images.size(); ++i) {
+  //for (int i = 1; i < (int)patch._images.size(); ++i) {
   for (int i = 1; i < inum; ++i) {
-    Vec3f diff = m_fm.m_pss.project(patch.m_images[i], patch.m_coord, m_fm.m_level) -
-      m_fm.m_pss.project(patch.m_images[i], patch.m_coord - ray * unit2, m_fm.m_level);
-    patch.m_dscale += norm(diff);
+    Vec3f diff = _fm._pss.project(patch._images[i], patch._coord, _fm._level) -
+      _fm._pss.project(patch._images[i], patch._coord - ray * unit2, _fm._level);
+    patch._dscale += norm(diff);
   }
 
-  // set m_dscale to the vertical distance where average pixel move is half pixel
-  //patch.m_dscale /= (int)patch.m_images.size() - 1;
-  patch.m_dscale /= inum - 1;
-  patch.m_dscale = unit2 / patch.m_dscale;
+  // set _dscale to the vertical distance where average pixel move is half pixel
+  //patch._dscale /= (int)patch._images.size() - 1;
+  patch._dscale /= inum - 1;
+  patch._dscale = unit2 / patch._dscale;
   
-  patch.m_ascale = atan(patch.m_dscale / (unit * m_fm.m_wsize / 2.0f));
+  patch._ascale = atan(patch._dscale / (unit * _fm._wsize / 2.0f));
 }
 
 // write out results
@@ -737,9 +737,9 @@ void CPatchOrganizerS::writePLY(const std::vector<PPatch>& patches,
     if (mode == 0) {
       int denom = 0;
       Vec3f colorf;
-      for (int i = 0; i < (int)(*bpatch)->m_images.size(); ++i) {
-        const int image = (*bpatch)->m_images[i];
-        colorf += m_fm.m_pss.getColor((*bpatch)->m_coord, image, m_fm.m_level);
+      for (int i = 0; i < (int)(*bpatch)->_images.size(); ++i) {
+        const int image = (*bpatch)->_images[i];
+        colorf += _fm._pss.getColor((*bpatch)->_coord, image, _fm._level);
         denom++;
       }
       colorf /= denom;
@@ -748,7 +748,7 @@ void CPatchOrganizerS::writePLY(const std::vector<PPatch>& patches,
       color[2] = min(255,(int)floor(colorf[2] + 0.5f));
     }
     else if (mode == 1) {
-      if ((*bpatch)->m_tmp == 1.0f) {
+      if ((*bpatch)->_tmp == 1.0f) {
         color[0] = 255;
         color[1] = 0;
         color[2] = 0;
@@ -761,16 +761,16 @@ void CPatchOrganizerS::writePLY(const std::vector<PPatch>& patches,
     }
     else if (mode == 2) {
       float angle = 0.0f;
-      vector<int>::iterator bimage = (*bpatch)->m_images.begin();
-      vector<int>::iterator eimage = (*bpatch)->m_images.end();
+      vector<int>::iterator bimage = (*bpatch)->_images.begin();
+      vector<int>::iterator eimage = (*bpatch)->_images.end();
 
       while (bimage != eimage) {
         const int index = *bimage;
-        Vec4f ray = m_fm.m_pss.m_photos[index].m_center - (*bpatch)->m_coord;
+        Vec4f ray = _fm._pss._photos[index]._center - (*bpatch)->_coord;
         ray[3] = 0.0f;
         unitize(ray);
 
-        angle += acos(ray * (*bpatch)->m_normal);
+        angle += acos(ray * (*bpatch)->_normal);
         ++bimage;
       }
       
@@ -782,14 +782,14 @@ void CPatchOrganizerS::writePLY(const std::vector<PPatch>& patches,
       color[2] = (int)(b * 255.0f);
     }
     
-    ofstr << (*bpatch)->m_coord[0] << ' '
-          << (*bpatch)->m_coord[1] << ' '
-          << (*bpatch)->m_coord[2] << ' '
-          << (*bpatch)->m_normal[0] << ' '
-          << (*bpatch)->m_normal[1] << ' '
-          << (*bpatch)->m_normal[2] << ' '
+    ofstr << (*bpatch)->_coord[0] << ' '
+          << (*bpatch)->_coord[1] << ' '
+          << (*bpatch)->_coord[2] << ' '
+          << (*bpatch)->_normal[0] << ' '
+          << (*bpatch)->_normal[1] << ' '
+          << (*bpatch)->_normal[2] << ' '
           << color[0] << ' ' << color[1] << ' ' << color[2] << ' '
-          << (*bpatch)->m_ncc << '\n';
+          << (*bpatch)->_ncc << '\n';
       ++bpatch;
   }
   ofstr.close();  
@@ -824,12 +824,12 @@ void CPatchOrganizerS::writePLY(const std::vector<PPatch>& patches,
   vector<Vec3i>::const_iterator colorb = colors.begin();
   
   while (bpatch != bend) {
-    ofstr << (*bpatch)->m_coord[0] << ' '
-          << (*bpatch)->m_coord[1] << ' '
-          << (*bpatch)->m_coord[2] << ' '
-          << (*bpatch)->m_normal[0] << ' '
-          << (*bpatch)->m_normal[1] << ' '
-          << (*bpatch)->m_normal[2] << ' '
+    ofstr << (*bpatch)->_coord[0] << ' '
+          << (*bpatch)->_coord[1] << ' '
+          << (*bpatch)->_coord[2] << ' '
+          << (*bpatch)->_normal[0] << ' '
+          << (*bpatch)->_normal[1] << ' '
+          << (*bpatch)->_normal[2] << ' '
           << *colorb << '\n';
     ++bpatch;
     ++colorb;

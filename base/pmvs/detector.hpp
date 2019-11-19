@@ -15,10 +15,10 @@ class CDetector {
  protected:
   static float setThreshold(std::multiset<CPoint>& grid);
   int isCloseBoundary(const int x, const int y, const int margin) const;
-  int m_width;
-  int m_height;
-  std::vector<std::vector<Vec3f> > m_image;  
-  std::vector<std::vector<unsigned char> > m_mask;
+  int _width;
+  int _height;
+  std::vector<std::vector<Vec3f> > _image;  
+  std::vector<std::vector<unsigned char> > _mask;
   
  public:  
   template <class T>

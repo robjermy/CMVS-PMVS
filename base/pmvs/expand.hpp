@@ -32,9 +32,9 @@ class CExpand {
  protected:
 
   std::priority_queue<Patch::PPatch, std::vector<Patch::PPatch>, P_compare>
-    m_queue;
+    _queue;
   
-  CFindMatch& m_fm;
+  CFindMatch& _fm;
   
   //-----------------------------------------------------------------
   // thread related
@@ -43,13 +43,13 @@ class CExpand {
   static int expandThreadTmp(void* arg);
 
   // Number of trials
-  std::vector<int> m_ecounts;
+  std::vector<int> _ecounts;
   // Number of failures in the prep
-  std::vector<int> m_fcounts0;
+  std::vector<int> _fcounts0;
   // Number of failures in the post processing
-  std::vector<int> m_fcounts1;
+  std::vector<int> _fcounts1;
   // Number passes
-  std::vector<int> m_pcounts;
+  std::vector<int> _pcounts;
 };
 };
 
