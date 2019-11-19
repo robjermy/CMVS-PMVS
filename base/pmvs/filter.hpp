@@ -1,72 +1,62 @@
-#ifndef PMVS3_FILTER_H
-#define PMVS3_FILTER_H
+#pragma once
 
 #include "patch.hpp"
 #include <list>
 #include "../numeric/vec2.hpp"
 
 namespace PMVS3 {
-  
-class CFindMatch;
-  
-class CFilter {
- public:
-  CFilter(CFindMatch& findMatch);
+  class CFindMatch;
 
-  void init(void);
-  void run(void);
+  class CFilter {
+  public:
+    CFilter(CFindMatch& findMatch);
 
-  float computeGain(const Patch::CPatch& patch, const int lock);
+    void init();
+    void run();
 
-  int filterQuad(const Patch::CPatch& patch,
-                 const std::vector<Patch::PPatch>& neighbors) const;
-  
-  
- protected:
-  void filterOutside(void);
-  void filterOutsideThread(void);
-  static int filterOutsideThreadTmp(void* arg);
+    float computeGain(const Patch::CPatch& patch, const int lock);
+    int filterQuad(const Patch::CPatch& patch, const std::vector<Patch::PPatch>& neighbors) const;
 
-  void filterExact(void);
-  void filterExactThread(void);
-  static int filterExactThreadTmp(void* arg);
-  
-  void filterNeighbor(const int time);
-  void filterSmallGroups(void);
-  void filterSmallGroupsSub(const int pid, const int id,
-                            std::vector<int>& label,
-                            std::list<int>& ltmp) const;
-  void setDepthMaps(void);
-  void setDepthMapsVGridsVPGridsAddPatchV(const int additive);
-  
-  void setConf(const int image);
+  protected:
+    void filterOutside();
+    void filterOutsideThread();
+    static int filterOutsideThreadTmp(void* arg);
 
-  std::vector<float> _gains;
+    void filterExact();
+    void filterExactThread();
+    static int filterExactThreadTmp(void* arg);
 
-  std::vector<std::vector<int> > _newimages, _removeimages;
-  std::vector<std::vector<TVec2<int> > > _newgrids, _removegrids;
+    void filterNeighbor(const int time);
+    void filterSmallGroups();
+    void filterSmallGroupsSub(const int pid, const int id, std::vector<int>& label, std::list<int>& ltmp) const;
+    void setDepthMaps();
+    void setDepthMapsVGridsVPGridsAddPatchV(const int additive);
 
-  int _time;
-  std::vector<int> _rejects;
-  
-  //----------------------------------------------------------------------
-  // Thread related
-  //----------------------------------------------------------------------
-  void setDepthMapsThread(void);
-  static int setDepthMapsThreadTmp(void* arg);
-  
-  void addPatchVThread(void);
-  static int addPatchVThreadTmp(void* arg);
-  
-  void setVGridsVPGridsThread(void);
-  static int setVGridsVPGridsThreadTmp(void* arg);
+    void setConf(const int image);
 
-  void filterNeighborThread(void);
-  static int filterNeighborThreadTmp(void* arg);
-  
-  CFindMatch& _fm;
-  
-};
-};
+    std::vector<float> _gains;
 
-#endif // PMVS3_FILTER_H
+    std::vector<std::vector<int> > _newimages, _removeimages;
+    std::vector<std::vector<TVec2<int> > > _newgrids, _removegrids;
+
+    int _time;
+    std::vector<int> _rejects;
+
+    //----------------------------------------------------------------------
+    // Thread related
+    //----------------------------------------------------------------------
+    void setDepthMapsThread();
+    static int setDepthMapsThreadTmp(void* arg);
+
+    void addPatchVThread();
+    static int addPatchVThreadTmp(void* arg);
+
+    void setVGridsVPGridsThread();
+    static int setVGridsVPGridsThreadTmp(void* arg);
+
+    void filterNeighborThread();
+    static int filterNeighborThreadTmp(void* arg);
+
+    CFindMatch& _fm;
+  };
+}
