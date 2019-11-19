@@ -764,7 +764,7 @@ void CFilter::setDepthMapsThread(void) {
       const int ys[2] = {(int)floor(fy), (int)ceil(fy)};
     
       const float depth =
-        _fm._pss._photos[index]._oaxis * ppatch->_coord;
+        _fm._pss._photos[index].OpticalAxis() * ppatch->_coord;
 
       for (int j = 0; j < 2; ++j) {
 	for (int i = 0; i < 2; ++i) {
@@ -775,7 +775,7 @@ void CFilter::setDepthMapsThread(void) {
 	  if (_fm._pos._dpgrids[index][index2] == _fm._pos._MAXDEPTH)
 	    _fm._pos._dpgrids[index][index2] = ppatch;
 	  else {
-	    const float dtmp = _fm._pss._photos[index]._oaxis *
+	    const float dtmp = _fm._pss._photos[index].OpticalAxis() *
 	      _fm._pos._dpgrids[index][index2]->_coord;
 	    
 	    if (depth < dtmp)

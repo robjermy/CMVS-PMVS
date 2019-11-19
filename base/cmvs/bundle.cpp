@@ -1256,7 +1256,7 @@ float CBundle::computeScore2(const Vec4f& coord,
   vector<float> scales;  scales.resize(inum);
   
   for (int r = 0; r < inum; ++r) {
-    rays[r] = _pss._photos[images[r]]._center - coord;
+    rays[r] = _pss._photos[images[r]].OpticalCenter() - coord;
     unitize(rays[r]);
     
     scales[r] = 1.0f / _pss._photos[images[r]].getScale(coord, 0);
@@ -1325,7 +1325,7 @@ float CBundle::computeScore2(const Vec4f& coord,
   vector<float> scales;  scales.resize(inum);
   
   for (int r = 0; r < inum; ++r) {
-    rays[r] = _pss._photos[images[r]]._center - coord;
+    rays[r] = _pss._photos[images[r]].OpticalCenter() - coord;
     unitize(rays[r]);
     
     scales[r] = 1.0f / _pss._photos[images[r]].getScale(coord, 0);
@@ -1414,9 +1414,9 @@ void CBundle::writeCameraCenters(void) {
           << "end_header" << endl;
     for (int j = 0; j < (int)_timages[i].size(); ++j) {
       const int c = _timages[i][j];
-      ofstr << _pss._photos[c]._center[0] << ' '
-            << _pss._photos[c]._center[1] << ' '
-            << _pss._photos[c]._center[2] << endl;
+      ofstr << _pss._photos[c].OpticalCenter()[0] << ' '
+            << _pss._photos[c].OpticalCenter()[1] << ' '
+            << _pss._photos[c].OpticalCenter()[2] << endl;
     }
     ofstr.close();
   }
@@ -1438,9 +1438,9 @@ void CBundle::writeCameraCenters(void) {
           << "property uchar diffuse_blue" << endl
           << "end_header" << endl;
     for (int c = 0; c < _cnum; ++c) {
-      ofstr << _pss._photos[c]._center[0] << ' '
-            << _pss._photos[c]._center[1] << ' '
-            << _pss._photos[c]._center[2] << ' ';
+      ofstr << _pss._photos[c].OpticalCenter()[0] << ' '
+            << _pss._photos[c].OpticalCenter()[1] << ' '
+            << _pss._photos[c].OpticalCenter()[2] << ' ';
       
       if (_removed[c])
         ofstr << "0 255 0" << endl;

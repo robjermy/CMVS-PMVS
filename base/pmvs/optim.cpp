@@ -49,12 +49,12 @@ void COptim::setAxesScales(void) {
   _yaxes.resize(_fm._num);
   _zaxes.resize(_fm._num);
   for (int index = 0; index < _fm._num; ++index) {
-    _zaxes[index] = Vec3f(_fm._pss._photos[index]._oaxis[0],
-                           _fm._pss._photos[index]._oaxis[1],
-                           _fm._pss._photos[index]._oaxis[2]);
-    _xaxes[index] = Vec3f(_fm._pss._photos[index]._projection[0][0][0],
-                           _fm._pss._photos[index]._projection[0][0][1],
-                           _fm._pss._photos[index]._projection[0][0][2]);
+    _zaxes[index] = Vec3f(_fm._pss._photos[index].OpticalAxis()[0],
+                           _fm._pss._photos[index].OpticalAxis()[1],
+                           _fm._pss._photos[index].OpticalAxis()[2]);
+    _xaxes[index] = Vec3f(_fm._pss._photos[index].ProjectionMatrix()[0][0][0],
+                           _fm._pss._photos[index].ProjectionMatrix()[0][0][1],
+                           _fm._pss._photos[index].ProjectionMatrix()[0][0][2]);
     _yaxes[index] = cross(_zaxes[index], _xaxes[index]);
     unitize(_yaxes[index]);
     _xaxes[index] = cross(_yaxes[index], _zaxes[index]);
@@ -65,8 +65,8 @@ void COptim::setAxesScales(void) {
     const Vec4f xaxe(_xaxes[index][0], _xaxes[index][1], _xaxes[index][2], 0.0);
     const Vec4f yaxe(_yaxes[index][0], _yaxes[index][1], _yaxes[index][2], 0.0);
   
-    const float fx = xaxe * _fm._pss._photos[index]._projection[0][0];
-    const float fy = yaxe * _fm._pss._photos[index]._projection[0][1];
+    const float fx = xaxe * _fm._pss._photos[index].ProjectionMatrix()[0][0];
+    const float fy = yaxe * _fm._pss._photos[index].ProjectionMatrix()[0][1];
     _ipscales[index] = fx + fy;
   }  
 }
@@ -76,7 +76,7 @@ void COptim::collectImages(const int index, std::vector<int>& indexes) const{
   // _sequenceThreshold, _targets. Results are sorted by
   // CphotoSet::_distances.
   indexes.clear();
-  Vec4f ray0 = _fm._pss._photos[index]._oaxis;
+  Vec4f ray0 = _fm._pss._photos[index].OpticalAxis();
   ray0[3] = 0.0f;
 
   vector<Vec2f> candidates;
@@ -90,7 +90,7 @@ void COptim::collectImages(const int index, std::vector<int>& indexes) const{
         _fm._sequenceThreshold < abs(index - indextmp))
       continue;
 
-    Vec4f ray1 = _fm._pss._photos[indextmp]._oaxis;
+    Vec4f ray1 = _fm._pss._photos[indextmp].OpticalAxis();
     ray1[3] = 0.0f;
 
     if (ray0 * ray1 < cos(_fm._angleThreshold0))
@@ -147,7 +147,7 @@ void COptim::filterImagesByAngle(CPatch& patch) {
 
   while (bimage != eimage) {
     const int index = *bimage;
-    Vec4f ray = _fm._pss._photos[index]._center - patch._coord;
+    Vec4f ray = _fm._pss._photos[index].OpticalCenter() - patch._coord;
     unitize(ray);
     if (ray * patch._normal < cos(_fm._angleThreshold1)) {
       // if reference image is deleted, over
@@ -457,7 +457,7 @@ void COptim::addImages(Patch::CPatch& patch) const{
       continue;
     }
     
-    Vec4f ray = _fm._pss._photos[*bimage]._center - patch._coord;
+    Vec4f ray = _fm._pss._photos[*bimage].OpticalCenter() - patch._coord;
     unitize(ray);
     const float ftmp = ray * patch._normal;
     
@@ -482,7 +482,7 @@ void COptim::computeUnits(const Patch::CPatch& patch,
     *bfine = INT_MAX/2;
     
     *bfine = getUnit(*bimage, patch._coord);
-    Vec4f ray = _fm._pss._photos[*bimage]._center - patch._coord;
+    Vec4f ray = _fm._pss._photos[*bimage].OpticalCenter() - patch._coord;
     unitize(ray);
     const float denom = ray * patch._normal;
     if (0.0 < denom)
@@ -503,7 +503,7 @@ void COptim::computeUnits(const Patch::CPatch& patch,
   vector<int>::const_iterator eimage = patch._images.end();
   
   while (bimage != eimage) {
-    Vec4f ray = _fm._pss._photos[*bimage]._center - patch._coord;
+    Vec4f ray = _fm._pss._photos[*bimage].OpticalCenter() - patch._coord;
     unitize(ray);
     const float dot = ray * patch._normal;
     if (dot <= 0.0f) {
@@ -615,7 +615,7 @@ bool COptim::refinePatchBFGS(CPatch& patch, const int id,
   int idtmp = id;
   
   _centersT[id] = patch._coord;
-  _raysT[id] = patch._coord - _fm._pss._photos[patch._images[0]]._center;
+  _raysT[id] = patch._coord - _fm._pss._photos[patch._images[0]].OpticalCenter();
   unitize(_raysT[id]);
   _indexesT[id] = patch._images;
   
@@ -868,7 +868,7 @@ int COptim::grabTex(const Vec4f& coord, const Vec4f& pxaxis, const Vec4f& pyaxis
                     std::vector<float>& tex) const {
   tex.clear();
 
-  Vec4f ray = _fm._pss._photos[index]._center - coord;
+  Vec4f ray = _fm._pss._photos[index].OpticalCenter() - coord;
   unitize(ray);
   const float weight = max(0.0f, ray * pzaxis);
 
@@ -1175,7 +1175,7 @@ float COptim::ssd(const std::vector<float>& tex0,
 }
 
 float COptim::getUnit(const int index, const Vec4f& coord) const {
-  const float fz = norm(coord - _fm._pss._photos[index]._center);
+  const float fz = norm(coord - _fm._pss._photos[index].OpticalCenter());
   const float ftmp = _ipscales[index];
   if (ftmp == 0.0)
     return 1.0;

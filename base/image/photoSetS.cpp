@@ -176,7 +176,7 @@ void CPhotoSetS::getMinMaxAngles(const Vec4f& coord, const std::vector<int>& ind
   vector<Vec4f> rays;  rays.resize((int)indexes.size());
   for (int i = 0; i < (int)indexes.size(); ++i) {
     const int index = indexes[i];
-    rays[i] = _photos[index]._center - coord;
+    rays[i] = _photos[index].OpticalCenter() - coord;
     unitize(rays[i]);
   }
   
@@ -199,7 +199,7 @@ int CPhotoSetS::checkAngles(const Vec4f& coord,
   vector<Vec4f> rays;  rays.resize((int)indexes.size());
   for (int i = 0; i < (int)indexes.size(); ++i) {
     const int index = indexes[i];
-    rays[i] = _photos[index]._center - coord;
+    rays[i] = _photos[index].OpticalCenter() - coord;
     unitize(rays[i]);
   }
   
@@ -233,7 +233,7 @@ void CPhotoSetS::setDistances(void) {
       if (i == j)
         _distances[i][j] = 0.0f;
       else {
-        const float ftmp = norm(_photos[i]._center - _photos[j]._center);
+        const float ftmp = norm(_photos[i].OpticalCenter() - _photos[j].OpticalCenter());
         _distances[i][j] = ftmp;
         avedis += ftmp;
         denom++;
@@ -251,10 +251,10 @@ void CPhotoSetS::setDistances(void) {
   
   // plus angle difference
   for (int i = 0; i < _num; ++i) {
-    Vec4f ray0 = _photos[i]._oaxis;
+    Vec4f ray0 = _photos[i].OpticalAxis();
     ray0[3] = 0.0f;
     for (int j = 0; j < _num; ++j) {
-      Vec4f ray1 = _photos[j]._oaxis;
+      Vec4f ray1 = _photos[j].OpticalAxis();
       ray1[3] = 0.0f;
       
       _distances[i][j] /= avedis;

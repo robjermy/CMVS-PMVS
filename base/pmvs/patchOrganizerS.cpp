@@ -353,7 +353,7 @@ void CPatchOrganizerS::updateDepthMaps(PPatch& ppatch) {
     const float fy = icoord[1] / _fm._csize;
     const int ys[2] = {(int)floor(fy), (int)ceil(fy)};
     
-    const float depth = _fm._pss._photos[image]._oaxis * ppatch->_coord;
+    const float depth = _fm._pss._photos[image].OpticalAxis() * ppatch->_coord;
 
 	_fm._imageLocks[image].wrlock();
     for (int j = 0; j < 2; ++j) {
@@ -366,7 +366,7 @@ void CPatchOrganizerS::updateDepthMaps(PPatch& ppatch) {
 	if (_dpgrids[image][index] == _MAXDEPTH)
 	  _dpgrids[image][index] = ppatch;
 	else {
-	  const float dtmp = _fm._pss._photos[image]._oaxis *
+	  const float dtmp = _fm._pss._photos[image].OpticalAxis() *
 	    _dpgrids[image][index]->_coord;
 	  
 	  if (depth < dtmp)
@@ -528,7 +528,7 @@ int CPatchOrganizerS::isVisible(const CPatch& patch, const int image,
     return 1;
   
 
-  Vec4f ray = patch._coord - _fm._pss._photos[image]._center;
+  Vec4f ray = patch._coord - _fm._pss._photos[image].OpticalCenter();
   unitize(ray);
   const float diff = ray * (patch._coord - dppatch->_coord);
   const float factor = min(2.0, 2.0 + ray * patch._normal);
@@ -677,7 +677,7 @@ float CPatchOrganizerS::computeUnit(const Patch::CPatch& patch) const{
 void CPatchOrganizerS::setScales(Patch::CPatch& patch) const {
   const float unit = _fm._optim.getUnit(patch._images[0], patch._coord);
   const float unit2 = 2.0f * unit;
-  Vec4f ray = patch._coord - _fm._pss._photos[patch._images[0]]._center;
+  Vec4f ray = patch._coord - _fm._pss._photos[patch._images[0]].OpticalCenter();
   unitize(ray);
 
   const int inum = min(_fm._tau, (int)patch._images.size());
@@ -766,7 +766,7 @@ void CPatchOrganizerS::writePLY(const std::vector<PPatch>& patches,
 
       while (bimage != eimage) {
         const int index = *bimage;
-        Vec4f ray = _fm._pss._photos[index]._center - (*bpatch)->_coord;
+        Vec4f ray = _fm._pss._photos[index].OpticalCenter() - (*bpatch)->_coord;
         ray[3] = 0.0f;
         unitize(ray);
 
