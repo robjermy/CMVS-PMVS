@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <numeric>
 #include <iterator>
-#include "expand.h"
-#include "findMatch.h"
+#include "expand.hpp"
+#include "findMatch.hpp"
 
 #include "time.h"
 

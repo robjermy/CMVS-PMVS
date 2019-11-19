@@ -1,6 +1,6 @@
 #include <algorithm>
-#include "dog.h"
-#include "point.h"
+#include "dog.hpp"
+#include "point.hpp"
 
 using namespace PMVS3;
 using namespace std;

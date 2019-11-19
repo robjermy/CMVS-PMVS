@@ -1,6 +1,6 @@
 #include <string>
 #include "../numeric/vec4.hpp"
-#include "patch.h"
+#include "patch.hpp"
 
 using namespace std;
 

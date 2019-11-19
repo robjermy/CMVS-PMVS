@@ -2,7 +2,7 @@
 #define PMVS3_OPTIM_H
 
 #include <vector>
-#include "patch.h"
+#include "patch.hpp"
 
 namespace PMVS3 {
   

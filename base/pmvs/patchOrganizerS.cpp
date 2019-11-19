@@ -4,8 +4,8 @@
 #include <iomanip>
 #include <limits>
 #include <string>
-#include "patchOrganizerS.h"
-#include "findMatch.h"
+#include "patchOrganizerS.hpp"
+#include "findMatch.hpp"
 
 using namespace PMVS3;
 using namespace Patch;

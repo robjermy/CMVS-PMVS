@@ -1,7 +1,7 @@
 #ifndef PMVS3_PATCHORGANIZERS_H
 #define PMVS3_PATCHORGANIZERS_H
 
-#include "patch.h"
+#include "patch.hpp"
 #include <queue>
 
 namespace PMVS3 {

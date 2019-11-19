@@ -3,8 +3,8 @@
 #include <ctime>
 #include <time.h>
 #include <random>
-#include "seed.h"
-#include "findMatch.h"
+#include "seed.hpp"
+#include "findMatch.hpp"
 
 using namespace Image;
 using namespace PMVS3;

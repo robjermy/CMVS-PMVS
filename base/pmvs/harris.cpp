@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "harris.h"
+#include "harris.hpp"
 
 using namespace PMVS3;
 using namespace std;

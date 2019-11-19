@@ -1,10 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include "../image/image.hpp"
-#include "detectFeatures.h"
-#include "harris.h"
-#include "dog.h"
-#include "point.h"
+#include "detectFeatures.hpp"
+#include "harris.hpp"
+#include "dog.hpp"
+#include "point.hpp"
 
 using namespace PMVS3;
 using namespace std;

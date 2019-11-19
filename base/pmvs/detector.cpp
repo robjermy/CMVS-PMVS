@@ -1,7 +1,7 @@
 #include <set>
 #include <algorithm>
-#include "point.h"
-#include "detector.h"
+#include "point.hpp"
+#include "detector.hpp"
 
 using namespace PMVS3;
 using namespace std;

@@ -1,28 +1,28 @@
 ADD_LIBRARY(pmvs_lib
-	detectFeatures.h
-	detectFeatures.cc
-	detector.h
-	detector.cc
-dog.h
-dog.cc
-expand.h
-expand.cc
-filter.h
-filter.cc
-findMatch.h
-findMatch.cc
-harris.h
-harris.cc
-optim.h
-optim.cc
-option.h
-option.cc
-patch.h
-patch.cc
-patchOrganizerS.h
-patchOrganizerS.cc
-point.h
-point.cc
-seed.h
-seed.cc
+	detectFeatures.hpp
+	detectFeatures.cpp
+	detector.hpp
+	detector.cpp
+dog.hpp
+dog.cpp
+expand.hpp
+expand.cpp
+filter.hpp
+filter.cpp
+findMatch.hpp
+findMatch.cpp
+harris.hpp
+harris.cpp
+optim.hpp
+optim.cpp
+option.hpp
+option.cpp
+patch.hpp
+patch.cpp
+patchOrganizerS.hpp
+patchOrganizerS.cpp
+point.hpp
+point.cpp
+seed.hpp
+seed.cpp
 )

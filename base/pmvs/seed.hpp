@@ -3,8 +3,8 @@
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
-#include "patch.h"
-#include "point.h"
+#include "patch.hpp"
+#include "point.hpp"
 
 #include "tinycthread.h"
 

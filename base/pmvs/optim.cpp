@@ -3,8 +3,8 @@
 
 #include <algorithm>
 #include <numeric>
-#include "findMatch.h"
-#include "optim.h"
+#include "findMatch.hpp"
+#include "optim.hpp"
 #include <cstdio>
 
 #include "nlopt.hpp"

@@ -4,7 +4,7 @@
 #include <vector>
 #include <queue>
 #include <list>
-#include "patchOrganizerS.h"
+#include "patchOrganizerS.hpp"
 
 namespace PMVS3 {
 class CfindMatch;

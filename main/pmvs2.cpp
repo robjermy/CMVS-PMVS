@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
-#include "../base/pmvs/findMatch.h"
-#include "../base/pmvs/option.h"
+#include "../base/pmvs/findMatch.hpp"
+#include "../base/pmvs/option.hpp"
 
 using namespace PMVS3;
 using namespace std;

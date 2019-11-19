@@ -4,8 +4,8 @@
 #include <map>
 #include <ctime>
 #include <time.h>
-#include "findMatch.h"
-#include "detectFeatures.h"
+#include "findMatch.hpp"
+#include "detectFeatures.hpp"
 
 using namespace PMVS3;
 using namespace std;

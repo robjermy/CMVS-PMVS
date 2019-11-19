@@ -3,8 +3,8 @@
 #include <ctime>
 #include <time.h>
 #include "../numeric/mylapack.hpp"
-#include "findMatch.h"
-#include "filter.h"
+#include "findMatch.hpp"
+#include "filter.hpp"
 
 using namespace Patch;
 using namespace PMVS3;

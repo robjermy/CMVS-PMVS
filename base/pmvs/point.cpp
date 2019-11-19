@@ -1,4 +1,4 @@
-#include "point.h"
+#include "point.hpp"
 #include <iostream>
 
 using namespace PMVS3;

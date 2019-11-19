@@ -1,7 +1,7 @@
 #ifndef PMVS3_FILTER_H
 #define PMVS3_FILTER_H
 
-#include "patch.h"
+#include "patch.hpp"
 #include <list>
 #include "../numeric/vec2.hpp"
 

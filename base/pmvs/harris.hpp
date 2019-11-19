@@ -4,8 +4,8 @@
 #include <vector>
 #include <set>
 #include "../numeric/vec3.hpp"
-#include "detector.h"
-#include "point.h"
+#include "detector.hpp"
+#include "point.hpp"
 
 namespace PMVS3 {
 

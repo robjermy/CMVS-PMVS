@@ -9,7 +9,7 @@
 #include <list>
 #include "tinycthread.h"
 #include "../image/photoSetS.hpp"
-#include "point.h"
+#include "point.hpp"
 
 namespace Image {
   class CphotoSetS;

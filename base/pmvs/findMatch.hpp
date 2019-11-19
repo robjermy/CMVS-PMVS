@@ -7,18 +7,18 @@
 #include <iostream>
 #include <fstream>
 #include <queue>
-#include "patch.h"
+#include "patch.hpp"
 #include <boost/shared_ptr.hpp>
 #include "tinycthread.h"
 #include "rwmutex.h"
 
 #include "../image/photoSetS.hpp"
-#include "patchOrganizerS.h"
-#include "seed.h"
-#include "expand.h"
-#include "filter.h"
-#include "optim.h"
-#include "option.h"
+#include "patchOrganizerS.hpp"
+#include "seed.hpp"
+#include "expand.hpp"
+#include "filter.hpp"
+#include "optim.hpp"
+#include "option.hpp"
 
 namespace PMVS3 {
   

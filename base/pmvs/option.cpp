@@ -3,7 +3,7 @@
 #include <cstdlib>
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include "option.h"
+#include "option.hpp"
 #include <algorithm>
 
 

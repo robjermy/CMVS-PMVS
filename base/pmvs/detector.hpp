@@ -2,7 +2,7 @@
 #define PMVS3_DETECTOR_H
 
 #include <vector>
-#include "point.h"
+#include "point.hpp"
 
 namespace PMVS3 {
 class Cdetector {

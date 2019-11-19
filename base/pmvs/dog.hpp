@@ -4,8 +4,8 @@
 #include <set>
 #include <vector>
 #include "../numeric/vec3.hpp"
-#include "detector.h"
-#include "point.h"
+#include "detector.hpp"
+#include "point.hpp"
 
 namespace PMVS3 {
 class Cdog: public Cdetector {
