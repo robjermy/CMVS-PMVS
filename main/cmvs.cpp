@@ -3,26 +3,25 @@
 #include <list>
 #include "../base/cmvs/bundle.hpp"
 
-
-using namespace std;
-
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    cerr << "Usage: " << argv[0] << " prefix maximage[=100] CPU[=4]" << endl
-         << endl
-         << "You should choose maximage based on the amount of memory in your machine." << endl
-         << "CPU should be the number of (virtual) CPUs or cores in your machine." << endl
-         << "If you want more control of the program, look into the comments inside program/main/cmvs.cpp" << endl;
+    std::cerr << "Usage: " << argv[0] << " prefix maximage[=100] CPU[=4]" << std::endl
+         << std::endl
+         << "You should choose maximage based on the amount of memory in your machine." << std::endl
+         << "CPU should be the number of (virtual) CPUs or cores in your machine." << std::endl
+         << "If you want more control of the program, look into the comments inside program/main/cmvs.cpp" << std::endl;
     exit (1);
-  }  
-  
+  }
+
   int maximage = 100;
-  if (3 <= argc)
+  if (3 <= argc) {
     maximage = atoi(argv[2]);
+  }
 
   int CPU = 4;
-  if (4 <= argc)
+  if (4 <= argc) {
     CPU = atoi(argv[3]);
+  }
 
   //----------------------------------------------------------------------
   // If you want more control of the program, you can also change the
@@ -43,12 +42,17 @@ int main(int argc, char* argv[]) {
   // clusters in the output.
   const float scoreRatioThreshold = 0.7f;
   const float coverageThreshold = 0.7f;
-  
 
   const int iNumForScore = 4;
   const int pnumThreshold = 0;
   CMVS::CBundle bundle;
-  bundle.run(argv[1], maximage, iNumForScore,
-             scoreRatioThreshold, coverageThreshold,
-             pnumThreshold, CPU);
+  bundle.run(
+    argv[1],
+    maximage,
+    iNumForScore,
+    scoreRatioThreshold,
+    coverageThreshold,
+    pnumThreshold,
+    CPU
+  );
 }
