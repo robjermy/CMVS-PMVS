@@ -1,40 +1,37 @@
-#ifndef PMVS3_POINT_H
-#define PMVS3_POINT_H
+#pragma once
 
 #include "../numeric/vec4.hpp"
 #include "../numeric/mat3.hpp"
 
 namespace PMVS3 {
-class CPoint {
- public:
-  CPoint(void);
-  virtual ~CPoint();
-  
-  Vec3f _icoord;
-  float _response;
+  class CPoint {
+  public:
+    CPoint(void);
+    virtual ~CPoint();
 
-  // 0: Harris
-  // 1: DoG
-  int _type;
+    Vec3f _icoord;
+    float _response;
 
-  // tempporary variable, used to store original imageid in initial match
-  int _itmp;
+    // 0: Harris
+    // 1: DoG
+    int _type;
 
-  // 3D coordinate
-  Vec4f _coord;
-  
-  bool operator < (const CPoint& rhs) const {
-    return _response < rhs._response;
-  }
+    // tempporary variable, used to store original imageid in initial match
+    int _itmp;
 
-  friend std::istream& operator >>(std::istream& istr, CPoint& rhs);
-  friend std::ostream& operator <<(std::ostream& ostr, const CPoint& rhs);
-};
+    // 3D coordinate
+    Vec4f _coord;
 
-bool SortCpoint(const CPoint& a, const CPoint& b);
+    bool operator<(const CPoint& rhs) const {
+      return _response < rhs._response;
+    }
 
-std::istream& operator >>(std::istream& istr, CPoint& rhs);
-std::ostream& operator <<(std::ostream& ostr, const CPoint& rhs);
-};
+    friend std::istream& operator>>(std::istream& istr, CPoint& rhs);
+    friend std::ostream& operator<<(std::ostream& ostr, const CPoint& rhs);
+  };
 
-#endif //PMVS3_POINT_H
+  bool SortCpoint(const CPoint& a, const CPoint& b);
+
+  std::istream& operator>>(std::istream& istr, CPoint& rhs);
+  std::ostream& operator<<(std::ostream& ostr, const CPoint& rhs);
+}
