@@ -7,13 +7,9 @@
 #include "dog.hpp"
 #include "point.hpp"
 
-PMVS3::CDetectFeatures::CDetectFeatures(void) {
-  mtx_init(&_rwlock, mtx_plain | mtx_recursive);
-}
+PMVS3::CDetectFeatures::CDetectFeatures() {}
 
-PMVS3::CDetectFeatures::~CDetectFeatures() {
-  mtx_destroy(&_rwlock);
-}
+PMVS3::CDetectFeatures::~CDetectFeatures() {}
 
 void PMVS3::CDetectFeatures::run(
   const Image::CPhotoSetS& pss,
@@ -57,14 +53,14 @@ int PMVS3::CDetectFeatures::runThreadTmp(void* arg) {
 void PMVS3::CDetectFeatures::runThread(void) {
   while (1) {
     int index = -1;
-    mtx_lock(&_rwlock);
+    _lock.lock();
     {
       if (!_jobs.empty()) {
         index = _jobs.front();
         _jobs.pop_front();
       }
     }
-    mtx_unlock(&_rwlock);
+    _lock.unlock();
     if (index == -1) break;
 
     const int image = _ppss->_images[index];

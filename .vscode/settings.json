@@ -74,6 +74,7 @@
     "utility": "cpp",
     "valarray": "cpp",
     "vector": "cpp",
-    "*.ipp": "cpp"
+    "*.ipp": "cpp",
+    "shared_mutex": "cpp"
   }
 }

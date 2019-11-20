@@ -3,10 +3,10 @@
 /*
  * A main class to detect features
  */
-
-#include <string>
 #include <list>
-#include "tinycthread.h"
+#include <string>
+#include <shared_mutex>
+
 #include "../image/photoSetS.hpp"
 #include "point.hpp"
 
@@ -38,7 +38,7 @@ namespace PMVS3 {
     //----------------------------------------------------------------------
     // thread related
     //----------------------------------------------------------------------
-    mtx_t _rwlock;
+    std::recursive_mutex _lock;
     int _CPU;
 
     std::list<int> _jobs;

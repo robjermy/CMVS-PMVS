@@ -14,7 +14,6 @@
 #include "../stann/sfcnn.hpp"
 #include "../numeric/mat3.hpp"
 #include "../image/photoSetS.hpp"
-// #include "tinycthread.h"
 
 namespace CMVS {
   struct Sadd {
