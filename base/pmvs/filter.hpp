@@ -2,6 +2,7 @@
 
 #include "patch.hpp"
 #include <list>
+#include <thread>
 #include "../numeric/vec2.hpp"
 
 namespace PMVS3 {
@@ -20,11 +21,9 @@ namespace PMVS3 {
   protected:
     void filterOutside();
     void filterOutsideThread();
-    static int filterOutsideThreadTmp(void* arg);
 
     void filterExact();
     void filterExactThread();
-    static int filterExactThreadTmp(void* arg);
 
     void filterNeighbor(const int time);
     void filterSmallGroups();
@@ -36,8 +35,8 @@ namespace PMVS3 {
 
     std::vector<float> _gains;
 
-    std::vector<std::vector<int> > _newimages, _removeimages;
-    std::vector<std::vector<TVec2<int> > > _newgrids, _removegrids;
+    std::vector<std::vector<int>> _newimages, _removeimages;
+    std::vector<std::vector<TVec2<int>>> _newgrids, _removegrids;
 
     int _time;
     std::vector<int> _rejects;
@@ -46,16 +45,9 @@ namespace PMVS3 {
     // Thread related
     //----------------------------------------------------------------------
     void setDepthMapsThread();
-    static int setDepthMapsThreadTmp(void* arg);
-
     void addPatchVThread();
-    static int addPatchVThreadTmp(void* arg);
-
     void setVGridsVPGridsThread();
-    static int setVGridsVPGridsThreadTmp(void* arg);
-
     void filterNeighborThread();
-    static int filterNeighborThreadTmp(void* arg);
 
     CFindMatch& _fm;
   };

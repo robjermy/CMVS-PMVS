@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <numeric>
 #include <iterator>
+#include <thread>
 #include "expand.hpp"
 #include "findMatch.hpp"
 
@@ -39,13 +40,16 @@ void PMVS3::CExpand::run() {
   _fm._pos.collectPatches(_queue);
 
   std::cerr << "Expanding patches..." << std::flush;
-  std::vector<thrd_t> threads(_fm._CPU);
+  std::vector<std::thread> threads(_fm._CPU);
   for (int c = 0; c < _fm._CPU; ++c) {
-    thrd_create(&threads[c], &expandThreadTmp, (void*)this);
+    threads[c] = std::thread(&CExpand::expandThread, this);
   }
 
   for (int c = 0; c < _fm._CPU; ++c) {
-    thrd_join(threads[c], NULL);
+    // thrd_join(threads[c], NULL);
+    if (threads[c].joinable()) {
+      threads[c].join();
+    }
   }
 
   std::cerr << std::endl << "---- EXPANSION: " << (time(NULL) - starttime) << " secs ----" << std::endl;
@@ -64,11 +68,6 @@ void PMVS3::CExpand::run() {
        << 100 * fail0 / (float)trial << ' '
        << 100 * fail1 / (float)trial << ' '
        << 100 * (pass + fail1) / (float)trial << std::endl;
-}
-
-int PMVS3::CExpand::expandThreadTmp(void* arg) {
-  ((CExpand*)arg)->expandThread();
-  return 0;
 }
 
 void PMVS3::CExpand::expandThread(void) {

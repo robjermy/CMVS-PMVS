@@ -104,13 +104,9 @@ void PMVS3::CFindMatch::init(const SOption& option) {
   _neighborThreshold1 = 1.0f;
 
   _neighborThreshold2 = 1.0f;
-
   _maxAngleThreshold = option._maxAngleThreshold;
-
   _nccThresholdBefore = _nccThreshold - 0.3f;
-
   _quadThreshold = option._quadThreshold;
-
   _epThreshold = 2.0f;
 }
 
@@ -151,9 +147,9 @@ int PMVS3::CFindMatch::isNeighbor(const Patch::CPatch& lhs, const Patch::CPatch&
 
   if (ftmp < neighborThreshold) {
     return 1;
-  } else {
-    return 0;
   }
+
+  return 0;
 }
 
 int PMVS3::CFindMatch::isNeighborRadius(

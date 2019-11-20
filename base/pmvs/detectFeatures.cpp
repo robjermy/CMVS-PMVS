@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <thread>
 #include "../image/image.hpp"
 #include "detectFeatures.hpp"
 #include "harris.hpp"
@@ -33,13 +34,15 @@ void PMVS3::CDetectFeatures::run(
     _jobs.push_back(index);
   }
 
-  std::vector<thrd_t> threads(_CPU);
+  std::vector<std::thread> threads(_CPU);
   for (int i = 0; i < _CPU; ++i) {
-    thrd_create(&threads[i], &runThreadTmp, (void*)this);
+    threads[i] = std::thread(&CDetectFeatures::runThread, this);
   }
 
   for (int i = 0; i < _CPU; ++i) {
-    thrd_join(threads[i], NULL);
+    if (threads[i].joinable()) {
+      threads[i].join();
+    }
   }
 
   std::cerr << "done" << std::endl;

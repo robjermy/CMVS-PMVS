@@ -35,7 +35,6 @@ namespace PMVS3 {
     // thread related
     //-----------------------------------------------------------------
     void expandThread();
-    static int expandThreadTmp(void* arg);
 
     // Number of trials
     std::vector<int> _ecounts;

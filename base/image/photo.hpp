@@ -16,10 +16,8 @@ namespace Image {
 
     // grabTex given 2D sampling information
     void grabTex(const int level, const Vec2f& icoord, const Vec2f& xaxis, const Vec2f& yaxis, const int size, std::vector<Vec3f>& tex, const int normalizef = 1) const;
-
     // grabTex given 3D sampling information
     void grabTex(const int level, const Vec4f& coord, const Vec4f& pxaxis, const Vec4f& pyaxis, const Vec4f& pzaxis, const int size, std::vector<Vec3f>& tex, float& weight, const int normalizef = 1) const;
-
 
     inline Vec3f getColor(const float fx, const float fy, const int level) const;
     inline Vec3f getColor(const Vec4f& coord, const int level) const;

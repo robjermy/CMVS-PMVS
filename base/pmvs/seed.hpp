@@ -5,8 +5,6 @@
 #include "patch.hpp"
 #include "point.hpp"
 
-#include "tinycthread.h"
-
 namespace PMVS3 {
   class CFindMatch;
   typedef std::shared_ptr<CPoint> PPoint;
@@ -42,7 +40,6 @@ namespace PMVS3 {
     // thread related
     //----------------------------------------------------------------------
     void initialMatchThread(void);
-    static int initialMatchThreadTmp(void* arg);
 
     // Number of trials
     std::vector<int> _scounts;

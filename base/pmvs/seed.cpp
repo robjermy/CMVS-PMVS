@@ -3,6 +3,7 @@
 #include <ctime>
 #include <time.h>
 #include <random>
+#include <thread>
 #include "seed.hpp"
 #include "findMatch.hpp"
 
@@ -75,13 +76,15 @@ void PMVS3::CSeed::run(void) {
   time_t tv;
   time(&tv);
   time_t curtime = tv;
-  std::vector<thrd_t> threads(_fm._CPU);
+  std::vector<std::thread> threads(_fm._CPU);
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_create(&threads[i], &initialMatchThreadTmp, (void*)this);
+    threads[i] = std::thread(&CSeed::initialMatchThread, this);
   }
 
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_join(threads[i], NULL);
+    if (threads[i].joinable()) {
+      threads[i].join();
+    }
   }
 
   //----------------------------------------------------------------------
@@ -122,11 +125,6 @@ void PMVS3::CSeed::initialMatchThread(void) {
 
     initialMatch(index, id);
  }
-}
-
-int PMVS3::CSeed::initialMatchThreadTmp(void* arg) {
-  ((CSeed*)arg)->initialMatchThread();
-  return 0;
 }
 
 void PMVS3::CSeed::clear(void) {

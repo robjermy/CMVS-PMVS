@@ -1,4 +1,3 @@
-#include "tinycthread.h"
 #include <numeric>
 #include <ctime>
 #include <time.h>
@@ -40,13 +39,15 @@ void PMVS3::CFilter::filterOutside(void) {
   std::cerr << "mainbody: " << std::flush;
 
   _fm._count = 0;
-  std::vector<thrd_t> threads(_fm._CPU);
+  std::vector<std::thread> threads(_fm._CPU);
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_create(&threads[i], &filterOutsideThreadTmp, (void*)this);
+    threads[i] = std::thread(&CFilter::filterOutsideThread, this);
   }
 
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_join(threads[i], NULL);
+    if (threads[i].joinable()) {
+      threads[i].join();
+    }
   }
   std::cerr << std::endl;
 
@@ -198,11 +199,6 @@ void PMVS3::CFilter::filterOutsideThread(void) {
   }
 }
 
-int PMVS3::CFilter::filterOutsideThreadTmp(void* arg) {
-  ((CFilter*)arg)->filterOutsideThread();
-  return 0;
-}
-
 void PMVS3::CFilter::filterExact(void) {
   time_t tv;
   time(&tv);
@@ -225,13 +221,15 @@ void PMVS3::CFilter::filterExact(void) {
   _removegrids.resize(psize);
 
   _fm._count = 0;
-  std::vector<thrd_t> threads0(_fm._CPU);
+  std::vector<std::thread> threads0(_fm._CPU);
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_create(&threads0[i], &filterExactThreadTmp, (void*)this);
+    threads0[i] = std::thread(&CFilter::filterExactThread, this);
   }
 
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_join(threads0[i], NULL);
+    if (threads0[i].joinable()) {
+      threads0[i].join();
+    }
   }
   std::cerr << std::endl;
 
@@ -355,11 +353,6 @@ void PMVS3::CFilter::filterExactThread(void) {
   mtx_unlock(&_fm._lock);
 }
 
-int PMVS3::CFilter::filterExactThreadTmp(void* arg) {
-  ((CFilter*)arg)->filterExactThread();
-  return 0;
-}
-
 void PMVS3::CFilter::filterNeighborThread(void) {
   const int size = (int)_fm._pos._ppatches.size();
   while (1) {
@@ -467,11 +460,6 @@ int PMVS3::CFilter::filterQuad(const Patch::CPatch& patch, const std::vector<Pat
   }
 }
 
-int PMVS3::CFilter::filterNeighborThreadTmp(void* arg) {
-  ((CFilter*)arg)->filterNeighborThread();
-  return 0;
-}
-
 void PMVS3::CFilter::filterNeighbor(const int times) {
   time_t tv;
   time(&tv);
@@ -496,13 +484,15 @@ void PMVS3::CFilter::filterNeighbor(const int times) {
       _fm._jobs.push_back(j);
     }
 
-    std::vector<thrd_t> threads(_fm._CPU);
+    std::vector<std::thread> threads(_fm._CPU);
     for (int i = 0; i < _fm._CPU; ++i) {
-      thrd_create(&threads[i], &filterNeighborThreadTmp, (void*)this);
+      threads[i] = std::thread(&CFilter::filterNeighborThread, this);
     }
 
     for (int i = 0; i < _fm._CPU; ++i) {
-      thrd_join(threads[i], NULL);
+      if (threads[i].joinable()) {
+        threads[i].join();
+      }
     }
 
     auto bpatch = _fm._pos._ppatches.begin();
@@ -680,20 +670,18 @@ void PMVS3::CFilter::setDepthMaps(void) {
   }
 
   _fm._count = 0;
-  std::vector<thrd_t> threads(_fm._CPU);
+  std::vector<std::thread> threads(_fm._CPU);
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_create(&threads[i], &setDepthMapsThreadTmp, (void*)this);
+    threads[i] = std::thread(&CFilter::setDepthMapsThread, this);
   }
 
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_join(threads[i], NULL);
+    if (threads[i].joinable()) {
+      threads[i].join();
+    }
   }
 }
 
-int PMVS3::CFilter::setDepthMapsThreadTmp(void* arg) {
-  ((CFilter*)arg)->setDepthMapsThread();
-  return 0;
-}
 
 void PMVS3::CFilter::setDepthMapsThread(void) {
   while (1) {
@@ -768,34 +756,29 @@ void PMVS3::CFilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
   }
 
   _fm._count = 0;
-  std::vector<thrd_t> threads0(_fm._CPU);
+  // std::vector<thrd_t> threads0(_fm._CPU);
+  std::vector<std::thread> threads0(_fm._CPU);
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_create(&threads0[i], &setVGridsVPGridsThreadTmp, (void*)this);
+    threads0[i] = std::thread(&CFilter::setVGridsVPGridsThread, this);
   }
 
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_join(threads0[i], NULL);
+    if (threads0[i].joinable()) {
+      threads0[i].join();
+    }
   }
 
   _fm._count = 0;
-  std::vector<thrd_t> threads1(_fm._CPU);
+  std::vector<std::thread> threads1(_fm._CPU);
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_create(&threads1[i], &addPatchVThreadTmp, (void*)this);
+    threads1[i] = std::thread(&CFilter::addPatchVThread, this);
   }
 
   for (int i = 0; i < _fm._CPU; ++i) {
-    thrd_join(threads1[i], NULL);
+    if (threads1[i].joinable()) {
+      threads1[i].join();
+    }
   }
-}
-
-int PMVS3::CFilter::setVGridsVPGridsThreadTmp(void* arg) {
-  ((CFilter*)arg)->setVGridsVPGridsThread();
-  return 0;
-}
-
-int PMVS3::CFilter::addPatchVThreadTmp(void* arg) {
-  ((CFilter*)arg)->addPatchVThread();
-  return 0;
 }
 
 void PMVS3::CFilter::setVGridsVPGridsThread(void) {
