@@ -2,6 +2,7 @@
 #include <iterator>
 #include <numeric> //PM
 #include <random>
+#include <thread>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -729,11 +730,6 @@ void CMVS::CBundle::mergeSfMPThread(void) {
   }
 }
 
-int CMVS::CBundle::mergeSfMPThreadTmp(void* arg) {
-  ((CBundle*)arg)->mergeSfMPThread();
-  return 0;
-}
-
 // Arbitrary seed for deterministic pseudorandomness.
 static const unsigned int RANDOM_SEED = 42;
 
@@ -779,13 +775,15 @@ void CMVS::CBundle::mergeSfMP(void) {
     }
 
     _count = 0;
-    std::vector<thrd_t> threads(_CPU);
+    std::vector<std::thread> threads(_CPU);
     for (int c = 0; c < _CPU; ++c) {
-      thrd_create(&threads[c], &mergeSfMPThreadTmp, (void*)this);
+      threads[c] = std::thread(&CBundle::mergeSfMPThread, this);
     }
 
     for (int c = 0; c < _CPU; ++c) {
-      thrd_join(threads[c], NULL);
+      if (threads[c].joinable()) {
+        threads[c].join();
+      }
     }
 
     int newpnum = 0;

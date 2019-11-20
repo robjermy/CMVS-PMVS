@@ -14,7 +14,7 @@
 #include "../stann/sfcnn.hpp"
 #include "../numeric/mat3.hpp"
 #include "../image/photoSetS.hpp"
-#include "tinycthread.h"
+// #include "tinycthread.h"
 
 namespace CMVS {
   struct Sadd {
@@ -139,7 +139,6 @@ namespace CMVS {
     void mergeSfM(void);
     void mergeSfMP(void);
     void mergeSfMPThread(void);
-    static int mergeSfMPThreadTmp(void* arg);
 
     std::vector<char> _merged;
 
