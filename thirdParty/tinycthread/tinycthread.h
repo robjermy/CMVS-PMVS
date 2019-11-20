@@ -467,9 +467,9 @@ int tss_set(tss_t key, void *val);
  * @param func Callback to invoke.
  */
 #if defined(_TTHREAD_WIN32_)
-  void call_once(once_flag *flag, void (*func)(void));
+  void call_once_thread(once_flag *flag, void (*func)(void));
 #else
-  #define call_once(flag,func) pthread_once(flag,func)
+  #define call_once_thread(flag,func) pthread_once(flag,func)
 #endif
 
 #ifdef __cplusplus

@@ -893,7 +893,7 @@ int _tthread_timespec_get(struct timespec *ts, int base)
 #endif /* _TTHREAD_EMULATE_TIMESPEC_GET_ */
 
 #if defined(_TTHREAD_WIN32_)
-void call_once(once_flag *flag, void (*func)(void))
+void call_once_thread(once_flag *flag, void (*func)(void))
 {
   /* The idea here is that we use a spin lock (via the
      InterlockedCompareExchange function) to restrict access to the
