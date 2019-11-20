@@ -25,7 +25,8 @@ CMVS::CBundle::CBundle() {
   _CPU = 8;
   _junit = 100;
   _debug = 0;
-  _puf = NULL;
+  // _puf = NULL;
+  _puf2 = nullptr;
   _ptree = NULL;
 
   mtx_init(&_lock, mtx_plain | mtx_recursive);
@@ -722,7 +723,8 @@ void CMVS::CBundle::mergeSfMPThread(void) {
         const int pid2 = pneighbors[i];
         if (visflag[i] && _merged[pid2] == 0) {
           _merged[pid2] = 1;
-          _puf->union_set(pid, pid2);
+          // _puf->union_set(pid, pid2);
+          _puf2->union_sets(pid, pid2);
         }
       }
     }
@@ -746,9 +748,11 @@ void CMVS::CBundle::mergeSfMP(void) {
     }
   }
 
-  _puf = new boost::disjoint_sets_with_storage<>(cpnum);
+  // _puf = new boost::disjoint_sets_with_storage<>(cpnum);
+  _puf2 = new DisjointSetForest<int>();
   for (int p = 0; p < cpnum; ++p) {
-    _puf->make_set(p);
+    // _puf->make_set(p);
+    _puf2->add_element(p);
   }
 
   {
@@ -792,7 +796,8 @@ void CMVS::CBundle::mergeSfMP(void) {
     std::vector<int> reps;
     dict.resize((int)_coords.size(), -1);
     for (int p = 0; p < (int)_coords.size(); ++p) {
-      const int ptmp = _puf->find_set(p);
+      // const int ptmp = _puf->find_set(p);
+      const int ptmp = _puf2->find_set(p);
       if (p == ptmp) {
         dict[p] = newpnum;
         reps.push_back(p);
@@ -806,8 +811,10 @@ void CMVS::CBundle::mergeSfMP(void) {
   resetPoints();
   std::cerr << "done" << std::endl;
 
-  delete _puf;
-  _puf = NULL;
+  // delete _puf;
+  delete _puf2;
+  // _puf = NULL;
+  _puf2 = nullptr;
   delete _ptree;
   _ptree = NULL;
 
@@ -822,7 +829,8 @@ void CMVS::CBundle::resetPoints(void) {
   counts.resize((int)_coords.size(), 0);
   smallestids.resize((int)_coords.size(), INT_MAX/2);
   for (int p = 0; p < (int)_coords.size(); ++p) {
-    const int ptmp = _puf->find_set(p);
+    // const int ptmp = _puf->find_set(p);
+    const int ptmp = _puf2->find_set(p);
     smallestids[ptmp] = std::min(smallestids[ptmp], p);
     ++counts[ptmp];
   }
@@ -846,7 +854,8 @@ void CMVS::CBundle::resetPoints(void) {
   std::vector<std::vector<int> > newvisibles;  newvisibles.resize(newpnum);
 
   for (int p = 0; p < (int)_coords.size(); ++p) {
-    const int ptmp = _puf->find_set(p);
+    // const int ptmp = _puf->find_set(p);
+    const int ptmp = _puf2->find_set(p);
     if (counts[ptmp] < mthreshold) continue;
 
     const int newpid = newpids[ptmp];

@@ -8,9 +8,8 @@
 #include <queue>
 #include <ctime>
 #include <time.h> // PM
-#include <boost/graph/properties.hpp>
-#include <boost/pending/disjoint_sets.hpp>
 
+#include "disjoint.hpp"
 #include "../stann/sfcnn.hpp"
 #include "../numeric/mat3.hpp"
 #include "../image/photoSetS.hpp"
@@ -227,7 +226,7 @@ namespace CMVS {
     float _coverageThreshold;
 
     // union find for sfm points
-    boost::disjoint_sets_with_storage<>* _puf;
+    DisjointSetForest<int>* _puf2;
 
     sfcnn<const float*, 3, float>* _ptree;
 

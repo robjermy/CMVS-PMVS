@@ -75,6 +75,8 @@
     "valarray": "cpp",
     "vector": "cpp",
     "*.ipp": "cpp",
-    "shared_mutex": "cpp"
+    "shared_mutex": "cpp",
+    "*.tcc": "cpp",
+    "variant": "cpp"
   }
 }
