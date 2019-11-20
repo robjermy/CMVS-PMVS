@@ -10,12 +10,14 @@ cmake_minimum_required(VERSION 2.8)
 
 project(CMVS-PMVS2 C CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # By default build in Release mode
 if(NOT CMAKE_BUILD_TYPE AND NOT MSVC)
   set(CMAKE_BUILD_TYPE "Release")
 endif(NOT CMAKE_BUILD_TYPE AND NOT MSVC)
+
+add_subdirectory(lib)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/program/base/image
@@ -33,9 +35,9 @@ find_package(Threads REQUIRED)
 set(PMVS_LIBRARIES ${PMVS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 # Eigen
-set( EIGEN3_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdParty/Eigen )
+set( EIGEN3_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/eigen )
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${EIGEN3_INCLUDE_DIR}/cmake" )
-find_package(Eigen3 3.0.0 REQUIRED)
+find_package(Eigen3 3.3.7 REQUIRED)
 message("Found Eigen ${EIGEN3_VERSION}")
 include_directories( ${EIGEN3_INCLUDE_DIR} )
 
@@ -50,7 +52,24 @@ if(Boost_FOUND)
 else(Boost_FOUND)
 	message("No system boost library found, using internal version")
 	set(PMVS_USE_INTERNAL_BOOST TRUE)
-	include_directories(${CMAKE_SOURCE_DIR}/thirdParty/miniBoost)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/assert/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/config/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/mpl/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/preprocessor/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/utility/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/core/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/type_traits/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/static_assert/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/property_map/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/concept_check/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/smart_ptr/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/throw_exception/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/predef/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/tuple/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/iterator/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/detail/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/disjoint_sets/include)
+	include_directories(${CMAKE_SOURCE_DIR}/lib/boost/libs/graph/include)
 endif(Boost_FOUND)
 
 # JPEG

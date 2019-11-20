@@ -1,3 +1,14 @@
+# Generated Mac OS files
 .DS_Store
+
+# Generated build files
 build
+
+# Data files for testing
 data
+
+# Downloaded library files
+!lib
+lib/*
+!lib/cmake
+!lib/CMakeLists.txt
