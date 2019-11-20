@@ -38,7 +38,7 @@ namespace PMVS3 {
     //----------------------------------------------------------------------
     // thread related
     //----------------------------------------------------------------------
-    std::recursive_mutex _lock;
+    std::mutex _lock;
     int _CPU;
 
     std::list<int> _jobs;
