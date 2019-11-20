@@ -44,6 +44,5 @@ namespace PMVS3 {
     std::list<int> _jobs;
 
     void runThread(void);
-    static int runThreadTmp(void*arg);
   };
 }

@@ -44,12 +44,6 @@ void PMVS3::CDetectFeatures::run(
   std::cerr << "done" << std::endl;
 }
 
-int PMVS3::CDetectFeatures::runThreadTmp(void* arg) {
-  CDetectFeatures* detectFeatures = (CDetectFeatures*)arg;
-  detectFeatures->runThread();
-  return 0;
-}
-
 void PMVS3::CDetectFeatures::runThread(void) {
   while (1) {
     int index = -1;
