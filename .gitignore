@@ -2,13 +2,8 @@
 .DS_Store
 
 # Generated build files
-build
+build/
+*-build/
 
 # Data files for testing
 data
-
-# Downloaded library files
-!lib
-lib/*
-!lib/cmake
-!lib/CMakeLists.txt

@@ -121,7 +121,7 @@ namespace CMVS {
       if(setX != setY) {
         link(setX, setY);
       }
-      throw exception();
+      throw "Items not in set";
     }
 
     /**
@@ -157,6 +157,7 @@ namespace CMVS {
     Element& get_element(int x) const {
       auto it = _elements.find(x);
       if(it != _elements.end()) return it->second;
+      throw "Element not in set";
     }
 
     void link(int x, int y) {
