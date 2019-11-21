@@ -7,3 +7,6 @@
 [submodule "lib/graclus"]
 	path = lib/graclus
 	url = https://github.com/robjermy/Graclus.git
+[submodule "lib/cimg"]
+	path = lib/cimg
+	url = https://github.com/dtschump/CImg.git
