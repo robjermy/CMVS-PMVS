@@ -77,5 +77,11 @@
     "shared_mutex": "cpp",
     "*.tcc": "cpp",
     "variant": "cpp"
+  },
+  "files.watcherExclude": {
+    "**/*-build/**": true,
+    "**/build/**": true,
+    "**/data/**": true,
+    "**/lib/**": true
   }
 }

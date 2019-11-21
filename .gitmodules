@@ -4,3 +4,6 @@
 [submodule "lib/nlopt"]
 	path = lib/nlopt
 	url = https://github.com/stevengj/nlopt.git
+[submodule "lib/graclus"]
+	path = lib/graclus
+	url = https://github.com/robjermy/Graclus.git

@@ -24,7 +24,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/program/base/numeric
 	${CMAKE_SOURCE_DIR}/program/base/pmvs
 	${CMAKE_SOURCE_DIR}/thirdParty/
-	${CMAKE_SOURCE_DIR}/thirdParty/graclus1.2/metisLib
 	${CMAKE_SOURCE_DIR}/thirdParty/cimg
 	${CMAKE_SOURCE_DIR}/thirdParty/tinycthread
 )
@@ -43,6 +42,9 @@ include_directories( ${EIGEN3_INCLUDE_DIR} )
 # nlopt
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/nlopt/src/api)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/nlopt-build/src/api)
+
+# graclus
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/graclus/metisLib)
 
 # JPEG
 find_package(JPEG)
