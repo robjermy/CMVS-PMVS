@@ -226,7 +226,7 @@ namespace CMVS {
     float _coverageThreshold;
 
     // union find for sfm points
-    DisjointSetForest<int>* _puf2;
+    CDisjointSet<int>* _puf2;
 
     sfcnn<const float*, 3, float>* _ptree;
 

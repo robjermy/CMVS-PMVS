@@ -749,7 +749,7 @@ void CMVS::CBundle::mergeSfMP(void) {
   }
 
   // _puf = new boost::disjoint_sets_with_storage<>(cpnum);
-  _puf2 = new DisjointSetForest<int>();
+  _puf2 = new CDisjointSet<int>();
   for (int p = 0; p < cpnum; ++p) {
     // _puf->make_set(p);
     _puf2->add_element(p);
