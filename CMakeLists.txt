@@ -25,7 +25,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/program/base/pmvs
 	${CMAKE_SOURCE_DIR}/thirdParty/
 	${CMAKE_SOURCE_DIR}/thirdParty/graclus1.2/metisLib
-	${CMAKE_SOURCE_DIR}/thirdParty/nlopt-2.4.2/api
 	${CMAKE_SOURCE_DIR}/thirdParty/cimg
 	${CMAKE_SOURCE_DIR}/thirdParty/tinycthread
 )
@@ -40,6 +39,10 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${EIGEN3_INCLUDE_DIR}/cmake" )
 find_package(Eigen3 3.3.7 REQUIRED)
 message("Found Eigen ${EIGEN3_VERSION}")
 include_directories( ${EIGEN3_INCLUDE_DIR} )
+
+# nlopt
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/nlopt/src/api)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/nlopt-build/src/api)
 
 # JPEG
 find_package(JPEG)

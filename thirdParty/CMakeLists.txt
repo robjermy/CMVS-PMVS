@@ -1,5 +1,4 @@
 
-ADD_SUBDIRECTORY(nlopt-2.4.2)
 ADD_SUBDIRECTORY(graclus1.2)
 ADD_SUBDIRECTORY(tinycthread)
 
