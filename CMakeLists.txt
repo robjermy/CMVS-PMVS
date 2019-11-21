@@ -6,11 +6,12 @@
 # 28 july 2014 Make VisualStudio Win32/Win64 detection automatic
 # 15.01.2015 Added tinycthread, nlopt, CImg, removed BLAS, LAPACK, GSL, lmfit, winpthread (R. Hiestand)
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.15.0)
 
 project(CMVS-PMVS2 C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # By default build in Release mode
 if(NOT CMAKE_BUILD_TYPE AND NOT MSVC)
@@ -32,42 +33,28 @@ find_package(Threads REQUIRED)
 set(PMVS_LIBRARIES ${PMVS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 # Eigen
-set( EIGEN3_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/eigen )
-set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${EIGEN3_INCLUDE_DIR}/cmake" )
-find_package(Eigen3 3.3.7 REQUIRED)
-message("Found Eigen ${EIGEN3_VERSION}")
-include_directories( ${EIGEN3_INCLUDE_DIR} )
+include_directories(${CMAKE_SOURCE_DIR}/lib/eigen)
 
 # nlopt
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/nlopt/src/api)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/nlopt-build/src/api)
+include_directories(${CMAKE_SOURCE_DIR}/lib/nlopt/src/api)
+include_directories(${CMAKE_BINARY_DIR}/lib/nlopt/src/api)
 
 # cimg
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/cimg)
+include_directories(${CMAKE_SOURCE_DIR}/lib/cimg)
 
 # graclus
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/graclus/metisLib)
+include_directories(${CMAKE_SOURCE_DIR}/lib/graclus/metisLib)
 
-# JPEG
-find_package(JPEG)
-if(JPEG_FOUND)
-	message("Using system JPEG library: ${JPEG_LIBRARIES}")
-	include_directories(${JPEG_INCLUDE_DIR})
-	set(PMVS_LIBRARIES ${PMVS_LIBRARIES} ${JPEG_LIBRARIES})
-else(JPEG_FOUND)
-	message("No system JPEG library found, using internal version")
-	set(PMVS_USE_INTERNAL_JPEG TRUE)
-	include_directories(${CMAKE_SOURCE_DIR}/thirdParty/jpeg)
-	include_directories(${CMAKE_BINARY_DIR}/thirdParty/jpeg)	# For jconfig.h
-	set(PMVS_LIBRARIES ${PMVS_LIBRARIES} jpeg)
-endif(JPEG_FOUND)
+# jpeg-turbo
+include_directories(${CMAKE_SOURCE_DIR}/lib/libjpeg-turbo)
+include_directories(${CMAKE_BINARY_DIR}/lib/libjpeg-turbo)
 
 # ZLIB
 #find_package(ZLIB REQUIRED)
 #include_directories(${ZLIB_INCLUDE_DIR})
 
 # PNG
-set(PMVS_USE_PNG        OFF)
+set(PMVS_USE_PNG OFF)
 if(PMVS_USE_PNG)
   find_package(PNG)
   if(PNG_FOUND)
@@ -79,7 +66,7 @@ if(PMVS_USE_PNG)
 endif(PMVS_USE_PNG)
 
 # TIFF
-set(PMVS_USE_TIFF        OFF)
+set(PMVS_USE_TIFF OFF)
 if(PMVS_USE_TIFF)
   find_package(TIFF)
   if(TIFF_FOUND)
@@ -93,4 +80,3 @@ endif(PMVS_USE_TIFF)
 add_subdirectory(base)
 add_subdirectory(main)
 add_subdirectory(thirdParty)
-

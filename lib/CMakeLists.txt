@@ -1,20 +1,24 @@
-# Add eigen directly to our build.
+# Add libjpeg-turbo directly to our build.
 add_subdirectory(
-  ${CMAKE_SOURCE_DIR}/lib/eigen
-  ${CMAKE_SOURCE_DIR}/lib/eigen-build
+  ${CMAKE_SOURCE_DIR}/lib/libjpeg-turbo
   EXCLUDE_FROM_ALL
 )
 
 # Add nlopt directly to our build.
 add_subdirectory(
   ${CMAKE_SOURCE_DIR}/lib/nlopt
-  ${CMAKE_SOURCE_DIR}/lib/nlopt-build
   EXCLUDE_FROM_ALL
 )
 
 # Add graclus directly to our build.
 add_subdirectory(
   ${CMAKE_SOURCE_DIR}/lib/graclus
-  ${CMAKE_SOURCE_DIR}/lib/graclus-build
+  EXCLUDE_FROM_ALL
+)
+
+# Add eigen directly to our build.
+file(COPY ${CMAKE_SOURCE_DIR}/lib/eigen-custom/CMakeLists.txt DESTINATION ${CMAKE_SOURCE_DIR}/lib/eigen)
+add_subdirectory(
+  ${CMAKE_SOURCE_DIR}/lib/eigen
   EXCLUDE_FROM_ALL
 )

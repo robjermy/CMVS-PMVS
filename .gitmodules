@@ -10,3 +10,6 @@
 [submodule "lib/cimg"]
 	path = lib/cimg
 	url = https://github.com/dtschump/CImg.git
+[submodule "lib/libjpeg-turbo"]
+	path = lib/libjpeg-turbo
+	url = https://github.com/libjpeg-turbo/libjpeg-turbo.git
