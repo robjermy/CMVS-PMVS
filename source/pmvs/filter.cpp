@@ -1,6 +1,5 @@
-#include <numeric>
 #include <ctime>
-#include <time.h>
+#include <numeric>
 
 #include "numeric/mylapack.hpp"
 #include "pmvs/findMatch.hpp"

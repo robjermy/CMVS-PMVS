@@ -1,11 +1,11 @@
 #define _USE_MATH_DEFINES
 
 #include <algorithm>
+#include <cmath>
+#include <csetjmp>
 #include <fstream>
 #include <jpeglib.h>
 #include <list>
-#include <math.h>
-#include <setjmp.h>
 
 #include "numeric/mat4.hpp"
 #include "image/image.hpp"

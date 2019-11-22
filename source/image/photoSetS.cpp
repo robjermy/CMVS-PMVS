@@ -1,8 +1,8 @@
 #define _USE_MATH_DEFINES
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
-#include <math.h>
 
 #include "image/photoSetS.hpp"
 

@@ -9,7 +9,6 @@
 #include <set>
 #include <string>
 #include <thread>
-#include <time.h>
 #include <vector>
 
 #include "disjoint.hpp"

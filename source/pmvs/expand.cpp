@@ -1,10 +1,10 @@
 #define _USE_MATH_DEFINES
 #include <algorithm>
 #include <cmath>
+#include <ctime>
 #include <iterator>
 #include <numeric>
 #include <thread>
-#include "time.h"
 
 #include "pmvs/expand.hpp"
 #include "pmvs/findMatch.hpp"
