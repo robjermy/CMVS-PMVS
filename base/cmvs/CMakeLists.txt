@@ -9,5 +9,8 @@ add_library(cmvs_lib
 
 target_include_directories(cmvs_lib PUBLIC
   ${CMVS_BASE_INCLUDE_DIR}
+)
+
+target_include_directories(cmvs_lib PRIVATE
   ${GRACLUS_INCLUDE_DIR}
 )
