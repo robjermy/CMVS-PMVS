@@ -11,7 +11,14 @@ PMVS3::CFindMatch::CFindMatch() : _pos(*this), _seed(*this), _expand(*this), _fi
   _debug = 0;
 }
 
-PMVS3::CFindMatch::~CFindMatch() {}
+PMVS3::CFindMatch::~CFindMatch() {
+  for (int image = 0; image < _num; ++image) {
+    delete _imageLocks[image];
+    delete _countLocks[image];
+  }
+  _imageLocks.clear();
+  _countLocks.clear();
+}
 
 void PMVS3::CFindMatch::updateThreshold() {
   _nccThreshold -= 0.05f;
