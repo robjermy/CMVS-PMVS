@@ -7,3 +7,8 @@ build/
 
 # Data files for testing
 data
+
+!lib/
+!lib/CMakeLists.txt
+!lib/eigen-custom/CMakeLists.txt
+lib/**
