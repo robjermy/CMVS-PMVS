@@ -27,4 +27,7 @@ add_library(pmvs_lib
   seed.cpp
 )
 
-target_include_directories(pmvs_lib PUBLIC ${CMAKE_SOURCE_DIR}/lib/cimg)
+target_include_directories(pmvs_lib PRIVATE
+  ${CIMG_INCLUDE_DIR}
+  ${NLOPT_INCLUDE_DIR}
+)

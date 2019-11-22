@@ -8,3 +8,5 @@ add_library(numeric_lib
   vec3.hpp
   vec4.hpp
 )
+
+target_include_directories(numeric_lib PRIVATE ${EIGEN_INCLUDE_DIR})

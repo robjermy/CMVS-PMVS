@@ -6,3 +6,7 @@ add_library(cmvs_lib
   bundle.cpp
   graclus.cpp
 )
+
+target_include_directories(cmvs_lib PRIVATE
+  ${GRACLUS_INCLUDE_DIR}
+)

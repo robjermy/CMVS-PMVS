@@ -13,38 +13,36 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # Use gold linker to speed up linking time, see cmake/useGoldLinker.cmake
 include(useGoldLinker)
 
-add_subdirectory(lib)
-
-include_directories(
-	${CMAKE_SOURCE_DIR}/program/base/image
-	${CMAKE_SOURCE_DIR}/program/base/numeric
-	${CMAKE_SOURCE_DIR}/program/base/pmvs
-)
-
-# Threads
+# threads
 find_package(Threads REQUIRED)
 set(PMVS_LIBRARIES ${PMVS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-# Eigen
-include_directories(${CMAKE_SOURCE_DIR}/lib/eigen)
+# eigen
+set(EIGEN_INCLUDE_DIR 
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/eigen
+)
 
 # nlopt
-include_directories(${CMAKE_SOURCE_DIR}/lib/nlopt/src/api)
-include_directories(${CMAKE_BINARY_DIR}/lib/nlopt/src/api)
+set(NLOPT_INCLUDE_DIR
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/nlopt/src/api
+	${CMAKE_CURRENT_BINARY_DIR}/lib/nlopt/src/api
+)
 
 # cimg
-include_directories(${CMAKE_SOURCE_DIR}/lib/cimg)
+set(CIMG_INCLUDE_DIR
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/cimg
+) 
 
 # graclus
-include_directories(${CMAKE_SOURCE_DIR}/lib/graclus/metisLib)
+set(GRACLUS_INCLUDE_DIR
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/graclus/metisLib
+)
 
-# jpeg-turbo
-include_directories(${CMAKE_SOURCE_DIR}/lib/libjpeg-turbo)
-include_directories(${CMAKE_BINARY_DIR}/lib/libjpeg-turbo)
-
-# ZLIB
-#find_package(ZLIB REQUIRED)
-#include_directories(${ZLIB_INCLUDE_DIR})
+# libjpeg-turbo
+set(JPEG_INCLUDE_DIR
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/libjpeg-turbo
+	${CMAKE_CURRENT_BINARY_DIR}/lib/libjpeg-turbo
+)
 
 # PNG
 set(PMVS_USE_PNG OFF)
@@ -70,5 +68,11 @@ if(PMVS_USE_TIFF)
   endif(TIFF_FOUND)
 endif(PMVS_USE_TIFF)
 
+# external libraries
+add_subdirectory(lib)
+
+# base functionality
 add_subdirectory(base)
+
+# main executables
 add_subdirectory(main)
