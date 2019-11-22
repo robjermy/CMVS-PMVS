@@ -14,8 +14,6 @@ extern "C" {
 };
 #endif
 
-using namespace std;
-
 /*
 // Solve Ax = 0.
 // Values contain singular values stored in an increasing order

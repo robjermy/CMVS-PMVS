@@ -9,8 +9,6 @@
 
 #include "nlopt.hpp"
 
-using namespace std;
-
 PMVS3::COptim* PMVS3::COptim::_one = NULL;
 
 PMVS3::COptim::COptim(CFindMatch& findMatch) : _fm(findMatch) {
@@ -73,7 +71,7 @@ void PMVS3::COptim::collectImages(const int index, std::vector<int>& indexes) co
   Vec4f ray0 = _fm._pss._photos[index].OpticalAxis();
   ray0[3] = 0.0f;
 
-  vector<Vec2f> candidates;
+  std::vector<Vec2f> candidates;
   // Search for only related images
   for (int i = 0; i < (int)_fm._visdata2[index].size(); ++i) {
     const int indextmp = _fm._visdata2[index][i];
@@ -89,7 +87,7 @@ void PMVS3::COptim::collectImages(const int index, std::vector<int>& indexes) co
   }
 
   sort(candidates.begin(), candidates.end(), Svec2cmp<float>());
-  for (int i = 0; i < min(_fm._tau, (int)candidates.size()); ++i) {
+  for (int i = 0; i < std::min(_fm._tau, (int)candidates.size()); ++i) {
     indexes.push_back((int)candidates[i][1]);
   }
 }
@@ -124,7 +122,7 @@ int PMVS3::COptim::preProcess(Patch::CPatch& patch, const int id, const int seed
 }
 
 void PMVS3::COptim::filterImagesByAngle(Patch::CPatch& patch) {
-  vector<int> newindexes;
+  std::vector<int> newindexes;
 
   auto bimage = patch._images.begin();
   auto eimage = patch._images.end();
@@ -172,8 +170,8 @@ int PMVS3::COptim::postProcess(Patch::CPatch& patch, const int id, const int see
 
   // set _timages
   patch._timages = 0;
-  vector<int>::const_iterator begin = patch._images.begin();
-  vector<int>::const_iterator end = patch._images.end();
+  std::vector<int>::const_iterator begin = patch._images.begin();
+  std::vector<int>::const_iterator end = patch._images.end();
   while (begin != end) {
     if (*begin < _fm.NumTargetImages()) {
       ++patch._timages;
@@ -192,12 +190,12 @@ int PMVS3::COptim::postProcess(Patch::CPatch& patch, const int id, const int see
 }
 
 void PMVS3::COptim::constraintImages(Patch::CPatch& patch, const float nccThreshold, const int id) {
-  vector<float> inccs;
+  std::vector<float> inccs;
   setINCCs(patch, inccs, patch._images, id, 0);
 
   //----------------------------------------------------------------------
   // Constraint images
-  vector<int> newimages;
+  std::vector<int> newimages;
   newimages.push_back(patch._images[0]);
   for (int i = 1; i < (int)patch._images.size(); ++i) {
     if (inccs[i] < 1.0f - nccThreshold) {
@@ -216,9 +214,9 @@ void PMVS3::COptim::setRefImage(Patch::CPatch& patch, const int id) {
   //----------------------------------------------------------------------
   // Set the reference image
   // Only for target images
-  vector<int> indexes;
-  vector<int>::const_iterator begin = patch._images.begin();
-  vector<int>::const_iterator end = patch._images.end();
+  std::vector<int> indexes;
+  std::vector<int>::const_iterator begin = patch._images.begin();
+  std::vector<int>::const_iterator end = patch._images.end();
   while (begin != end) {
     if (*begin < _fm.NumTargetImages()) {
       indexes.push_back(*begin);
@@ -231,7 +229,7 @@ void PMVS3::COptim::setRefImage(Patch::CPatch& patch, const int id) {
     return;
   }
 
-  vector<vector<float> > inccs;
+  std::vector<std::vector<float> > inccs;
   setINCCs(patch, inccs, indexes, id, 1);
 
   int refindex = -1;
@@ -259,7 +257,7 @@ void PMVS3::COptim::setRefImage(Patch::CPatch& patch, const int id) {
 void PMVS3::COptim::setRefConstraintImages(Patch::CPatch& patch, const float nccThreshold, const int id) {
   //----------------------------------------------------------------------
   // Set the reference image
-  vector<vector<float> > inccs;
+  std::vector<std::vector<float> > inccs;
   setINCCs(patch, inccs, patch._images, id, 1);
 
   int refindex = -1;
@@ -273,7 +271,7 @@ void PMVS3::COptim::setRefConstraintImages(Patch::CPatch& patch, const float ncc
   }
 
   const float robustThreshold = robustincc(1.0f - nccThreshold);
-  vector<int> newimages;
+  std::vector<int> newimages;
   newimages.push_back(patch._images[refindex]);
   for (int i = 0; i < (int)patch._images.size(); ++i) {
     if (i != refindex && inccs[refindex][i] < robustThreshold) {
@@ -287,9 +285,9 @@ void PMVS3::COptim::sortImages(Patch::CPatch& patch) const{
   const int newm = 1;
   if (newm == 1) {
     const float threshold = 1.0f - cos(10.0 * M_PI / 180.0);
-    vector<int> indexes, indexes2;
-    vector<float> units, units2;
-    vector<Vec4f> rays, rays2;
+    std::vector<int> indexes, indexes2;
+    std::vector<float> units, units2;
+    std::vector<Vec4f> rays, rays2;
 
     computeUnits(patch, indexes, units, rays);
 
@@ -313,7 +311,7 @@ void PMVS3::COptim::sortImages(Patch::CPatch& patch) const{
 
         indexes2.push_back(indexes[j]);
         rays2.push_back(rays[j]);
-        const float ftmp = min(threshold, max(threshold / 2.0f, 1.0f - rays[index] * rays[j]));
+        const float ftmp = std::min(threshold, std::max(threshold / 2.0f, 1.0f - rays[index] * rays[j]));
 
         units2.push_back(units[j] * (threshold / ftmp));
       }
@@ -326,9 +324,9 @@ void PMVS3::COptim::sortImages(Patch::CPatch& patch) const{
     //Sort and grab the best _tau images. All the other images don't
     //matter.  First image is the reference and fixed
     const float threshold = cos(5.0 * M_PI / 180.0);
-    vector<int> indexes, indexes2;
-    vector<float> units, units2;
-    vector<Vec4f> rays, rays2;
+    std::vector<int> indexes, indexes2;
+    std::vector<float> units, units2;
+    std::vector<Vec4f> rays, rays2;
 
     computeUnits(patch, indexes, units, rays);
 
@@ -372,7 +370,7 @@ int PMVS3::COptim::check(Patch::CPatch& patch) {
   }
 
   {
-    vector<Patch::PPatch> neighbors;
+    std::vector<Patch::PPatch> neighbors;
     _fm._pos.findNeighbors(patch, neighbors, 1, 4, 2);
     // Only check when enough number of neighbors
     if (6 < (int)neighbors.size() && _fm._filter.filterQuad(patch, neighbors)) {
@@ -385,9 +383,9 @@ int PMVS3::COptim::check(Patch::CPatch& patch) {
 }
 
 void PMVS3::COptim::removeImagesEdge(Patch::CPatch& patch) const{
-  vector<int> newindexes;
-  vector<int>::const_iterator bimage = patch._images.begin();
-  vector<int>::const_iterator eimage = patch._images.end();
+  std::vector<int> newindexes;
+  std::vector<int>::const_iterator bimage = patch._images.begin();
+  std::vector<int>::const_iterator eimage = patch._images.end();
   while (bimage != eimage) {
     if (_fm._pss.getEdge(patch._coord, *bimage, _fm._level)) {
       newindexes.push_back(*bimage);
@@ -399,14 +397,14 @@ void PMVS3::COptim::removeImagesEdge(Patch::CPatch& patch) const{
 
 void PMVS3::COptim::addImages(Patch::CPatch& patch) const{
   // take into account _edge
-  vector<int> used;
+  std::vector<int> used;
   used.resize(_fm.NumImages());
   for (int index = 0; index < _fm.NumImages(); ++index) {
     used[index] = 0;
   }
 
-  vector<int>::const_iterator bimage = patch._images.begin();
-  vector<int>::const_iterator eimage = patch._images.end();
+  std::vector<int>::const_iterator bimage = patch._images.begin();
+  std::vector<int>::const_iterator eimage = patch._images.end();
   while (bimage != eimage) {
     used[*bimage] = 1;
     ++bimage;
@@ -449,8 +447,8 @@ void PMVS3::COptim::computeUnits(const Patch::CPatch& patch, std::vector<float>&
   const int size = (int)patch._images.size();
   units.resize(size);
 
-  vector<int>::const_iterator bimage = patch._images.begin();
-  vector<int>::const_iterator eimage = patch._images.end();
+  std::vector<int>::const_iterator bimage = patch._images.begin();
+  std::vector<int>::const_iterator eimage = patch._images.end();
 
   auto bfine = units.begin();
 
@@ -473,8 +471,8 @@ void PMVS3::COptim::computeUnits(const Patch::CPatch& patch, std::vector<float>&
 }
 
 void PMVS3::COptim::computeUnits(const Patch::CPatch& patch, std::vector<int>& indexes, std::vector<float>& units, std::vector<Vec4f>& rays) const{
-  vector<int>::const_iterator bimage = patch._images.begin();
-  vector<int>::const_iterator eimage = patch._images.end();
+  std::vector<int>::const_iterator bimage = patch._images.begin();
+  std::vector<int>::const_iterator eimage = patch._images.end();
 
   while (bimage != eimage) {
     Vec4f ray = _fm._pss._photos[*bimage].OpticalCenter() - patch._coord;
@@ -526,8 +524,8 @@ double PMVS3::COptim::my_f(unsigned n, const double *x, double *grad, void *my_f
   Vec4f pxaxis, pyaxis;
   _one->getPAxes(index, coord, normal, pxaxis, pyaxis);
 
-  const int size = min(_one->_fm._tau, (int)_one->_indexesT[id].size());
-  const int mininum = min(_one->_fm._minImageNumThreshold, size);
+  const int size = std::min(_one->_fm._tau, (int)_one->_indexesT[id].size());
+  const int mininum = std::min(_one->_fm._minImageNumThreshold, size);
 
   for (int i = 0; i < size; ++i) {
     int flag = _one->grabTex(coord, pxaxis, pyaxis, normal, _one->_indexesT[id][i], _one->_fm._wsize, _one->_texsT[id][i]);
@@ -593,7 +591,7 @@ bool PMVS3::COptim::refinePatchBFGS(Patch::CPatch& patch, const int id, const in
 
   computeUnits(patch, _weightsT[id]);
   for (int i = 1; i < (int)_weightsT[id].size(); ++i) {
-    _weightsT[id][i] = min(1.0f, _weightsT[id][0] / _weightsT[id][i]);
+    _weightsT[id][i] = std::min(1.0f, _weightsT[id][0] / _weightsT[id][i]);
   }
   _weightsT[id][0] = 1.0f;
 
@@ -632,7 +630,7 @@ bool PMVS3::COptim::refinePatchBFGS(Patch::CPatch& patch, const int id, const in
     for(int i = 0; i < 3; i++)
     {
       // NLOPT returns an error if x is not within the bounds
-      x[i] = max(min(p[i], upper_bounds[i]), lower_bounds[i]);
+      x[i] = std::max(std::min(p[i], upper_bounds[i]), lower_bounds[i]);
     }
 
     double minf;
@@ -671,7 +669,7 @@ void PMVS3::COptim::encode(const Vec4f& coord, const Vec4f& normal, double* cons
   const float fy = _yaxes[image] * proj(normal);
   const float fz = _zaxes[image] * proj(normal);
 
-  vect[2] = asin(max(-1.0f, min(1.0f, fy)));
+  vect[2] = asin(std::max(-1.0f, std::min(1.0f, fy)));
   const float cosb = cos(vect[2]);
 
   if (cosb == 0.0) {
@@ -679,7 +677,7 @@ void PMVS3::COptim::encode(const Vec4f& coord, const Vec4f& normal, double* cons
   } else {
     const float sina = fx / cosb;
     const float cosa = - fz / cosb;
-    vect[1] = acos(max(-1.0f, min(1.0f, cosa)));
+    vect[1] = acos(std::max(-1.0f, std::min(1.0f, cosa)));
     if (sina < 0.0) {
       vect[1] = - vect[1];
     }
@@ -713,7 +711,7 @@ void PMVS3::COptim::setINCCs(const Patch::CPatch& patch, std::vector<float> & in
   Vec4f pxaxis, pyaxis;
   getPAxes(index, patch._coord, patch._normal, pxaxis, pyaxis);
 
-  vector<vector<float> >& texs = _texsT[id];
+  std::vector<std::vector<float> >& texs = _texsT[id];
 
   const int size = (int)indexes.size();
   for (int i = 0; i < size; ++i) {
@@ -750,7 +748,7 @@ void PMVS3::COptim::setINCCs(const Patch::CPatch& patch, std::vector<std::vector
   Vec4f pxaxis, pyaxis;
   getPAxes(index, patch._coord, patch._normal, pxaxis, pyaxis);
 
-  vector<vector<float>>& texs = _texsT[id];
+  std::vector<std::vector<float>>& texs = _texsT[id];
 
   const int size = (int)indexes.size();
   for (int i = 0; i < size; ++i) {
@@ -791,10 +789,10 @@ int PMVS3::COptim::grabSafe(const int index, const int size, const Vec3f& center
   const Vec3f bl = center - dx * margin + dy * margin;
   const Vec3f br = center + dx * margin + dy * margin;
 
-  const float minx = min(tl[0], min(tr[0], min(bl[0], br[0])));
-  const float maxx = max(tl[0], max(tr[0], max(bl[0], br[0])));
-  const float miny = min(tl[1], min(tr[1], min(bl[1], br[1])));
-  const float maxy = max(tl[1], max(tr[1], max(bl[1], br[1])));
+  const float minx = std::min(tl[0], std::min(tr[0], std::min(bl[0], br[0])));
+  const float maxx = std::max(tl[0], std::max(tr[0], std::max(bl[0], br[0])));
+  const float miny = std::min(tl[1], std::min(tr[1], std::min(bl[1], br[1])));
+  const float maxy = std::max(tl[1], std::max(tr[1], std::max(bl[1], br[1])));
 
   // 1 should be enough
   const int margin2 = 3;
@@ -819,7 +817,7 @@ int PMVS3::COptim::grabTex(const Vec4f& coord, const Vec4f& pxaxis, const Vec4f&
 
   Vec4f ray = _fm._pss._photos[index].OpticalCenter() - coord;
   unitize(ray);
-  const float weight = max(0.0f, ray * pzaxis);
+  const float weight = std::max(0.0f, ray * pzaxis);
 
   //???????
   if (weight < cos(_fm._angleThreshold1)) return 1;
@@ -834,7 +832,7 @@ int PMVS3::COptim::grabTex(const Vec4f& coord, const Vec4f& pxaxis, const Vec4f&
   int leveldif = (int)floor(log(ratio) / Log2 + 0.5f);
 
   // Upper limit is 2
-  leveldif = max(-_fm._level, min(2, leveldif));
+  leveldif = std::max(-_fm._level, std::min(2, leveldif));
 
   const float scale = MyPow2(leveldif);
   const int newlevel = _fm._level + leveldif;
@@ -877,8 +875,8 @@ double PMVS3::COptim::computeINCC(const Vec4f& coord, const Vec4f& normal, const
 double PMVS3::COptim::computeINCC(const Vec4f& coord, const Vec4f& normal, const std::vector<int>& indexes, const Vec4f& pxaxis, const Vec4f& pyaxis, const int id, const int robust) {
   if ((int)indexes.size() < 2) return 2.0;
 
-  const int size = min(_fm._tau, (int)indexes.size());
-  vector<vector<float> >& texs = _texsT[id];
+  const int size = std::min(_fm._tau, (int)indexes.size());
+  std::vector<std::vector<float> >& texs = _texsT[id];
 
   for (int i = 0; i < size; ++i) {
     int flag;
@@ -959,7 +957,7 @@ void PMVS3::COptim::func(int m, int n, double* x, double* fvec, int* iflag, void
   Vec4f pxaxis, pyaxis;
   getPAxes(index, coord, normal, pxaxis, pyaxis);
 
-  const int size = min(_fm._tau, (int)_indexesT[id].size());
+  const int size = std::min(_fm._tau, (int)_indexesT[id].size());
 
   for (int i = 0; i < size; ++i) {
     int flag;
@@ -987,7 +985,7 @@ void PMVS3::COptim::normalize(std::vector<std::vector<float> >& texs, const int 
   Vec3f ave;
   int denom = 0;
 
-  vector<Vec3f> rgbs;
+  std::vector<Vec3f> rgbs;
   rgbs.resize(size);
   for (int i = 0; i < size; ++i) {
     if (texs[i].empty()) continue;
@@ -1079,8 +1077,8 @@ float PMVS3::COptim::dot(const std::vector<float>& tex0, const std::vector<float
   return ans / size;
 #else
   const int size = (int)tex0.size();
-  vector<float>::const_iterator i0 = tex0.begin();
-  vector<float>::const_iterator i1 = tex1.begin();
+  std::vector<float>::const_iterator i0 = tex0.begin();
+  std::vector<float>::const_iterator i1 = tex1.begin();
   float ans = 0.0f;
   for (int i = 0; i < size; ++i, ++i0, ++i1) {
     ans += (*i0) * (*i1) * _template[i];
@@ -1103,8 +1101,8 @@ float PMVS3::COptim::ssd(const std::vector<float>& tex0, const std::vector<float
   return scale * ans / size;
 #else
   const int size = (int)tex0.size();
-  vector<float>::const_iterator i0 = tex0.begin();
-  vector<float>::const_iterator i1 = tex1.begin();
+  std::vector<float>::const_iterator i0 = tex0.begin();
+  std::vector<float>::const_iterator i1 = tex1.begin();
   float ans = 0.0f;
   for (int i = 0; i < size; ++i, ++i0, ++i1) {
     const float ftmp = fabs((*i0) - (*i1));
@@ -1148,7 +1146,7 @@ void PMVS3::COptim::getPAxes(const int index, const Vec4f& coord, const Vec4f& n
 void PMVS3::COptim::setWeightsT(const Patch::CPatch& patch, const int id) {
   computeUnits(patch, _weightsT[id]);
   for (int i = 1; i < (int)_weightsT[id].size(); ++i) {
-    _weightsT[id][i] = min(1.0f, _weightsT[id][0] / _weightsT[id][i]);
+    _weightsT[id][i] = std::min(1.0f, _weightsT[id][0] / _weightsT[id][i]);
   }
   _weightsT[id][0] = 1.0f;
 }
