@@ -6,18 +6,20 @@
 # 28 july 2014 Make VisualStudio Win32/Win64 detection automatic
 # 15.01.2015 Added tinycthread, nlopt, CImg, removed BLAS, LAPACK, GSL, lmfit, winpthread (R. Hiestand)
 
-cmake_minimum_required(VERSION 3.15.0)
+cmake_minimum_required(VERSION 3.6)
 
-project(cmvs3 C CXX)
+project(cmvs3 VERSION 3.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-# By default build in Release mode
-# if(NOT CMAKE_BUILD_TYPE AND NOT MSVC)
-#   set(CMAKE_BUILD_TYPE "Release")
-# endif(NOT CMAKE_BUILD_TYPE AND NOT MSVC)
+# Use gold linker to speed up linking time, see cmake/useGoldLinker.cmake
+include(useGoldLinker)
 
 add_subdirectory(lib)
 
