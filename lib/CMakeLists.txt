@@ -1,28 +1,32 @@
-# Download and unpack eigen at configure time
-# Copy file with external library definition to download folder
-configure_file(cmake/eigen.cmake eigen-download/CMakeLists.txt)
+include(ExternalProject)
+find_package(Git REQUIRED)
+include(cmvsExtensions)
 
-# Generate CMake files that will be used to perform the download
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-RESULT_VARIABLE result
-WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/eigen-download)
-
-if(result)
-message(FATAL_ERROR "CMake step for eigen failed: ${result}")
-endif()
-
-# Download eigen from git here, checkout branch
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-RESULT_VARIABLE result
-WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/eigen-download )
-
-if(result)
-message(FATAL_ERROR "Build step for eigen failed: ${result}")
-endif()
-
-# Add eigen directly to our build.
+ExternalGitProject(libjpeg-turbo https://github.com/libjpeg-turbo/libjpeg-turbo.git 2.0.3)
 add_subdirectory(
-  ${CMAKE_SOURCE_DIR}/lib/eigen
-  ${CMAKE_SOURCE_DIR}/lib/eigen/build
+  ${libjpeg-turbo_SOURCE_DIR}
+  EXCLUDE_FROM_ALL
+)
+
+# Header only
+ExternalGitProject(cimg https://github.com/dtschump/CImg.git v.2.7.5)
+
+# Eigen lib with modified CMakeLists to not build uninstall target
+ExternalGitProject(eigen https://github.com/eigenteam/eigen-git-mirror.git 3.3.7)
+file(COPY ${CMAKE_SOURCE_DIR}/lib/eigen-custom/CMakeLists.txt DESTINATION ${eigen_SOURCE_DIR})
+add_subdirectory(
+  ${eigen_SOURCE_DIR}
+  EXCLUDE_FROM_ALL
+)
+
+ExternalGitProject(nlopt https://github.com/stevengj/nlopt.git v2.6.1)
+add_subdirectory(
+  ${nlopt_SOURCE_DIR}
+  EXCLUDE_FROM_ALL
+)
+
+ExternalGitProject(graclus https://github.com/robjermy/Graclus.git 1.3)
+add_subdirectory(
+  ${graclus_SOURCE_DIR}
   EXCLUDE_FROM_ALL
 )

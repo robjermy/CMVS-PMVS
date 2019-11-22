@@ -11,13 +11,14 @@
       "program": "${workspaceFolder}/build/main/pmvs2",
       "args": [
         "../data/hall/",
-        "option.txt-0001"
+        "option.txt-0000"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/build",
       "environment": [],
       "externalConsole": false,
       "MIMode": "lldb",
+      "miDebuggerPath": "/usr/bin/gdb",
       "preLaunchTask": "CMake Build"
     }
   ]

@@ -26,3 +26,5 @@ add_library(pmvs_lib
   seed.hpp
   seed.cpp
 )
+
+target_include_directories(pmvs_lib PUBLIC ${CMAKE_SOURCE_DIR}/lib/cimg)

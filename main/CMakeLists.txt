@@ -1,12 +1,14 @@
 
 add_executable(pmvs2 pmvs2.cpp)
-
-target_link_libraries(pmvs2 pmvs_lib image_lib numeric_lib ${PMVS_LIBRARIES} nlopt tinycthread)
+target_link_libraries(pmvs2 pmvs_lib image_lib numeric_lib ${PMVS_LIBRARIES} nlopt)
 
 add_executable(genOption genOption.cpp)
 
 add_executable(cmvs cmvs.cpp)
-target_link_libraries(cmvs cmvs_lib image_lib graclus_lib ${PMVS_LIBRARIES} tinycthread)
+target_link_libraries(cmvs cmvs_lib image_lib graclus ${PMVS_LIBRARIES})
+
+# cimg
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/cimg/CImg.h)
 
 install(TARGETS genOption DESTINATION bin/)
 install(TARGETS cmvs DESTINATION bin/)

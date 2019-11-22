@@ -7,7 +7,6 @@
 #include <fstream>
 #include <queue>
 #include "patch.hpp"
-#include "rwmutex.h"
 
 #include "../image/photoSetS.hpp"
 #include "patchOrganizerS.hpp"
@@ -16,6 +15,9 @@
 #include "filter.hpp"
 #include "optim.hpp"
 #include "option.hpp"
+
+#include <shared_mutex>
+#include <thread>
 
 namespace PMVS3 {
   class CFindMatch {
@@ -125,10 +127,10 @@ namespace PMVS3 {
     // For threads related
     //----------------------------------------------------------------------
     // General lock
-    mtx_t _lock;
+    std::mutex _lock;
     // For each image
-    std::vector<RWMutex> _imageLocks;
-    std::vector<RWMutex> _countLocks;
+    std::vector<std::shared_mutex*> _imageLocks;
+    std::vector<std::shared_mutex*> _countLocks;
     // count
     int _count;
     // jobs

@@ -22,7 +22,6 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
-#include "tinycthread.h"
 #include <limits>
 #include <stdexcept>
 using namespace std;

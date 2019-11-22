@@ -7,6 +7,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <jpeglib.h>
+
 // CImg
 #define cimg_display 0
 #if defined(PMVS_HAVE_PNG)		// See CMakeLists.txt

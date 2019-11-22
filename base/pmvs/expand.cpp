@@ -71,21 +71,21 @@ void PMVS3::CExpand::run() {
 }
 
 void PMVS3::CExpand::expandThread(void) {
-  mtx_lock(&_fm._lock);
+  _fm._lock.lock();
   const int id = _fm._count++;
-  mtx_unlock(&_fm._lock);
+  _fm._lock.unlock();
 
   while (1) {
     Patch::PPatch ppatch;
     int empty = 0;
-    mtx_lock(&_fm._lock);
+    _fm._lock.lock();
     if (_queue.empty()) {
       empty = 1;
     } else {
       ppatch = _queue.top();
       _queue.pop();
     }
-    mtx_unlock(&_fm._lock);
+    _fm._lock.unlock();
 
     if (empty) break;
 
@@ -247,9 +247,9 @@ int PMVS3::CExpand::expandSub(const Patch::PPatch& orgppatch, const int id, cons
   _fm._pos.addPatch(ppatch);
 
   if (add) {
-    mtx_lock(&_fm._lock);
+    _fm._lock.lock();
     _queue.push(ppatch);
-    mtx_unlock(&_fm._lock);
+    _fm._lock.unlock();
   }
 
   return 0;
@@ -280,11 +280,11 @@ int PMVS3::CExpand::checkCounts(Patch::CPatch& patch) {
     const int index2 = iy * _fm._pos._gwidths[index] + ix;
 
     int flag = 0;
-	  _fm._imageLocks[index].rdlock();
+	  _fm._imageLocks[index]->lock_shared();
     if (!_fm._pos._pgrids[index][index2].empty()) {
       flag = 1;
     }
-	  _fm._imageLocks[index].unlock();
+	  _fm._imageLocks[index]->unlock();
 
     if (flag) {
       ++full;
@@ -294,13 +294,13 @@ int PMVS3::CExpand::checkCounts(Patch::CPatch& patch) {
     }
 
     //mtx_lock(&_fm._countLocks[index]);
-	  _fm._countLocks[index].rdlock();
+	  _fm._countLocks[index]->lock_shared();
     if (_fm._countThreshold1 <= _fm._pos._counts[index][index2]) {
       ++full;
     } else {
       ++empty;
     }
-	  _fm._countLocks[index].unlock();
+	  _fm._countLocks[index]->unlock();
     ++begin;
     ++begin2;
   }
@@ -348,14 +348,14 @@ int PMVS3::CExpand::updateCounts(const Patch::CPatch& patch) {
 
       const int index2 = iy * _fm._pos._gwidths[index] + ix;
 
-	    _fm._countLocks[index].wrlock();
+	    _fm._countLocks[index]->lock_shared();
       if (_fm._countThreshold1 <= _fm._pos._counts[index][index2]) {
         ++full;
       } else {
         ++empty;
       }
       ++_fm._pos._counts[index][index2];
-	    _fm._countLocks[index].unlock();
+	    _fm._countLocks[index]->unlock();
       ++begin;
       ++begin2;
     }
@@ -385,14 +385,14 @@ int PMVS3::CExpand::updateCounts(const Patch::CPatch& patch) {
 
       const int index2 = iy * _fm._pos._gwidths[index] + ix;
 
-	    _fm._countLocks[index].wrlock();;
+	    _fm._countLocks[index]->lock_shared();;
       if (_fm._countThreshold1 <= _fm._pos._counts[index][index2]) {
         ++full;
       } else {
         ++empty;
       }
       ++_fm._pos._counts[index][index2];
-	    _fm._countLocks[index].unlock();
+	    _fm._countLocks[index]->unlock();
       ++begin;
       ++begin2;
     }

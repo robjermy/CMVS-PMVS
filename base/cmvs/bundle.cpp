@@ -2,14 +2,14 @@
 #include <iterator>
 #include <numeric> //PM
 #include <random>
-#include <thread>
+
+#include "bundle.hpp"
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
-#include "graclus.hpp"
-#include "bundle.hpp"
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -28,8 +28,6 @@ CMVS::CBundle::CBundle() {
   // _puf = NULL;
   _puf2 = nullptr;
   _ptree = NULL;
-
-  mtx_init(&_lock, mtx_plain | mtx_recursive);
 }
 
 CMVS::CBundle::~CBundle() {}
@@ -673,7 +671,7 @@ void CMVS::CBundle::mergeSfMPThread(void) {
 
   while (1) {
     int pid = -1;
-    mtx_lock(&_lock);
+    _lock.lock();
     if (!_jobs.empty()) {
       pid = _jobs.front();
       _jobs.pop_front();
@@ -686,7 +684,7 @@ void CMVS::CBundle::mergeSfMPThread(void) {
       std::cerr << '*' << flush;
     }
     ++_count;
-    mtx_unlock(&_lock);
+    _lock.unlock();
 
     if (pid == -2) continue;
     if (pid == -1) break;
@@ -715,7 +713,7 @@ void CMVS::CBundle::mergeSfMPThread(void) {
     }
 
     // Now lock and try to register
-    mtx_lock(&_lock);
+    _lock.lock();
     // If the main one is removed, over... waste.
     if (_merged[pid] == 0) {
       _merged[pid] = 1;
@@ -728,7 +726,7 @@ void CMVS::CBundle::mergeSfMPThread(void) {
         }
       }
     }
-    mtx_unlock(&_lock);
+    _lock.unlock();
   }
 }
 
@@ -946,12 +944,12 @@ void CMVS::CBundle::setCluster(const int p) {
     _sfms2[p]._satisfied = 1;
 
     //  update _lacks
-    mtx_lock(&_lock);
+    _lock.lock();
     for (int i = 0; i < (int)_visibles[p].size(); ++i) {
       const int image = _visibles[p][i];
       --_lacks[image];
     }
-    mtx_unlock(&_lock);
+    _lock.unlock();
   }
 }
 

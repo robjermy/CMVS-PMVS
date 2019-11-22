@@ -11,16 +11,7 @@ PMVS3::CFindMatch::CFindMatch() : _pos(*this), _seed(*this), _expand(*this), _fi
   _debug = 0;
 }
 
-PMVS3::CFindMatch::~CFindMatch() {
-  mtx_destroy(&_lock);
-
-  for (int image = 0; image < (int)_imageLocks.size(); ++image) {
-    _imageLocks[image].destroy();
-  }
-  for (int image = 0; image < (int)_countLocks.size(); ++image) {
-    _countLocks[image].destroy();
-  }
-}
+PMVS3::CFindMatch::~CFindMatch() {}
 
 void PMVS3::CFindMatch::updateThreshold() {
   _nccThreshold -= 0.05f;
@@ -65,12 +56,10 @@ void PMVS3::CFindMatch::init(const SOption& option) {
   _visdata2 = option._visdata2;
 
   //----------------------------------------------------------------------
-  mtx_init(&_lock, mtx_plain | mtx_recursive);
-  _imageLocks.resize(_num);
-  _countLocks.resize(_num);
+  // mtx_init(&_lock, mtx_plain | mtx_recursive);
   for (int image = 0; image < _num; ++image) {
-    _imageLocks[image].init();
-    _countLocks[image].init();
+    _imageLocks.push_back(new std::shared_mutex());
+    _countLocks.push_back(new std::shared_mutex());
   }
   // We set _level + 3, to use multi-resolutional texture grabbing
   _pss.init(_images, _prefix, _level + 3, _wsize, 1);
