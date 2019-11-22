@@ -1,4 +1,5 @@
 #pragma once
+#include "graclus.hpp" // Include this early because std::chrono messes it up
 
 #include <vector>
 #include <string>
@@ -8,6 +9,8 @@
 #include <queue>
 #include <ctime>
 #include <time.h> // PM
+#include <mutex>
+#include <thread>
 
 #include "disjoint.hpp"
 #include "../stann/sfcnn.hpp"
@@ -233,7 +236,7 @@ namespace CMVS {
     //----------------------------------------------------------------------
     // Threads
     int _CPU;
-    mtx_t _lock;
+    std::mutex _lock;
     std::list<int> _jobs;
     int _junit;
     int _thread;

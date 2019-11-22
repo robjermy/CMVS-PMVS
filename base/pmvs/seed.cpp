@@ -108,23 +108,23 @@ void PMVS3::CSeed::run(void) {
 }
 
 void PMVS3::CSeed::initialMatchThread(void) {
-  mtx_lock(&_fm._lock);
+  _fm._lock.lock();
   const int id = _fm._count++;
-  mtx_unlock(&_fm._lock);
+  _fm._lock.unlock();
 
   while (1) {
     int index = -1;
-    mtx_lock(&_fm._lock);
+    _fm._lock.lock();
     if (!_fm._jobs.empty()) {
       index = _fm._jobs.front();
       _fm._jobs.pop_front();
     }
-    mtx_unlock(&_fm._lock);
+    _fm._lock.unlock();
 
     if (index == -1) break;
 
     initialMatch(index, id);
- }
+  }
 }
 
 void PMVS3::CSeed::clear(void) {

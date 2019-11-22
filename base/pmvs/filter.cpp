@@ -98,7 +98,7 @@ float PMVS3::CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
 
     float maxpressure = 0.0f;
     if (lock) {
-      _fm._imageLocks[index].rdlock();
+      _fm._imageLocks[index]->lock_shared();
     }
 
     for (int j = 0; j < (int)_fm._pos._pgrids[index][index2].size(); ++j) {
@@ -107,7 +107,7 @@ float PMVS3::CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
       }
     }
     if (lock) {
-      _fm._imageLocks[index].unlock();
+      _fm._imageLocks[index]->unlock();
     }
 
     gain -= maxpressure;
@@ -126,7 +126,7 @@ float PMVS3::CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
     float maxpressure = 0.0f;
 
     if (lock) {
-      _fm._imageLocks[index].rdlock();
+      _fm._imageLocks[index]->lock_shared();
     }
 
     for (int j = 0; j < (int)_fm._pos._pgrids[index][index2].size(); ++j) {
@@ -136,7 +136,7 @@ float PMVS3::CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
       }
     }
     if (lock) {
-      _fm._imageLocks[index].unlock();
+      _fm._imageLocks[index]->unlock();
     }
 
     gain -= maxpressure;
@@ -145,9 +145,9 @@ float PMVS3::CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
 }
 
 void PMVS3::CFilter::filterOutsideThread(void) {
-  mtx_lock(&_fm._lock);
+  _fm._lock.lock();
   const int id = _fm._count++;
-  mtx_unlock(&_fm._lock);
+  _fm._lock.unlock();
 
   const int size = (int)_fm._pos._ppatches.size();
   const int itmp = (int)ceil(size / (float)_fm._CPU);
@@ -300,9 +300,9 @@ void PMVS3::CFilter::filterExactThread(void) {
   removegrids.resize(psize);
 
   while (1) {
-    mtx_lock(&_fm._lock);
+    _fm._lock.lock();
     const int image = _fm._count++;
-    mtx_unlock(&_fm._lock);
+    _fm._lock.unlock();
 
     if (_fm._tnum <= image) break;
 
@@ -343,26 +343,26 @@ void PMVS3::CFilter::filterExactThread(void) {
     }
   }
 
-  mtx_lock(&_fm._lock);
+  _fm._lock.lock();
   for (int p = 0; p < psize; ++p) {
     _newimages[p].insert(_newimages[p].end(), newimages[p].begin(), newimages[p].end());
     _newgrids[p].insert(_newgrids[p].end(), newgrids[p].begin(), newgrids[p].end());
     _removeimages[p].insert(_removeimages[p].end(), removeimages[p].begin(), removeimages[p].end());
     _removegrids[p].insert(_removegrids[p].end(), removegrids[p].begin(), removegrids[p].end());
   }
-  mtx_unlock(&_fm._lock);
+  _fm._lock.unlock();
 }
 
 void PMVS3::CFilter::filterNeighborThread(void) {
   const int size = (int)_fm._pos._ppatches.size();
   while (1) {
     int jtmp = -1;
-    mtx_lock(&_fm._lock);
+    _fm._lock.lock();
     if (!_fm._jobs.empty()) {
       jtmp = _fm._jobs.front();
       _fm._jobs.pop_front();
     }
-    mtx_unlock(&_fm._lock);
+    _fm._lock.unlock();
     if (jtmp == -1) break;
 
     const int begin = _fm._junit * jtmp;
@@ -685,9 +685,9 @@ void PMVS3::CFilter::setDepthMaps(void) {
 
 void PMVS3::CFilter::setDepthMapsThread(void) {
   while (1) {
-    mtx_lock(&_fm._lock);
+    _fm._lock.lock();
     const int index = _fm._count++;
-    mtx_unlock(&_fm._lock);
+    _fm._lock.unlock();
 
     if (_fm._tnum <= index) break;
 
@@ -787,9 +787,9 @@ void PMVS3::CFilter::setVGridsVPGridsThread(void) {
   const int job = std::max(1, size / (noj - 1));
 
   while (1) {
-    mtx_lock(&_fm._lock);
+    _fm._lock.lock();
     const int id = _fm._count++;
-    mtx_unlock(&_fm._lock);
+    _fm._lock.unlock();
 
     const int begin = id * job;
     const int end = std::min(size, (id + 1) * job);
@@ -806,9 +806,9 @@ void PMVS3::CFilter::setVGridsVPGridsThread(void) {
 
 void PMVS3::CFilter::addPatchVThread(void) {
   while (1) {
-    mtx_lock(&_fm._lock);
+    _fm._lock.lock();
     const int index = _fm._count++;
-    mtx_unlock(&_fm._lock);
+    _fm._lock.unlock();
 
     if (_fm._tnum <= index) break;
 

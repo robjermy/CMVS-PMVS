@@ -14,9 +14,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # By default build in Release mode
-if(NOT CMAKE_BUILD_TYPE AND NOT MSVC)
-  set(CMAKE_BUILD_TYPE "Release")
-endif(NOT CMAKE_BUILD_TYPE AND NOT MSVC)
+# if(NOT CMAKE_BUILD_TYPE AND NOT MSVC)
+#   set(CMAKE_BUILD_TYPE "Release")
+# endif(NOT CMAKE_BUILD_TYPE AND NOT MSVC)
 
 add_subdirectory(lib)
 
@@ -24,8 +24,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/program/base/image
 	${CMAKE_SOURCE_DIR}/program/base/numeric
 	${CMAKE_SOURCE_DIR}/program/base/pmvs
-	${CMAKE_SOURCE_DIR}/thirdParty/
-	${CMAKE_SOURCE_DIR}/thirdParty/tinycthread
 )
 
 # Threads
@@ -79,4 +77,3 @@ endif(PMVS_USE_TIFF)
 
 add_subdirectory(base)
 add_subdirectory(main)
-add_subdirectory(thirdParty)

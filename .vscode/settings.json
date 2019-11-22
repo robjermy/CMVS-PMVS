@@ -76,7 +76,16 @@
     "*.ipp": "cpp",
     "shared_mutex": "cpp",
     "*.tcc": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "bit": "cpp",
+    "clocale": "cpp",
+    "condition_variable": "cpp",
+    "memory_resource": "cpp",
+    "hash_map": "cpp",
+    "slist": "cpp",
+    "future": "cpp",
+    "cfenv": "cpp",
+    "cinttypes": "cpp"
   },
   "files.watcherExclude": {
     "**/*-build/**": true,
