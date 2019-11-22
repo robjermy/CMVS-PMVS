@@ -9,7 +9,6 @@
 
 #include "nlopt.hpp"
 
-using namespace Patch;
 using namespace std;
 
 PMVS3::COptim* PMVS3::COptim::_one = NULL;
@@ -95,7 +94,7 @@ void PMVS3::COptim::collectImages(const int index, std::vector<int>& indexes) co
   }
 }
 
-int PMVS3::COptim::preProcess(CPatch& patch, const int id, const int seed) {
+int PMVS3::COptim::preProcess(Patch::CPatch& patch, const int id, const int seed) {
   addImages(patch);
 
   // Here define reference images, and sort images.
@@ -124,7 +123,7 @@ int PMVS3::COptim::preProcess(CPatch& patch, const int id, const int seed) {
   return 0;
 }
 
-void PMVS3::COptim::filterImagesByAngle(CPatch& patch) {
+void PMVS3::COptim::filterImagesByAngle(Patch::CPatch& patch) {
   vector<int> newindexes;
 
   auto bimage = patch._images.begin();
@@ -150,7 +149,7 @@ void PMVS3::COptim::filterImagesByAngle(CPatch& patch) {
   patch._images.swap(newindexes);
 }
 
-int PMVS3::COptim::postProcess(CPatch& patch, const int id, const int seed) {
+int PMVS3::COptim::postProcess(Patch::CPatch& patch, const int id, const int seed) {
   if ((int)patch._images.size() < _fm._minImageNumThreshold) return 1;
 
   if (_fm._pss.getMask(patch._coord, _fm._level) == 0 || _fm.insideBimages(patch._coord) == 0) return 1;
@@ -192,7 +191,7 @@ int PMVS3::COptim::postProcess(CPatch& patch, const int id, const int seed) {
   return 0;
 }
 
-void PMVS3::COptim::constraintImages(CPatch& patch, const float nccThreshold, const int id) {
+void PMVS3::COptim::constraintImages(Patch::CPatch& patch, const float nccThreshold, const int id) {
   vector<float> inccs;
   setINCCs(patch, inccs, patch._images, id, 0);
 
@@ -208,7 +207,7 @@ void PMVS3::COptim::constraintImages(CPatch& patch, const float nccThreshold, co
   patch._images.swap(newimages);
 }
 
-void PMVS3::COptim::setRefImage(CPatch& patch, const int id) {
+void PMVS3::COptim::setRefImage(Patch::CPatch& patch, const int id) {
 #ifdef DEBUG
   if (patch._images.empty()) {
     cerr << "empty images" << endl;    exit (1);
@@ -257,7 +256,7 @@ void PMVS3::COptim::setRefImage(CPatch& patch, const int id) {
 }
 
 // When no sampling was done, this is used
-void PMVS3::COptim::setRefConstraintImages(CPatch& patch, const float nccThreshold, const int id) {
+void PMVS3::COptim::setRefConstraintImages(Patch::CPatch& patch, const float nccThreshold, const int id) {
   //----------------------------------------------------------------------
   // Set the reference image
   vector<vector<float> > inccs;
@@ -284,7 +283,7 @@ void PMVS3::COptim::setRefConstraintImages(CPatch& patch, const float nccThresho
   patch._images.swap(newimages);
 }
 
-void PMVS3::COptim::sortImages(CPatch& patch) const{
+void PMVS3::COptim::sortImages(Patch::CPatch& patch) const{
   const int newm = 1;
   if (newm == 1) {
     const float threshold = 1.0f - cos(10.0 * M_PI / 180.0);
@@ -363,7 +362,7 @@ void PMVS3::COptim::sortImages(CPatch& patch) const{
   }
 }
 
-int PMVS3::COptim::check(CPatch& patch) {
+int PMVS3::COptim::check(Patch::CPatch& patch) {
   const float gain = _fm._filter.computeGain(patch, 1);
   patch._tmp = gain;
 
@@ -373,7 +372,7 @@ int PMVS3::COptim::check(CPatch& patch) {
   }
 
   {
-    vector<PPatch> neighbors;
+    vector<Patch::PPatch> neighbors;
     _fm._pos.findNeighbors(patch, neighbors, 1, 4, 2);
     // Only check when enough number of neighbors
     if (6 < (int)neighbors.size() && _fm._filter.filterQuad(patch, neighbors)) {
@@ -496,7 +495,7 @@ void PMVS3::COptim::computeUnits(const Patch::CPatch& patch, std::vector<int>& i
   }
 }
 
-void PMVS3::COptim::refinePatch(CPatch& patch, const int id, const int time) {
+void PMVS3::COptim::refinePatch(Patch::CPatch& patch, const int id, const int time) {
   if(!refinePatchBFGS(patch, id, 1000, 1)) {
 	  std::cout << "refinePatchBFGS failed!" << std::endl;
   }
@@ -580,7 +579,7 @@ double PMVS3::COptim::my_f(unsigned n, const double *x, double *grad, void *my_f
   return ret;
 }
 
-bool PMVS3::COptim::refinePatchBFGS(CPatch& patch, const int id, const int time, const int ncc)
+bool PMVS3::COptim::refinePatchBFGS(Patch::CPatch& patch, const int id, const int time, const int ncc)
 {
   int idtmp = id;
 
@@ -746,7 +745,7 @@ void PMVS3::COptim::setINCCs(const Patch::CPatch& patch, std::vector<float> & in
   }
 }
 
-void PMVS3::COptim::setINCCs(const Patch ::CPatch& patch, std::vector<std::vector<float> >& inccs, const std::vector<int>& indexes, const int id, const int robust) {
+void PMVS3::COptim::setINCCs(const Patch::CPatch& patch, std::vector<std::vector<float> >& inccs, const std::vector<int>& indexes, const int id, const int robust) {
   const int index = indexes[0];
   Vec4f pxaxis, pyaxis;
   getPAxes(index, patch._coord, patch._normal, pxaxis, pyaxis);
