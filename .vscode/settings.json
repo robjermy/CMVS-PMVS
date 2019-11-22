@@ -88,7 +88,6 @@
     "cinttypes": "cpp"
   },
   "files.watcherExclude": {
-    "**/*-build/**": true,
     "**/build/**": true,
     "**/data/**": true,
     "**/lib/**": true

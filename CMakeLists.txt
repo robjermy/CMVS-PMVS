@@ -8,7 +8,7 @@
 
 cmake_minimum_required(VERSION 3.15.0)
 
-project(CMVS-PMVS2 C CXX)
+project(cmvs3 C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
