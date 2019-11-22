@@ -1,7 +1,7 @@
 #pragma once
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 template<typename T>
 class TVec2 {

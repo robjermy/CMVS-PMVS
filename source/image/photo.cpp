@@ -1,4 +1,5 @@
 #include <fstream>
+
 #include "image/photo.hpp"
 
 Image::CPhoto::CPhoto() {}

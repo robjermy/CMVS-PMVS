@@ -1,9 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <set>
-#include "numeric/vec3.hpp"
+#include <vector>
+
 #include "detector.hpp"
+#include "numeric/vec3.hpp"
 #include "point.hpp"
 
 namespace PMVS3 {

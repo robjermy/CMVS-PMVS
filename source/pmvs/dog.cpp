@@ -1,4 +1,5 @@
 #include <algorithm>
+
 #include "pmvs/dog.hpp"
 #include "pmvs/point.hpp"
 

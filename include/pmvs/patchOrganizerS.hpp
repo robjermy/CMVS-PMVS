@@ -1,7 +1,8 @@
 #pragma once
 
-#include "patch.hpp"
 #include <queue>
+
+#include "patch.hpp"
 
 namespace PMVS3 {
   class CFindMatch;

@@ -4,8 +4,8 @@
  * A main class to detect features
  */
 #include <list>
-#include <string>
 #include <shared_mutex>
+#include <string>
 
 #include "image/photoSetS.hpp"
 #include "point.hpp"

@@ -1,6 +1,6 @@
 #include <fstream>
 #include <iterator>
-#include <numeric> //PM
+#include <numeric>
 #include <random>
 
 #include "cmvs/bundle.hpp"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "numeric/vec4.hpp"
 #include "numeric/mat3.hpp"
+#include "numeric/vec4.hpp"
 
 namespace PMVS3 {
   class CPoint {

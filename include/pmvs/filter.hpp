@@ -1,9 +1,10 @@
 #pragma once
 
-#include "patch.hpp"
 #include <list>
 #include <thread>
+
 #include "numeric/vec2.hpp"
+#include "patch.hpp"
 
 namespace PMVS3 {
   class CFindMatch;

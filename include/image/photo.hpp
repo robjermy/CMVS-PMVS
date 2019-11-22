@@ -1,8 +1,8 @@
 #pragma once
 
-#include "numeric/vec4.hpp"
-#include "image.hpp"
 #include "camera.hpp"
+#include "image.hpp"
+#include "numeric/vec4.hpp"
 
 namespace Image {
   // CPhoto is an image with camera parameters

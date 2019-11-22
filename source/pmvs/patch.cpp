@@ -1,4 +1,5 @@
 #include <string>
+
 #include "numeric/vec4.hpp"
 #include "pmvs/patch.hpp"
 

@@ -1,11 +1,10 @@
-#include <time.h>
-#include <numeric>
 #include <ctime>
-#include <time.h>
+#include <numeric>
 #include <random>
 #include <thread>
-#include "pmvs/seed.hpp"
+
 #include "pmvs/findMatch.hpp"
+#include "pmvs/seed.hpp"
 
 PMVS3::CSeed::CSeed(CFindMatch& findMatch) : _fm(findMatch) {}
 

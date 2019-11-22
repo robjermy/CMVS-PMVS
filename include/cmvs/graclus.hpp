@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+
 extern "C"
 {
 	#include <metis.h>

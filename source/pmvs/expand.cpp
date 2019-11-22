@@ -1,14 +1,14 @@
 #define _USE_MATH_DEFINES
-#include <cmath>
-
 #include <algorithm>
-#include <numeric>
+#include <cmath>
 #include <iterator>
+#include <numeric>
 #include <thread>
+#include "time.h"
+
 #include "pmvs/expand.hpp"
 #include "pmvs/findMatch.hpp"
 
-#include "time.h"
 
 PMVS3::CExpand::CExpand(CFindMatch& findMatch) : _fm(findMatch) {}
 

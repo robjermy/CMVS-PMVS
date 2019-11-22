@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+
 #include "patch.hpp"
 #include "point.hpp"
 

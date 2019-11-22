@@ -1,9 +1,9 @@
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <stdio.h>
-#include <stdlib.h>
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {

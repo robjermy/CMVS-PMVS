@@ -1,6 +1,7 @@
 #include <iostream>
-#include <vector>
 #include <list>
+#include <vector>
+
 #include "cmvs/bundle.hpp"
 
 int main(int argc, char* argv[]) {

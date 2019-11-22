@@ -1,11 +1,11 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
-
 #include <iomanip>
 #include <limits>
 #include <string>
-#include "pmvs/patchOrganizerS.hpp"
+
 #include "pmvs/findMatch.hpp"
+#include "pmvs/patchOrganizerS.hpp"
 
 Patch::PPatch PMVS3::CPatchOrganizerS::_MAXDEPTH(new Patch::CPatch());
 Patch::PPatch PMVS3::CPatchOrganizerS::_BACKGROUND(new Patch::CPatch());

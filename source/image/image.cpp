@@ -1,13 +1,15 @@
-#include <list>
-#include <fstream>
+#define _USE_MATH_DEFINES
+
 #include <algorithm>
+#include <fstream>
+#include <jpeglib.h>
+#include <list>
+#include <math.h>
+#include <setjmp.h>
+
 #include "numeric/mat4.hpp"
 #include "image/image.hpp"
-#include <setjmp.h>
-#define _USE_MATH_DEFINES
-#include <math.h>
 
-#include <jpeglib.h>
 
 // CImg
 #define cimg_display 0

@@ -1,5 +1,6 @@
-#include "pmvs/point.hpp"
 #include <iostream>
+
+#include "pmvs/point.hpp"
 
 PMVS3::CPoint::CPoint(void) {
   _response = -1.0;

@@ -1,8 +1,10 @@
-#include <fstream>
-#include <algorithm>
-#include "image/photoSetS.hpp"
 #define _USE_MATH_DEFINES
+
+#include <algorithm>
+#include <fstream>
 #include <math.h>
+
+#include "image/photoSetS.hpp"
 
 Image::CPhotoSetS::CPhotoSetS() {}
 Image::CPhotoSetS::~CPhotoSetS() {}

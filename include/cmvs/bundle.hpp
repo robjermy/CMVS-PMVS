@@ -1,21 +1,21 @@
 #pragma once
 #include "graclus.hpp" // Include this early because std::chrono messes it up
 
-#include <vector>
-#include <string>
-#include <list>
-#include <map>
-#include <set>
-#include <queue>
 #include <ctime>
-#include <time.h> // PM
+#include <map>
+#include <list>
 #include <mutex>
+#include <queue>
+#include <set>
+#include <string>
 #include <thread>
+#include <time.h>
+#include <vector>
 
 #include "disjoint.hpp"
-#include "stann/sfcnn.hpp"
-#include "numeric/mat3.hpp"
 #include "image/photoSetS.hpp"
+#include "numeric/mat3.hpp"
+#include "stann/sfcnn.hpp"
 
 namespace CMVS {
   struct Sadd {

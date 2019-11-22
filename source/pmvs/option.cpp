@@ -1,10 +1,11 @@
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
 #define _USE_MATH_DEFINES
-#include <math.h>
-#include "pmvs/option.hpp"
 #include <algorithm>
+#include <cstdlib>
+#include <cmath>
+#include <fstream>
+#include <iostream>
+
+#include "pmvs/option.hpp"
 
 PMVS3::SOption::SOption(void) {
   _level = 1;

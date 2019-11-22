@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+
 #include "point.hpp"
 
 namespace PMVS3 {

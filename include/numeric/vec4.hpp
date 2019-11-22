@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+
 #include "vec3.hpp"
 
 template<typename T>

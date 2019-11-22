@@ -1,11 +1,9 @@
 
-#include "numeric/mylapack.hpp"
 #include <cstdlib>
+#include <Eigen/Dense>
 #include <iostream>
 
-// Use Eigen library or LAPACK
-//#define PMVS_USE_LAPACK
-#include <Eigen/Dense>
+#include "numeric/mylapack.hpp"
 
 #if defined(PMVS_USE_LAPACK)
 extern "C" {

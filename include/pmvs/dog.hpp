@@ -2,8 +2,9 @@
 
 #include <set>
 #include <vector>
-#include "numeric/vec3.hpp"
+
 #include "detector.hpp"
+#include "numeric/vec3.hpp"
 #include "point.hpp"
 
 namespace PMVS3 {

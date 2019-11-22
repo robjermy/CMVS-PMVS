@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include "cmvs/graclus.hpp"
 
 CMVS::CGraclus::CGraclus() {}

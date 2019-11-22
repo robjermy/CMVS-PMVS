@@ -1,23 +1,23 @@
 #pragma once
 
-#include <vector>
-#include <list>
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <list>
 #include <queue>
-#include "patch.hpp"
+#include <shared_mutex>
+#include <string>
+#include <thread>
+#include <vector>
 
-#include "image/photoSetS.hpp"
-#include "patchOrganizerS.hpp"
-#include "seed.hpp"
 #include "expand.hpp"
 #include "filter.hpp"
+#include "image/photoSetS.hpp"
 #include "optim.hpp"
 #include "option.hpp"
+#include "patch.hpp"
+#include "patchOrganizerS.hpp"
+#include "seed.hpp"
 
-#include <shared_mutex>
-#include <thread>
 
 namespace PMVS3 {
   class CFindMatch {

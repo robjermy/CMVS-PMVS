@@ -1,4 +1,5 @@
 #include <algorithm>
+
 #include "pmvs/harris.hpp"
 
 void PMVS3::CHarris::init(

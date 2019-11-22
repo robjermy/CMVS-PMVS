@@ -1,7 +1,9 @@
-#include <fstream>
-#include <cstdlib>
-#include "image/camera.hpp"
 #define _USE_MATH_DEFINES
+
+#include <cstdlib>
+#include <fstream>
+
+#include "image/camera.hpp"
 #include <math.h>
 
 Image::CCamera::CCamera() : _axesScale(1.f), _maxLevel(1) {}

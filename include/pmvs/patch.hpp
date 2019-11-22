@@ -1,8 +1,9 @@
 #pragma once
 
-#include <vector>
 #include <iostream>
 #include <memory>
+#include <vector>
+
 #include "numeric/vec4.hpp"
 
 namespace Patch {

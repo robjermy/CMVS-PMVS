@@ -1,13 +1,13 @@
 #define _USE_MATH_DEFINES
-#include <cmath>
 
 #include <algorithm>
-#include <numeric>
-#include "pmvs/findMatch.hpp"
-#include "pmvs/optim.hpp"
+#include <cmath>
 #include <cstdio>
+#include <numeric>
 
 #include "nlopt.hpp"
+#include "pmvs/optim.hpp"
+#include "pmvs/findMatch.hpp"
 
 PMVS3::COptim* PMVS3::COptim::_one = NULL;
 

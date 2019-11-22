@@ -1,14 +1,14 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <thread>
+
 #include "image/image.hpp"
 #include "pmvs/detectFeatures.hpp"
-#include "pmvs/harris.hpp"
 #include "pmvs/dog.hpp"
+#include "pmvs/harris.hpp"
 #include "pmvs/point.hpp"
 
 PMVS3::CDetectFeatures::CDetectFeatures() {}
-
 PMVS3::CDetectFeatures::~CDetectFeatures() {}
 
 void PMVS3::CDetectFeatures::run(

@@ -1,11 +1,11 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include <map>
 #include <ctime>
-#include <time.h>
-#include "pmvs/findMatch.hpp"
+#include <map>
+
 #include "pmvs/detectFeatures.hpp"
+#include "pmvs/findMatch.hpp"
 
 PMVS3::CFindMatch::CFindMatch() : _pos(*this), _seed(*this), _expand(*this), _filter(*this), _optim(*this) {
   _debug = 0;

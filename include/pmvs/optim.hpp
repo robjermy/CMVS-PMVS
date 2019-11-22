@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+
 #include "patch.hpp"
 
 namespace PMVS3 {

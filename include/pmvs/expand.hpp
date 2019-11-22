@@ -1,8 +1,9 @@
 #pragma once
 
-#include <vector>
-#include <queue>
 #include <list>
+#include <queue>
+#include <vector>
+
 #include "patchOrganizerS.hpp"
 
 namespace PMVS3 {

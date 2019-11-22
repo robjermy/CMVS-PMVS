@@ -1,7 +1,8 @@
-#include <set>
 #include <algorithm>
-#include "pmvs/point.hpp"
+#include <set>
+
 #include "pmvs/detector.hpp"
+#include "pmvs/point.hpp"
 
 void PMVS3::CDetector::setGaussD(const float sigmaD, std::vector<float>& gaussD) {
   const int marginD = (int)ceil(2 * sigmaD);

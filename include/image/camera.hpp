@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "numeric/vec4.hpp"
-#include "numeric/mat4.hpp"
 #include "numeric/mat3.hpp"
+#include "numeric/mat4.hpp"
+#include "numeric/vec4.hpp"
 
 namespace Image {
   class CCamera {
