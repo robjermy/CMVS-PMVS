@@ -67,15 +67,12 @@ if(PMVS_USE_TIFF)
   endif()
 endif()
 
-set(CMVS_BASE_INCLUDE_DIR
-  ${CMAKE_CURRENT_SOURCE_DIR}/base
+set(CMVS_INCLUDE_DIR
+	${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # external libraries
 add_subdirectory(lib)
 
-# base functionality
-add_subdirectory(base)
-
-# main executables
-add_subdirectory(main)
+# source code
+add_subdirectory(source)
