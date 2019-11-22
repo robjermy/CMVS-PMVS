@@ -1,11 +1,3 @@
-# CMake powered build system for CMVS
-# Create by Pierre Moulon
-# First draft the 4 june 2010
-# Second draft 24 sept 2010
-# Third draft (linux) 12 oct 2010
-# 28 july 2014 Make VisualStudio Win32/Win64 detection automatic
-# 15.01.2015 Added tinycthread, nlopt, CImg, removed BLAS, LAPACK, GSL, lmfit, winpthread (R. Hiestand)
-
 cmake_minimum_required(VERSION 3.6)
 
 project(cmvs3 VERSION 3.0.0 LANGUAGES CXX)
