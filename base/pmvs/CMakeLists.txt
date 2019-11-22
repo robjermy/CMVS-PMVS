@@ -1,0 +1,30 @@
+add_library(pmvs_lib
+	detectFeatures.hpp
+	detectFeatures.cpp
+	detector.hpp
+	detector.cpp
+  dog.hpp
+  dog.cpp
+  expand.hpp
+  expand.cpp
+  filter.hpp
+  filter.cpp
+  findMatch.hpp
+  findMatch.cpp
+  harris.hpp
+  harris.cpp
+  optim.hpp
+  optim.cpp
+  option.hpp
+  option.cpp
+  patch.hpp
+  patch.cpp
+  patchOrganizerS.hpp
+  patchOrganizerS.cpp
+  point.hpp
+  point.cpp
+  seed.hpp
+  seed.cpp
+)
+
+target_include_directories(pmvs_lib PUBLIC ${CMAKE_SOURCE_DIR}/lib/cimg)
