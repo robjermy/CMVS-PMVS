@@ -17,10 +17,10 @@ void PMVS3::CExpand::init() {}
 void PMVS3::CExpand::run() {
   _fm.Count() = 0;
   _fm.Jobs().clear();
-  _ecounts.resize(_fm._CPU);
-  _fcounts0.resize(_fm._CPU);
-  _fcounts1.resize(_fm._CPU);
-  _pcounts.resize(_fm._CPU);
+  _ecounts.resize(_fm.CPU());
+  _fcounts0.resize(_fm.CPU());
+  _fcounts1.resize(_fm.CPU());
+  _pcounts.resize(_fm.CPU());
 
   fill(_ecounts.begin(), _ecounts.end(), 0);
   fill(_fcounts0.begin(), _fcounts0.end(), 0);
@@ -29,23 +29,23 @@ void PMVS3::CExpand::run() {
 
   time_t starttime = time(NULL);
 
-  _fm._pos.clearCounts();
-  _fm._pos.clearFlags();
+  _fm.PatchOrganizer().clearCounts();
+  _fm.PatchOrganizer().clearFlags();
 
   if (!_queue.empty()) {
     std::cerr << "Queue is not empty in expand" << std::endl;
     exit (1);
   }
   // set queue
-  _fm._pos.collectPatches(_queue);
+  _fm.PatchOrganizer().collectPatches(_queue);
 
   std::cerr << "Expanding patches..." << std::flush;
-  std::vector<std::thread> threads(_fm._CPU);
-  for (int c = 0; c < _fm._CPU; ++c) {
+  std::vector<std::thread> threads(_fm.CPU());
+  for (int c = 0; c < _fm.CPU(); ++c) {
     threads[c] = std::thread(&CExpand::expandThread, this);
   }
 
-  for (int c = 0; c < _fm._CPU; ++c) {
+  for (int c = 0; c < _fm.CPU(); ++c) {
     // thrd_join(threads[c], NULL);
     if (threads[c].joinable()) {
       threads[c].join();
@@ -137,7 +137,7 @@ void PMVS3::CExpand::findEmptyBlocks(const Patch::PPatch& ppatch, std::vector<st
   const float radiushigh = radius * 2.5f;//2.0f;//1.5f;
 
   std::vector<Patch::PPatch> neighbors;
-  _fm._pos.findNeighbors(patch, neighbors, 1, 4.0f);//3.0f);
+  _fm.PatchOrganizer().findNeighbors(patch, neighbors, 1, 4.0f);//3.0f);
 
   auto bpatch = neighbors.begin();
   auto epatch = neighbors.end();
@@ -182,7 +182,7 @@ void PMVS3::CExpand::findEmptyBlocks(const Patch::PPatch& ppatch, std::vector<st
 float PMVS3::CExpand::computeRadius(const Patch::CPatch& patch) {
   const int minnum = 2;
   std::vector<float> units;
-  _fm._optim.computeUnits(patch, units);
+  _fm.Optimizer().computeUnits(patch, units);
   std::vector<float> vftmp = units;
 #ifdef DEBUG
   if ((int)units.size() < minnum) {
@@ -194,7 +194,7 @@ float PMVS3::CExpand::computeRadius(const Patch::CPatch& patch) {
   std::nth_element(vftmp.begin(), vftmp.begin() + minnum - 1, vftmp.end());
   // Threshold is the second smallest value with some margin
   // ??? critical
-  return (*(vftmp.begin() + minnum - 1)) * _fm._csize;
+  return (*(vftmp.begin() + minnum - 1)) * _fm.CSize();
 }
 
 int PMVS3::CExpand::expandSub(const Patch::PPatch& orgppatch, const int id, const Vec4f& canCoord) {
@@ -204,34 +204,34 @@ int PMVS3::CExpand::expandSub(const Patch::PPatch& orgppatch, const int id, cons
   patch._normal = orgppatch->_normal;
   patch._flag = 1;
 
-  _fm._pos.setGridsImages(patch, orgppatch->_images);
+  _fm.PatchOrganizer().setGridsImages(patch, orgppatch->_images);
   if (patch._images.empty()) return 1;
 
   //-----------------------------------------------------------------
   // Check bimages and mask. Then, initialize possible visible images
-  if (_fm._pss.getMask(patch._coord, _fm._level) == 0 || _fm.insideBimages(patch._coord) == 0) return 1;
+  if (_fm.PhotoSets().getMask(patch._coord, _fm.Level()) == 0 || _fm.insideBimages(patch._coord) == 0) return 1;
 
   // Check _counts and maybe _pgrids
   const int flag = checkCounts(patch);
   if (flag) return 1;
 
   // Check edge
-  _fm._optim.removeImagesEdge(patch);
+  _fm.Optimizer().removeImagesEdge(patch);
   if (patch._images.empty()) return 1;
 
   ++_ecounts[id];
   //-----------------------------------------------------------------
   // Preprocess
-  if (_fm._optim.preProcess(patch, id, 0)) {
+  if (_fm.Optimizer().preProcess(patch, id, 0)) {
     ++_fcounts0[id];
     return 1;
   }
 
   //-----------------------------------------------------------------
-  _fm._optim.refinePatch(patch, id, 100);
+  _fm.Optimizer().refinePatch(patch, id, 100);
 
   //-----------------------------------------------------------------
-  if (_fm._optim.postProcess(patch, id, 0)) {
+  if (_fm.Optimizer().postProcess(patch, id, 0)) {
     ++_fcounts1[id];
     return 1;
   }
@@ -244,7 +244,7 @@ int PMVS3::CExpand::expandSub(const Patch::PPatch& orgppatch, const int id, cons
   //patch._images = orgppatch->_images;
   const int add = updateCounts(patch);
 
-  _fm._pos.addPatch(ppatch);
+  _fm.PatchOrganizer().addPatch(ppatch);
 
   if (add) {
     _fm.Lock();
@@ -271,17 +271,17 @@ int PMVS3::CExpand::checkCounts(Patch::CPatch& patch) {
     }
 
     const int ix = (*begin2)[0];    const int iy = (*begin2)[1];
-    if (ix < 0 || _fm._pos._gwidths[index] <= ix || iy < 0 || _fm._pos._gheights[index] <= iy) {
+    if (ix < 0 || _fm.PatchOrganizer()._gwidths[index] <= ix || iy < 0 || _fm.PatchOrganizer()._gheights[index] <= iy) {
       ++begin;
       ++begin2;
       continue;
     }
 
-    const int index2 = iy * _fm._pos._gwidths[index] + ix;
+    const int index2 = iy * _fm.PatchOrganizer()._gwidths[index] + ix;
 
     int flag = 0;
 	  _fm.LockSharedImage(index);;
-    if (!_fm._pos._pgrids[index][index2].empty()) {
+    if (!_fm.PatchOrganizer()._pgrids[index][index2].empty()) {
       flag = 1;
     }
 	  _fm.UnlockSharedImage(index);
@@ -295,7 +295,7 @@ int PMVS3::CExpand::checkCounts(Patch::CPatch& patch) {
 
     //mtx_lock(&_fm._countLocks[index]);
 	  _fm.LockSharedCount(index);
-    if (_fm._countThreshold1 <= _fm._pos._counts[index][index2]) {
+    if (_fm.CountThreshold1() <= _fm.PatchOrganizer()._counts[index][index2]) {
       ++full;
     } else {
       ++empty;
@@ -306,15 +306,15 @@ int PMVS3::CExpand::checkCounts(Patch::CPatch& patch) {
   }
 
   //First expansion is expensive and make the condition strict
-  if (_fm._depth <= 1) {
-    if (empty < _fm._minImageNumThreshold && full != 0) {
+  if (_fm.Depth() <= 1) {
+    if (empty < _fm.MinImageNumThreshold() && full != 0) {
       return 1;
     } else {
       return 0;
     }
   }
   else {
-    if (empty < _fm._minImageNumThreshold - 1 && full != 0) {
+    if (empty < _fm.MinImageNumThreshold() - 1 && full != 0) {
       return 1;
     } else {
       return 0;
@@ -340,21 +340,21 @@ int PMVS3::CExpand::updateCounts(const Patch::CPatch& patch) {
 
       const int ix = (*begin2)[0];
       const int iy = (*begin2)[1];
-      if (ix < 0 || _fm._pos._gwidths[index] <= ix || iy < 0 || _fm._pos._gheights[index] <= iy) {
+      if (ix < 0 || _fm.PatchOrganizer()._gwidths[index] <= ix || iy < 0 || _fm.PatchOrganizer()._gheights[index] <= iy) {
         ++begin;
         ++begin2;
         continue;
       }
 
-      const int index2 = iy * _fm._pos._gwidths[index] + ix;
+      const int index2 = iy * _fm.PatchOrganizer()._gwidths[index] + ix;
 
 	    _fm.LockSharedCount(index);
-      if (_fm._countThreshold1 <= _fm._pos._counts[index][index2]) {
+      if (_fm.CountThreshold1() <= _fm.PatchOrganizer()._counts[index][index2]) {
         ++full;
       } else {
         ++empty;
       }
-      ++_fm._pos._counts[index][index2];
+      ++_fm.PatchOrganizer()._counts[index][index2];
 	    _fm.UnlockSharedCount(index);
       ++begin;
       ++begin2;
@@ -377,21 +377,21 @@ int PMVS3::CExpand::updateCounts(const Patch::CPatch& patch) {
 
       const int ix = (*begin2)[0];
       const int iy = (*begin2)[1];
-      if (ix < 0 || _fm._pos._gwidths[index] <= ix || iy < 0 || _fm._pos._gheights[index] <= iy) {
+      if (ix < 0 || _fm.PatchOrganizer()._gwidths[index] <= ix || iy < 0 || _fm.PatchOrganizer()._gheights[index] <= iy) {
         ++begin;
         ++begin2;
         continue;
       }
 
-      const int index2 = iy * _fm._pos._gwidths[index] + ix;
+      const int index2 = iy * _fm.PatchOrganizer()._gwidths[index] + ix;
 
 	    _fm.LockSharedCount(index);
-      if (_fm._countThreshold1 <= _fm._pos._counts[index][index2]) {
+      if (_fm.CountThreshold1() <= _fm.PatchOrganizer()._counts[index][index2]) {
         ++full;
       } else {
         ++empty;
       }
-      ++_fm._pos._counts[index][index2];
+      ++_fm.PatchOrganizer()._counts[index][index2];
 	    _fm.UnlockSharedCount(index);
       ++begin;
       ++begin2;

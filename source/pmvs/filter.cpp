@@ -31,20 +31,20 @@ void PMVS3::CFilter::filterOutside(void) {
   time_t curtime = tv;
   std::cerr << "FilterOutside" << std::endl;
   //??? notice (1) here to avoid removing _fix=1
-  _fm._pos.collectPatches(1);
+  _fm.PatchOrganizer().collectPatches(1);
 
-  const int psize = (int)_fm._pos._ppatches.size();
+  const int psize = (int)_fm.PatchOrganizer()._ppatches.size();
   _gains.resize(psize);
 
   std::cerr << "mainbody: " << std::flush;
 
   _fm.Count() = 0;
-  std::vector<std::thread> threads(_fm._CPU);
-  for (int i = 0; i < _fm._CPU; ++i) {
+  std::vector<std::thread> threads(_fm.CPU());
+  for (int i = 0; i < _fm.CPU(); ++i) {
     threads[i] = std::thread(&CFilter::filterOutsideThread, this);
   }
 
-  for (int i = 0; i < _fm._CPU; ++i) {
+  for (int i = 0; i < _fm.CPU(); ++i) {
     if (threads[i].joinable()) {
       threads[i].join();
     }
@@ -64,7 +64,7 @@ void PMVS3::CFilter::filterOutside(void) {
     ++denom;
 
     if (_gains[p] < 0.0) {
-      _fm._pos.removePatch(_fm._pos._ppatches[p]);
+      _fm.PatchOrganizer().removePatch(_fm.PatchOrganizer()._ppatches[p]);
       count++;
     }
   }
@@ -78,14 +78,14 @@ void PMVS3::CFilter::filterOutside(void) {
   std::cerr << "Gain (ave/var): " << ave << ' ' << ave2 << std::endl;
 
   time(&tv);
-  std::cerr << (int)_fm._pos._ppatches.size() << " -> "
-       << (int)_fm._pos._ppatches.size() - count << " ("
-       << 100 * ((int)_fm._pos._ppatches.size() - count) / (float)_fm._pos._ppatches.size()
+  std::cerr << (int)_fm.PatchOrganizer()._ppatches.size() << " -> "
+       << (int)_fm.PatchOrganizer()._ppatches.size() - count << " ("
+       << 100 * ((int)_fm.PatchOrganizer()._ppatches.size() - count) / (float)_fm.PatchOrganizer()._ppatches.size()
        << "%)\t" << (tv - curtime) / CLOCKS_PER_SEC << " secs" << std::endl;
 }
 
 float PMVS3::CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
-  float gain = patch.score2(_fm._nccThreshold);
+  float gain = patch.score2(_fm.NCCThreshold());
 
   const int size = (int)patch._images.size();
   for (int i = 0; i < size; ++i) {
@@ -94,16 +94,16 @@ float PMVS3::CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
 
     const int& ix = patch._grids[i][0];
     const int& iy = patch._grids[i][1];
-    const int index2 = iy * _fm._pos._gwidths[index] + ix;
+    const int index2 = iy * _fm.PatchOrganizer()._gwidths[index] + ix;
 
     float maxpressure = 0.0f;
     if (lock) {
       _fm.LockSharedImage(index);
     }
 
-    for (int j = 0; j < (int)_fm._pos._pgrids[index][index2].size(); ++j) {
-      if (!_fm.isNeighbor(patch, *_fm._pos._pgrids[index][index2][j], _fm._neighborThreshold1)) {
-        maxpressure = std::max(maxpressure, _fm._pos._pgrids[index][index2][j]->_ncc - _fm._nccThreshold);
+    for (int j = 0; j < (int)_fm.PatchOrganizer()._pgrids[index][index2].size(); ++j) {
+      if (!_fm.isNeighbor(patch, *_fm.PatchOrganizer()._pgrids[index][index2][j], _fm.NeighborThreshold1())) {
+        maxpressure = std::max(maxpressure, _fm.PatchOrganizer()._pgrids[index][index2][j]->_ncc - _fm.NCCThreshold());
       }
     }
     if (lock) {
@@ -118,21 +118,21 @@ float PMVS3::CFilter::computeGain(const Patch::CPatch& patch, const int lock) {
     const int& index = patch._vimages[i];
     if (_fm.NumTargetImages() <= index) continue;
 
-    const float pdepth = _fm._pss.computeDepth(index, patch._coord);
+    const float pdepth = _fm.PhotoSets().computeDepth(index, patch._coord);
 
     const int& ix = patch._vgrids[i][0];
     const int& iy = patch._vgrids[i][1];
-    const int index2 = iy * _fm._pos._gwidths[index] + ix;
+    const int index2 = iy * _fm.PatchOrganizer()._gwidths[index] + ix;
     float maxpressure = 0.0f;
 
     if (lock) {
       _fm.LockSharedImage(index);
     }
 
-    for (int j = 0; j < (int)_fm._pos._pgrids[index][index2].size(); ++j) {
-      const float bdepth = _fm._pss.computeDepth(index, _fm._pos._pgrids[index][index2][j]->_coord);
-      if (pdepth < bdepth && !_fm.isNeighbor(patch, *_fm._pos._pgrids[index][index2][j], _fm._neighborThreshold1)) {
-        maxpressure = std::max(maxpressure, _fm._pos._pgrids[index][index2][j]->_ncc - _fm._nccThreshold);
+    for (int j = 0; j < (int)_fm.PatchOrganizer()._pgrids[index][index2].size(); ++j) {
+      const float bdepth = _fm.PhotoSets().computeDepth(index, _fm.PatchOrganizer()._pgrids[index][index2][j]->_coord);
+      if (pdepth < bdepth && !_fm.isNeighbor(patch, *_fm.PatchOrganizer()._pgrids[index][index2][j], _fm.NeighborThreshold1())) {
+        maxpressure = std::max(maxpressure, _fm.PatchOrganizer()._pgrids[index][index2][j]->_ncc - _fm.NCCThreshold());
       }
     }
     if (lock) {
@@ -149,14 +149,14 @@ void PMVS3::CFilter::filterOutsideThread(void) {
   const int id = _fm.Count()++;
   _fm.Unlock();
 
-  const int size = (int)_fm._pos._ppatches.size();
-  const int itmp = (int)ceil(size / (float)_fm._CPU);
+  const int size = (int)_fm.PatchOrganizer()._ppatches.size();
+  const int itmp = (int)ceil(size / (float)_fm.CPU());
   const int begin = id * itmp;
   const int end = std::min(size, (id + 1) * itmp);
 
   for (int p = begin; p < end; ++p) {
-    Patch::PPatch& ppatch = _fm._pos._ppatches[p];
-    _gains[p] = ppatch->score2(_fm._nccThreshold);
+    Patch::PPatch& ppatch = _fm.PatchOrganizer()._ppatches[p];
+    _gains[p] = ppatch->score2(_fm.NCCThreshold());
 
     const int size = (int)ppatch->_images.size();
     for (int i = 0; i < size; ++i) {
@@ -165,12 +165,12 @@ void PMVS3::CFilter::filterOutsideThread(void) {
 
       const int& ix = ppatch->_grids[i][0];
       const int& iy = ppatch->_grids[i][1];
-      const int index2 = iy * _fm._pos._gwidths[index] + ix;
+      const int index2 = iy * _fm.PatchOrganizer()._gwidths[index] + ix;
 
       float maxpressure = 0.0f;
-      for (int j = 0; j < (int)_fm._pos._pgrids[index][index2].size(); ++j) {
-	      if (!_fm.isNeighbor(*ppatch, *_fm._pos._pgrids[index][index2][j], _fm._neighborThreshold1))
-	        maxpressure = std::max(maxpressure, _fm._pos._pgrids[index][index2][j]->_ncc - _fm._nccThreshold);
+      for (int j = 0; j < (int)_fm.PatchOrganizer()._pgrids[index][index2].size(); ++j) {
+	      if (!_fm.isNeighbor(*ppatch, *_fm.PatchOrganizer()._pgrids[index][index2][j], _fm.NeighborThreshold1()))
+	        maxpressure = std::max(maxpressure, _fm.PatchOrganizer()._pgrids[index][index2][j]->_ncc - _fm.NCCThreshold());
       }
 
       _gains[p] -= maxpressure;
@@ -181,17 +181,17 @@ void PMVS3::CFilter::filterOutsideThread(void) {
       const int& index = ppatch->_vimages[i];
       if (_fm.NumTargetImages() <= index) continue;
 
-      const float pdepth = _fm._pss.computeDepth(index, ppatch->_coord);
+      const float pdepth = _fm.PhotoSets().computeDepth(index, ppatch->_coord);
 
       const int& ix = ppatch->_vgrids[i][0];
       const int& iy = ppatch->_vgrids[i][1];
-      const int index2 = iy * _fm._pos._gwidths[index] + ix;
+      const int index2 = iy * _fm.PatchOrganizer()._gwidths[index] + ix;
       float maxpressure = 0.0f;
 
-      for (int j = 0; j < (int)_fm._pos._pgrids[index][index2].size(); ++j) {
-        const float bdepth = _fm._pss.computeDepth(index, _fm._pos._pgrids[index][index2][j]->_coord);
-        if (pdepth < bdepth && !_fm.isNeighbor(*ppatch, *_fm._pos._pgrids[index][index2][j], _fm._neighborThreshold1)) {
-	        maxpressure = std::max(maxpressure, _fm._pos._pgrids[index][index2][j]->_ncc - _fm._nccThreshold);
+      for (int j = 0; j < (int)_fm.PatchOrganizer()._pgrids[index][index2].size(); ++j) {
+        const float bdepth = _fm.PhotoSets().computeDepth(index, _fm.PatchOrganizer()._pgrids[index][index2][j]->_coord);
+        if (pdepth < bdepth && !_fm.isNeighbor(*ppatch, *_fm.PatchOrganizer()._pgrids[index][index2][j], _fm.NeighborThreshold1())) {
+	        maxpressure = std::max(maxpressure, _fm.PatchOrganizer()._pgrids[index][index2][j]->_ncc - _fm.NCCThreshold());
         }
       }
       _gains[p] -= maxpressure;
@@ -206,8 +206,8 @@ void PMVS3::CFilter::filterExact(void) {
   std::cerr << "Filter Exact: " << std::flush;
 
   //??? cannot use (1) because we use patch._id to set newimages,....
-  _fm._pos.collectPatches();
-  const int psize = (int)_fm._pos._ppatches.size();
+  _fm.PatchOrganizer().collectPatches();
+  const int psize = (int)_fm.PatchOrganizer()._ppatches.size();
 
   // dis associate images
   _newimages.clear();
@@ -221,12 +221,12 @@ void PMVS3::CFilter::filterExact(void) {
   _removegrids.resize(psize);
 
   _fm.Count() = 0;
-  std::vector<std::thread> threads0(_fm._CPU);
-  for (int i = 0; i < _fm._CPU; ++i) {
+  std::vector<std::thread> threads0(_fm.CPU());
+  for (int i = 0; i < _fm.CPU(); ++i) {
     threads0[i] = std::thread(&CFilter::filterExactThread, this);
   }
 
-  for (int i = 0; i < _fm._CPU; ++i) {
+  for (int i = 0; i < _fm.CPU(); ++i) {
     if (threads0[i].joinable()) {
       threads0[i].join();
     }
@@ -235,7 +235,7 @@ void PMVS3::CFilter::filterExact(void) {
 
   //----------------------------------------------------------------------
   for (int p = 0; p < psize; ++p) {
-    if (_fm._pos._ppatches[p]->_fix) continue;
+    if (_fm.PatchOrganizer()._ppatches[p]->_fix) continue;
 
     for (int i = 0; i < (int)_removeimages[p].size(); ++i) {
       const int index = _removeimages[p][i];
@@ -245,19 +245,19 @@ void PMVS3::CFilter::filterExact(void) {
       }
       const int ix = _removegrids[p][i][0];
       const int iy = _removegrids[p][i][1];
-      const int index2 = iy * _fm._pos._gwidths[index] + ix;
+      const int index2 = iy * _fm.PatchOrganizer()._gwidths[index] + ix;
 
-      _fm._pos._pgrids[index][index2].erase(remove(_fm._pos._pgrids[index][index2].begin(), _fm._pos._pgrids[index][index2].end(), _fm._pos._ppatches[p]), _fm._pos._pgrids[index][index2].end());
+      _fm.PatchOrganizer()._pgrids[index][index2].erase(remove(_fm.PatchOrganizer()._pgrids[index][index2].begin(), _fm.PatchOrganizer()._pgrids[index][index2].end(), _fm.PatchOrganizer()._ppatches[p]), _fm.PatchOrganizer()._pgrids[index][index2].end());
     }
   }
 
-  _fm._debug = 1;
+  _fm.Debug() = 1;
 
   int count = 0;
   for (int p = 0; p < psize; ++p) {
-    if (_fm._pos._ppatches[p]->_fix) continue;
+    if (_fm.PatchOrganizer()._ppatches[p]->_fix) continue;
 
-    Patch::CPatch& patch = *_fm._pos._ppatches[p];
+    Patch::CPatch& patch = *_fm.PatchOrganizer()._ppatches[p];
 
     // This should be images in targetting images. Has to come before the next for-loop.
     patch._timages = (int)_newimages[p].size();
@@ -273,25 +273,25 @@ void PMVS3::CFilter::filterExact(void) {
     patch._images.swap(_newimages[p]);
     patch._grids.swap(_newgrids[p]);
 
-    if (_fm._minImageNumThreshold <= (int)patch._images.size()) {
-      _fm._optim.setRefImage(patch, 0);
-      _fm._pos.setGrids(patch);
+    if (_fm.MinImageNumThreshold() <= (int)patch._images.size()) {
+      _fm.Optimizer().setRefImage(patch, 0);
+      _fm.PatchOrganizer().setGrids(patch);
     }
 
-    if ((int)patch._images.size() < _fm._minImageNumThreshold) {
-      _fm._pos.removePatch(_fm._pos._ppatches[p]);
+    if ((int)patch._images.size() < _fm.MinImageNumThreshold()) {
+      _fm.PatchOrganizer().removePatch(_fm.PatchOrganizer()._ppatches[p]);
       count++;
     }
   }
   time(&tv);
-  std::cerr << (int)_fm._pos._ppatches.size() << " -> "
-       << (int)_fm._pos._ppatches.size() - count << " ("
-       << 100 * ((int)_fm._pos._ppatches.size() - count) / (float)_fm._pos._ppatches.size()
+  std::cerr << (int)_fm.PatchOrganizer()._ppatches.size() << " -> "
+       << (int)_fm.PatchOrganizer()._ppatches.size() - count << " ("
+       << 100 * ((int)_fm.PatchOrganizer()._ppatches.size() - count) / (float)_fm.PatchOrganizer()._ppatches.size()
        << "%)\t" << (tv - curtime) / CLOCKS_PER_SEC << " secs" << std::endl;
 }
 
 void PMVS3::CFilter::filterExactThread(void) {
-  const int psize = (int)_fm._pos._ppatches.size();
+  const int psize = (int)_fm.PatchOrganizer()._ppatches.size();
   std::vector<std::vector<int> > newimages, removeimages;
   std::vector<std::vector<TVec2<int> > > newgrids, removegrids;
   newimages.resize(psize);
@@ -308,27 +308,27 @@ void PMVS3::CFilter::filterExactThread(void) {
 
     std::cerr << '*' << std::flush;
 
-    const int& w = _fm._pos._gwidths[image];
-    const int& h = _fm._pos._gheights[image];
+    const int& w = _fm.PatchOrganizer()._gwidths[image];
+    const int& h = _fm.PatchOrganizer()._gheights[image];
     int index = -1;
     for (int y = 0; y < h; ++y) {
       for (int x = 0; x < w; ++x) {
         ++index;
-        for (int i = 0; i < (int)_fm._pos._pgrids[image][index].size(); ++i) {
-          const Patch::CPatch& patch = *_fm._pos._pgrids[image][index][i];
+        for (int i = 0; i < (int)_fm.PatchOrganizer()._pgrids[image][index].size(); ++i) {
+          const Patch::CPatch& patch = *_fm.PatchOrganizer()._pgrids[image][index][i];
           if (patch._fix) continue;
 
           int safe = 0;
 
-          if (_fm._pos.isVisible(patch, image, x, y, _fm._neighborThreshold1, 0)) {
+          if (_fm.PatchOrganizer().isVisible(patch, image, x, y, _fm.NeighborThreshold1(), 0)) {
             safe = 1;
-          } else if (0 < x && _fm._pos.isVisible(patch, image, x - 1, y, _fm._neighborThreshold1, 0)) { // use 4 neighbors?
+          } else if (0 < x && _fm.PatchOrganizer().isVisible(patch, image, x - 1, y, _fm.NeighborThreshold1(), 0)) { // use 4 neighbors?
             safe = 1;
-          } else if (x < w - 1 && _fm._pos.isVisible(patch, image, x + 1, y, _fm._neighborThreshold1, 0)) {
+          } else if (x < w - 1 && _fm.PatchOrganizer().isVisible(patch, image, x + 1, y, _fm.NeighborThreshold1(), 0)) {
             safe = 1;
-          } else if (0 < y && _fm._pos.isVisible(patch, image, x, y - 1, _fm._neighborThreshold1, 0)) {
+          } else if (0 < y && _fm.PatchOrganizer().isVisible(patch, image, x, y - 1, _fm.NeighborThreshold1(), 0)) {
             safe = 1;
-          } else if (y < h - 1 && _fm._pos.isVisible(patch, image, x, y + 1, _fm._neighborThreshold1, 0)) {
+          } else if (y < h - 1 && _fm.PatchOrganizer().isVisible(patch, image, x, y + 1, _fm.NeighborThreshold1(), 0)) {
             safe = 1;
           }
           if (safe) {
@@ -354,7 +354,7 @@ void PMVS3::CFilter::filterExactThread(void) {
 }
 
 void PMVS3::CFilter::filterNeighborThread(void) {
-  const int size = (int)_fm._pos._ppatches.size();
+  const int size = (int)_fm.PatchOrganizer()._ppatches.size();
   while (1) {
     int jtmp = -1;
     _fm.Lock();
@@ -369,12 +369,12 @@ void PMVS3::CFilter::filterNeighborThread(void) {
     const int end = std::min(size, _fm.JUnit() * (jtmp + 1));
 
     for (int p = begin; p < end; ++p) {
-      Patch::PPatch& ppatch = _fm._pos._ppatches[p];
+      Patch::PPatch& ppatch = _fm.PatchOrganizer()._ppatches[p];
       if (_rejects[p]) continue;
 
       std::vector<Patch::PPatch> neighbors;
-      //_fm._pos.findNeighbors(*ppatch, neighbors, 0, 4, 2);
-      _fm._pos.findNeighbors(*ppatch, neighbors, 0, 4, 2, 1);
+      //_fm.PatchOrganizer().findNeighbors(*ppatch, neighbors, 0, 4, 2);
+      _fm.PatchOrganizer().findNeighbors(*ppatch, neighbors, 0, 4, 2, 1);
 
       //?? new filter
       if ((int)neighbors.size() < 6) {
@@ -430,11 +430,11 @@ int PMVS3::CFilter::filterQuad(const Patch::CPatch& patch, const std::vector<Pat
   Cmylapack::lls(A, b, x);
 
   // Compute residual divided by _dscale
-  const int inum = std::min(_fm._tau, (int)patch._images.size());
+  const int inum = std::min(_fm.Tau(), (int)patch._images.size());
   float unit = 0.0;
   //for (int i = 0; i < (int)patch._images.size(); ++i)
   for (int i = 0; i < inum; ++i) {
-    unit += _fm._optim.getUnit(patch._images[i], patch._coord);
+    unit += _fm.Optimizer().getUnit(patch._images[i], patch._coord);
   }
   //unit /= (int)patch._images.size();
   unit /= inum;
@@ -453,7 +453,7 @@ int PMVS3::CFilter::filterQuad(const Patch::CPatch& patch, const std::vector<Pat
 
   residual /= (nsize - 5);
 
-  if (residual < _fm._quadThreshold) {
+  if (residual < _fm.QuadThreshold()) {
     return 0;
   } else {
     return 1;
@@ -467,10 +467,10 @@ void PMVS3::CFilter::filterNeighbor(const int times) {
   std::cerr << "FilterNeighbor:\t" << std::flush;
 
   //??? notice (1) to avoid removing _fix=1
-  _fm._pos.collectPatches(1);
-  if (_fm._pos._ppatches.empty()) return;
+  _fm.PatchOrganizer().collectPatches(1);
+  if (_fm.PatchOrganizer()._ppatches.empty()) return;
 
-  _rejects.resize((int)_fm._pos._ppatches.size());
+  _rejects.resize((int)_fm.PatchOrganizer()._ppatches.size());
   fill(_rejects.begin(), _rejects.end(), 0);
 
   // Lapack is not thread-safe? Sometimes, the code gets stuck here.
@@ -479,30 +479,30 @@ void PMVS3::CFilter::filterNeighbor(const int times) {
     _fm.Count() = 0;
 
     _fm.Jobs().clear();
-    const int jtmp = (int)ceil(_fm._pos._ppatches.size() / (float)_fm.JUnit());
+    const int jtmp = (int)ceil(_fm.PatchOrganizer()._ppatches.size() / (float)_fm.JUnit());
     for (int j = 0; j < jtmp; ++j) {
       _fm.Jobs().push_back(j);
     }
 
-    std::vector<std::thread> threads(_fm._CPU);
-    for (int i = 0; i < _fm._CPU; ++i) {
+    std::vector<std::thread> threads(_fm.CPU());
+    for (int i = 0; i < _fm.CPU(); ++i) {
       threads[i] = std::thread(&CFilter::filterNeighborThread, this);
     }
 
-    for (int i = 0; i < _fm._CPU; ++i) {
+    for (int i = 0; i < _fm.CPU(); ++i) {
       if (threads[i].joinable()) {
         threads[i].join();
       }
     }
 
-    auto bpatch = _fm._pos._ppatches.begin();
-    auto epatch = _fm._pos._ppatches.end();
+    auto bpatch = _fm.PatchOrganizer()._ppatches.begin();
+    auto epatch = _fm.PatchOrganizer()._ppatches.end();
     auto breject = _rejects.begin();
 
     while (bpatch != epatch) {
       if ((*breject) == _time + 1) {
         count++;
-        _fm._pos.removePatch(*bpatch);;
+        _fm.PatchOrganizer().removePatch(*bpatch);;
       }
 
       ++bpatch;
@@ -511,9 +511,9 @@ void PMVS3::CFilter::filterNeighbor(const int times) {
   }
 
   time(&tv);
-  std::cerr << (int)_fm._pos._ppatches.size() << " -> "
-       << (int)_fm._pos._ppatches.size() - count << " ("
-       << 100 * ((int)_fm._pos._ppatches.size() - count) / (float)_fm._pos._ppatches.size()
+  std::cerr << (int)_fm.PatchOrganizer()._ppatches.size() << " -> "
+       << (int)_fm.PatchOrganizer()._ppatches.size() - count << " ("
+       << 100 * ((int)_fm.PatchOrganizer()._ppatches.size() - count) / (float)_fm.PatchOrganizer()._ppatches.size()
        << "%)\t" << (tv - curtime) / CLOCKS_PER_SEC << " secs" << std::endl;
 }
 
@@ -525,16 +525,16 @@ void PMVS3::CFilter::filterSmallGroups(void) {
   time(&tv);
   time_t curtime = tv;
   std::cerr << "FilterGroups:\t" << std::flush;
-  _fm._pos.collectPatches();
-  if (_fm._pos._ppatches.empty()) return;
+  _fm.PatchOrganizer().collectPatches();
+  if (_fm.PatchOrganizer()._ppatches.empty()) return;
 
-  const int psize = (int)_fm._pos._ppatches.size();
+  const int psize = (int)_fm.PatchOrganizer()._ppatches.size();
   std::vector<int> label;
   label.resize(psize);
   std::fill(label.begin(), label.end(), -1);
 
   std::list<int> untouch;
-  auto bpatch = _fm._pos._ppatches.begin();
+  auto bpatch = _fm.PatchOrganizer()._ppatches.begin();
   for (int p = 0; p < psize; ++p, ++bpatch) {
     untouch.push_back(p);
     (*bpatch)->_flag = p;
@@ -587,7 +587,7 @@ void PMVS3::CFilter::filterSmallGroups(void) {
 
   bite = label.begin();
   eite = label.end();
-  bpatch = _fm._pos._ppatches.begin();
+  bpatch = _fm.PatchOrganizer()._ppatches.begin();
   while (bite != eite) {
     if ((*bpatch)->_fix) {
       ++bite;
@@ -596,7 +596,7 @@ void PMVS3::CFilter::filterSmallGroups(void) {
     }
 
     if (size[*bite] == 0) {
-      _fm._pos.removePatch(*bpatch);
+      _fm.PatchOrganizer().removePatch(*bpatch);
       count++;
     }
     ++bite;
@@ -604,21 +604,21 @@ void PMVS3::CFilter::filterSmallGroups(void) {
   }
 
   time(&tv);
-  std::cerr << (int)_fm._pos._ppatches.size() << " -> "
-       << (int)_fm._pos._ppatches.size() - count << " ("
-       << 100 * ((int)_fm._pos._ppatches.size() - count) / (float)_fm._pos._ppatches.size()
+  std::cerr << (int)_fm.PatchOrganizer()._ppatches.size() << " -> "
+       << (int)_fm.PatchOrganizer()._ppatches.size() - count << " ("
+       << 100 * ((int)_fm.PatchOrganizer()._ppatches.size() - count) / (float)_fm.PatchOrganizer()._ppatches.size()
        << "%)\t" << (tv - curtime)/CLOCKS_PER_SEC << " secs" << std::endl;
 }
 
 void PMVS3::CFilter::filterSmallGroupsSub(const int pid, const int id, std::vector<int>& label, std::list<int>& ltmp) const {
   // find neighbors of ptmp and set their ids
-  const Patch::CPatch& patch = *_fm._pos._ppatches[pid];
+  const Patch::CPatch& patch = *_fm.PatchOrganizer()._ppatches[pid];
 
   const int index = patch._images[0];
   const int ix = patch._grids[0][0];
   const int iy = patch._grids[0][1];
-  const int gwidth = _fm._pos._gwidths[index];
-  const int gheight = _fm._pos._gheights[index];
+  const int gwidth = _fm.PatchOrganizer()._gwidths[index];
+  const int gheight = _fm.PatchOrganizer()._gheights[index];
 
   for (int y = -1; y <= 1; ++y) {
     const int iytmp = iy + y;
@@ -629,8 +629,8 @@ void PMVS3::CFilter::filterSmallGroupsSub(const int pid, const int id, std::vect
       if (ixtmp < 0 || gwidth <= ixtmp) continue;
 
       const int index2 = iytmp * gwidth + ixtmp;
-      auto bgrid = _fm._pos._pgrids[index][index2].begin();
-      auto egrid = _fm._pos._pgrids[index][index2].end();
+      auto bgrid = _fm.PatchOrganizer()._pgrids[index][index2].begin();
+      auto egrid = _fm.PatchOrganizer()._pgrids[index][index2].end();
       while (bgrid != egrid) {
         const int itmp = (*bgrid)->_flag;
         if (label[itmp] != -1) {
@@ -638,14 +638,14 @@ void PMVS3::CFilter::filterSmallGroupsSub(const int pid, const int id, std::vect
           continue;
         }
 
-        if (_fm.isNeighbor(patch, **bgrid, _fm._neighborThreshold2)) {
+        if (_fm.isNeighbor(patch, **bgrid, _fm.NeighborThreshold2())) {
           label[itmp] = id;
           ltmp.push_back(itmp);
         }
         ++bgrid;
       }
-      bgrid = _fm._pos._vpgrids[index][index2].begin();
-      egrid = _fm._pos._vpgrids[index][index2].end();
+      bgrid = _fm.PatchOrganizer()._vpgrids[index][index2].begin();
+      egrid = _fm.PatchOrganizer()._vpgrids[index][index2].end();
       while (bgrid != egrid) {
         const int itmp = (*bgrid)->_flag;
         if (label[itmp] != -1) {
@@ -653,7 +653,7 @@ void PMVS3::CFilter::filterSmallGroupsSub(const int pid, const int id, std::vect
           continue;
         }
 
-        if (_fm.isNeighbor(patch, **bgrid, _fm._neighborThreshold2)) {
+        if (_fm.isNeighbor(patch, **bgrid, _fm.NeighborThreshold2())) {
           label[itmp] = id;
           ltmp.push_back(itmp);
         }
@@ -666,16 +666,16 @@ void PMVS3::CFilter::filterSmallGroupsSub(const int pid, const int id, std::vect
 void PMVS3::CFilter::setDepthMaps(void) {
   // initialize
   for (int index = 0; index < _fm.NumTargetImages(); ++index) {
-    std::fill(_fm._pos._dpgrids[index].begin(), _fm._pos._dpgrids[index].end(), _fm._pos._MAXDEPTH);
+    std::fill(_fm.PatchOrganizer()._dpgrids[index].begin(), _fm.PatchOrganizer()._dpgrids[index].end(), _fm.PatchOrganizer()._MAXDEPTH);
   }
 
   _fm.Count() = 0;
-  std::vector<std::thread> threads(_fm._CPU);
-  for (int i = 0; i < _fm._CPU; ++i) {
+  std::vector<std::thread> threads(_fm.CPU());
+  for (int i = 0; i < _fm.CPU(); ++i) {
     threads[i] = std::thread(&CFilter::setDepthMapsThread, this);
   }
 
-  for (int i = 0; i < _fm._CPU; ++i) {
+  for (int i = 0; i < _fm.CPU(); ++i) {
     if (threads[i].joinable()) {
       threads[i].join();
     }
@@ -691,22 +691,22 @@ void PMVS3::CFilter::setDepthMapsThread(void) {
 
     if (_fm.NumTargetImages() <= index) break;
 
-    const int gwidth = _fm._pos._gwidths[index];
-    const int gheight = _fm._pos._gheights[index];
+    const int gwidth = _fm.PatchOrganizer()._gwidths[index];
+    const int gheight = _fm.PatchOrganizer()._gheights[index];
 
-    auto bpatch = _fm._pos._ppatches.begin();
-    auto epatch = _fm._pos._ppatches.end();
+    auto bpatch = _fm.PatchOrganizer()._ppatches.begin();
+    auto epatch = _fm.PatchOrganizer()._ppatches.end();
 
     while (bpatch != epatch) {
       Patch::PPatch& ppatch = *bpatch;
-      const Vec3f icoord = _fm._pss.project(index, ppatch->_coord, _fm._level);
+      const Vec3f icoord = _fm.PhotoSets().project(index, ppatch->_coord, _fm.Level());
 
-      const float fx = icoord[0] / _fm._csize;
+      const float fx = icoord[0] / _fm.CSize();
       const int xs[2] = {(int)floor(fx), (int)ceil(fx)};
-      const float fy = icoord[1] / _fm._csize;
+      const float fy = icoord[1] / _fm.CSize();
       const int ys[2] = {(int)floor(fy), (int)ceil(fy)};
 
-      const float depth = _fm._pss._photos[index].OpticalAxis() * ppatch->_coord;
+      const float depth = _fm.PhotoSets()._photos[index].OpticalAxis() * ppatch->_coord;
 
       for (int j = 0; j < 2; ++j) {
         for (int i = 0; i < 2; ++i) {
@@ -714,13 +714,13 @@ void PMVS3::CFilter::setDepthMapsThread(void) {
 
           const int index2 = ys[j] * gwidth + xs[i];
 
-          if (_fm._pos._dpgrids[index][index2] == _fm._pos._MAXDEPTH) {
-            _fm._pos._dpgrids[index][index2] = ppatch;
+          if (_fm.PatchOrganizer()._dpgrids[index][index2] == _fm.PatchOrganizer()._MAXDEPTH) {
+            _fm.PatchOrganizer()._dpgrids[index][index2] = ppatch;
           } else {
-            const float dtmp = _fm._pss._photos[index].OpticalAxis() * _fm._pos._dpgrids[index][index2]->_coord;
+            const float dtmp = _fm.PhotoSets()._photos[index].OpticalAxis() * _fm.PatchOrganizer()._dpgrids[index][index2]->_coord;
 
             if (depth < dtmp) {
-              _fm._pos._dpgrids[index][index2] = ppatch;
+              _fm.PatchOrganizer()._dpgrids[index][index2] = ppatch;
             }
           }
         }
@@ -731,13 +731,13 @@ void PMVS3::CFilter::setDepthMapsThread(void) {
 }
 
 void PMVS3::CFilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
-  _fm._pos.collectPatches();
+  _fm.PatchOrganizer().collectPatches();
   setDepthMaps();
 
   // clear _vpgrids
   for (int index = 0; index < _fm.NumTargetImages(); ++index) {
-    auto bvvp = _fm._pos._vpgrids[index].begin();
-    auto evvp = _fm._pos._vpgrids[index].end();
+    auto bvvp = _fm.PatchOrganizer()._vpgrids[index].begin();
+    auto evvp = _fm.PatchOrganizer()._vpgrids[index].end();
     while (bvvp != evvp) {
       (*bvvp).clear();
       ++bvvp;
@@ -746,8 +746,8 @@ void PMVS3::CFilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
 
   if (additive == 0) {
     // initialization
-    auto bpatch = _fm._pos._ppatches.begin();
-    auto epatch = _fm._pos._ppatches.end();
+    auto bpatch = _fm.PatchOrganizer()._ppatches.begin();
+    auto epatch = _fm.PatchOrganizer()._ppatches.end();
     while (bpatch != epatch) {
       (*bpatch)->_vimages.clear();
       (*bpatch)->_vgrids.clear();
@@ -756,25 +756,25 @@ void PMVS3::CFilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
   }
 
   _fm.Count() = 0;
-  // std::vector<thrd_t> threads0(_fm._CPU);
-  std::vector<std::thread> threads0(_fm._CPU);
-  for (int i = 0; i < _fm._CPU; ++i) {
+  // std::vector<thrd_t> threads0(_fm.CPU());
+  std::vector<std::thread> threads0(_fm.CPU());
+  for (int i = 0; i < _fm.CPU(); ++i) {
     threads0[i] = std::thread(&CFilter::setVGridsVPGridsThread, this);
   }
 
-  for (int i = 0; i < _fm._CPU; ++i) {
+  for (int i = 0; i < _fm.CPU(); ++i) {
     if (threads0[i].joinable()) {
       threads0[i].join();
     }
   }
 
   _fm.Count() = 0;
-  std::vector<std::thread> threads1(_fm._CPU);
-  for (int i = 0; i < _fm._CPU; ++i) {
+  std::vector<std::thread> threads1(_fm.CPU());
+  for (int i = 0; i < _fm.CPU(); ++i) {
     threads1[i] = std::thread(&CFilter::addPatchVThread, this);
   }
 
-  for (int i = 0; i < _fm._CPU; ++i) {
+  for (int i = 0; i < _fm.CPU(); ++i) {
     if (threads1[i].joinable()) {
       threads1[i].join();
     }
@@ -783,7 +783,7 @@ void PMVS3::CFilter::setDepthMapsVGridsVPGridsAddPatchV(const int additive) {
 
 void PMVS3::CFilter::setVGridsVPGridsThread(void) {
   const int noj = 1000;
-  const int size = (int)_fm._pos._ppatches.size();
+  const int size = (int)_fm.PatchOrganizer()._ppatches.size();
   const int job = std::max(1, size / (noj - 1));
 
   while (1) {
@@ -798,8 +798,8 @@ void PMVS3::CFilter::setVGridsVPGridsThread(void) {
 
     // add patches to _vpgrids
     for (int p = begin; p < end; ++p) {
-      Patch::PPatch& ppatch = _fm._pos._ppatches[p];
-      _fm._pos.setVImagesVGrids(ppatch);
+      Patch::PPatch& ppatch = _fm.PatchOrganizer()._ppatches[p];
+      _fm.PatchOrganizer().setVImagesVGrids(ppatch);
     }
   }
 }
@@ -812,8 +812,8 @@ void PMVS3::CFilter::addPatchVThread(void) {
 
     if (_fm.NumTargetImages() <= index) break;
 
-    auto bpatch = _fm._pos._ppatches.begin();
-    auto epatch = _fm._pos._ppatches.end();
+    auto bpatch = _fm.PatchOrganizer()._ppatches.begin();
+    auto epatch = _fm.PatchOrganizer()._ppatches.end();
     while (bpatch != epatch) {
       Patch::PPatch& ppatch = *bpatch;
       auto bimage = ppatch->_vimages.begin();
@@ -824,8 +824,8 @@ void PMVS3::CFilter::addPatchVThread(void) {
 	      if (*bimage == index) {
           const int& ix = (*bgrid)[0];
           const int& iy = (*bgrid)[1];
-          const int index2 = iy * _fm._pos._gwidths[index] + ix;
-          _fm._pos._vpgrids[index][index2].push_back(ppatch);
+          const int index2 = iy * _fm.PatchOrganizer()._gwidths[index] + ix;
+          _fm.PatchOrganizer()._vpgrids[index][index2].push_back(ppatch);
 	        break;
       	}
 

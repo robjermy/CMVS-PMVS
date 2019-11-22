@@ -96,10 +96,10 @@ void PMVS3::CFindMatch::init(const SOption& option) {
   _countThreshold1 = 4;
   _countThreshold2 = 2;
 
-  _neighborThreshold = 0.5f;
+  _neighborThreshold0 = 0.5f;
   _neighborThreshold1 = 1.0f;
-
   _neighborThreshold2 = 1.0f;
+  
   _maxAngleThreshold = option._maxAngleThreshold;
   _nccThresholdBefore = _nccThreshold - 0.3f;
   _quadThreshold = option._quadThreshold;

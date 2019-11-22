@@ -13,8 +13,8 @@ void PMVS3::CSeed::init(const std::vector<std::vector<CPoint> >& points) {
   _ppoints.resize(_fm.NumImages());
 
   for (int index = 0; index < _fm.NumImages(); ++index) {
-    const int gheight = _fm._pos._gheights[index];
-    const int gwidth = _fm._pos._gwidths[index];
+    const int gheight = _fm.PatchOrganizer()._gheights[index];
+    const int gwidth = _fm.PatchOrganizer()._gwidths[index];
     _ppoints[index].resize(gwidth * gheight);
   }
 
@@ -26,9 +26,9 @@ void PMVS3::CSeed::readPoints(const std::vector<std::vector<CPoint> >& points) {
     for (int i = 0; i < (int)points[index].size(); ++i) {
       PPoint ppoint(new CPoint(points[index][i]));
       ppoint->_itmp = index;
-      const int ix = ((int)floor(ppoint->_icoord[0] + 0.5f)) / _fm._csize;
-      const int iy = ((int)floor(ppoint->_icoord[1] + 0.5f)) / _fm._csize;
-      const int index2 = iy * _fm._pos._gwidths[index] + ix;
+      const int ix = ((int)floor(ppoint->_icoord[0] + 0.5f)) / _fm.CSize();
+      const int iy = ((int)floor(ppoint->_icoord[1] + 0.5f)) / _fm.CSize();
+      const int index2 = iy * _fm.PatchOrganizer()._gwidths[index] + ix;
       _ppoints[index][index2].push_back(ppoint);
     }
   }
@@ -40,10 +40,10 @@ static const unsigned int RANDOM_SEED = 42;
 void PMVS3::CSeed::run(void) {
   _fm.Count() = 0;
   _fm.Jobs().clear();
-  _scounts.resize(_fm._CPU);
-  _fcounts0.resize(_fm._CPU);
-  _fcounts1.resize(_fm._CPU);
-  _pcounts.resize(_fm._CPU);
+  _scounts.resize(_fm.CPU());
+  _fcounts0.resize(_fm.CPU());
+  _fcounts1.resize(_fm.CPU());
+  _pcounts.resize(_fm.CPU());
 
   std::fill(_scounts.begin(), _scounts.end(), 0);
   std::fill(_fcounts0.begin(), _fcounts0.end(), 0);
@@ -61,13 +61,13 @@ void PMVS3::CSeed::run(void) {
 
   std::cerr << "adding seeds " << std::endl;
 
-  _fm._pos.clearCounts();
+  _fm.PatchOrganizer().clearCounts();
 
   // If there already exists a patch, don't use
   for (int index = 0; index < (int)_fm.NumTargetImages(); ++index) {
-    for (int j = 0; j < (int)_fm._pos._pgrids[index].size(); ++j) {
-      if (!_fm._pos._pgrids[index][j].empty()) {
-        _fm._pos._counts[index][j] = _fm._countThreshold2;
+    for (int j = 0; j < (int)_fm.PatchOrganizer()._pgrids[index].size(); ++j) {
+      if (!_fm.PatchOrganizer()._pgrids[index][j].empty()) {
+        _fm.PatchOrganizer()._counts[index][j] = _fm.CountThreshold2();
       }
     }
   }
@@ -75,12 +75,12 @@ void PMVS3::CSeed::run(void) {
   time_t tv;
   time(&tv);
   time_t curtime = tv;
-  std::vector<std::thread> threads(_fm._CPU);
-  for (int i = 0; i < _fm._CPU; ++i) {
+  std::vector<std::thread> threads(_fm.CPU());
+  for (int i = 0; i < _fm.CPU(); ++i) {
     threads[i] = std::thread(&CSeed::initialMatchThread, this);
   }
 
-  for (int i = 0; i < _fm._CPU; ++i) {
+  for (int i = 0; i < _fm.CPU(); ++i) {
     if (threads[i].joinable()) {
       threads[i].join();
     }
@@ -132,10 +132,10 @@ void PMVS3::CSeed::clear(void) {
 
 void PMVS3::CSeed::initialMatch(const int index, const int id) {
   std::vector<int> indexes;
-  _fm._optim.collectImages(index, indexes);
+  _fm.Optimizer().collectImages(index, indexes);
 
-  if (_fm._tau < (int)indexes.size()) {
-    indexes.resize(_fm._tau);
+  if (_fm.Tau() < (int)indexes.size()) {
+    indexes.resize(_fm.Tau());
   }
 
   if (indexes.empty()) return;
@@ -144,8 +144,8 @@ void PMVS3::CSeed::initialMatch(const int index, const int id) {
   //======================================================================
   // for each feature point, starting from the optical center, keep on
   // matching until we find candidateThreshold patches
-  const int gheight = _fm._pos._gheights[index];
-  const int gwidth = _fm._pos._gwidths[index];
+  const int gheight = _fm.PatchOrganizer()._gheights[index];
+  const int gwidth = _fm.PatchOrganizer()._gwidths[index];
 
   int index2 = -1;
   for (int y = 0; y < gheight; ++y) {
@@ -166,34 +166,34 @@ void PMVS3::CSeed::initialMatch(const int index, const int id) {
         for (int i = 0; i < (int)vcp.size(); ++i) {
           Patch::CPatch patch;
           patch._coord = vcp[i]->_coord;
-          patch._normal = _fm._pss.Photo(index).OpticalCenter() - patch._coord;
+          patch._normal = _fm.PhotoSets().Photo(index).OpticalCenter() - patch._coord;
 
           unitize(patch._normal);
           patch._normal[3] = 0.0;
           patch._flag = 0;
 
-          ++_fm._pos._counts[index][index2];
-          const int ix = ((int)floor(vcp[i]->_icoord[0] + 0.5f)) / _fm._csize;
-          const int iy = ((int)floor(vcp[i]->_icoord[1] + 0.5f)) / _fm._csize;
-          const int index3 = iy * _fm._pos._gwidths[vcp[i]->_itmp] + ix;
+          ++_fm.PatchOrganizer()._counts[index][index2];
+          const int ix = ((int)floor(vcp[i]->_icoord[0] + 0.5f)) / _fm.CSize();
+          const int iy = ((int)floor(vcp[i]->_icoord[1] + 0.5f)) / _fm.CSize();
+          const int index3 = iy * _fm.PatchOrganizer()._gwidths[vcp[i]->_itmp] + ix;
           if (vcp[i]->_itmp < _fm.NumTargetImages()) {
-            ++_fm._pos._counts[vcp[i]->_itmp][index3];
+            ++_fm.PatchOrganizer()._counts[vcp[i]->_itmp][index3];
           }
 
           const int flag = initialMatchSub(index, vcp[i]->_itmp, id, patch);
           if (flag == 0) {
             ++count;
-            if (bestpatch.score(_fm._nccThreshold) < patch.score(_fm._nccThreshold)) {
+            if (bestpatch.score(_fm.NCCThreshold()) < patch.score(_fm.NCCThreshold())) {
               bestpatch = patch;
             }
 
-            if (_fm._countThreshold0 <= count) break;
+            if (_fm.CountThreshold0() <= count) break;
           }
         }
 
         if (count != 0) {
           Patch::PPatch ppatch(new Patch::CPatch(bestpatch));
-          _fm._pos.addPatch(ppatch);
+          _fm.PatchOrganizer().addPatch(ppatch);
           ++totalcount;
           break;
         }
@@ -213,9 +213,9 @@ void PMVS3::CSeed::collectCells(const int index0, const int index1, const CPoint
 #endif
 
   Mat3 F;
-  Image::setF(_fm._pss.Photo(index0), _fm._pss.Photo(index1), F, _fm._level);
-  const int gwidth = _fm._pos._gwidths[index1];
-  const int gheight = _fm._pos._gheights[index1];
+  Image::setF(_fm.PhotoSets().Photo(index0), _fm.PhotoSets().Photo(index1), F, _fm.Level());
+  const int gwidth = _fm.PatchOrganizer()._gwidths[index1];
+  const int gheight = _fm.PatchOrganizer()._gheights[index1];
 
   Vec3 line = transpose(F) * point;
   if (line[0] == 0.0 && line[1] == 0.0) {
@@ -227,11 +227,11 @@ void PMVS3::CSeed::collectCells(const int index0, const int index1, const CPoint
   // vertical
   if (fabs(line[0]) > fabs(line[1])) {
     for (int y = 0; y < gheight; ++y) {
-      const float fy = (y + 0.5) * _fm._csize - 0.5f;
+      const float fy = (y + 0.5) * _fm.CSize() - 0.5f;
       float fx = (- line[1] * fy - line[2]) / line[0];
       fx = std::max((float)(INT_MIN + 3.0f), std::min((float)(INT_MAX - 3.0f), fx));
 
-      const int ix = ((int)floor(fx + 0.5f)) / _fm._csize;
+      const int ix = ((int)floor(fx + 0.5f)) / _fm.CSize();
       if (0 <= ix && ix < gwidth) {
         cells.push_back(TVec2<int>(ix, y));
       }
@@ -246,11 +246,11 @@ void PMVS3::CSeed::collectCells(const int index0, const int index1, const CPoint
     }
   } else {
     for (int x = 0; x < gwidth; ++x) {
-      const float fx = (x + 0.5) * _fm._csize - 0.5f;
+      const float fx = (x + 0.5) * _fm.CSize() - 0.5f;
       float fy = (- line[0] * fx - line[2]) / line[1];
       fy = std::max((float)(INT_MIN + 3.0f), std::min((float)(INT_MAX - 3.0f), fy));
 
-      const int iy = ((int)floor(fy + 0.5f)) / _fm._csize;
+      const int iy = ((int)floor(fy + 0.5f)) / _fm.CSize();
       if (0 <= iy && iy < gheight) {
         cells.push_back(TVec2<int>(x, iy));
       }
@@ -276,13 +276,13 @@ void PMVS3::CSeed::collectCandidates(const int index, const std::vector<int>& in
     std::vector<TVec2<int> > cells;
     collectCells(index, indexid, point, cells);
     Mat3 F;
-    Image::setF(_fm._pss.Photo(index), _fm._pss.Photo(indexid), F, _fm._level);
+    Image::setF(_fm.PhotoSets().Photo(index), _fm.PhotoSets().Photo(indexid), F, _fm.Level());
 
     for (int i = 0; i < (int)cells.size(); ++i) {
       const int x = cells[i][0];      const int y = cells[i][1];
       if (!canAdd(indexid, x, y)) continue;
 
-      const int index2 = y * _fm._pos._gwidths[indexid] + x;
+      const int index2 = y * _fm.PatchOrganizer()._gwidths[indexid] + x;
 
       auto begin = _ppoints[indexid][index2].begin();
       auto end = _ppoints[indexid][index2].end();
@@ -295,7 +295,7 @@ void PMVS3::CSeed::collectCandidates(const int index, const std::vector<int>& in
         }
 
         const Vec3 p1(rhs._icoord[0], rhs._icoord[1], 1.0);
-        if (_fm._epThreshold <= Image::computeEPD(F, p0, p1)) {
+        if (_fm.EpipolarThreshold() <= Image::computeEPD(F, p0, p1)) {
           ++begin;
           continue;
         }
@@ -310,11 +310,11 @@ void PMVS3::CSeed::collectCandidates(const int index, const std::vector<int>& in
   for (int i = 0; i < (int)vcp.size(); ++i) {
     unproject(index, vcp[i]->_itmp, point, *vcp[i], vcp[i]->_coord);
 
-    if (_fm._pss.Photo(index).ProjectionMatrix()[_fm._level][2] * vcp[i]->_coord <= 0.0) continue;
-    if (_fm._pss.getMask(vcp[i]->_coord, _fm._level) == 0 || _fm.insideBimages(vcp[i]->_coord) == 0) continue;
+    if (_fm.PhotoSets().Photo(index).ProjectionMatrix()[_fm.Level()][2] * vcp[i]->_coord <= 0.0) continue;
+    if (_fm.PhotoSets().getMask(vcp[i]->_coord, _fm.Level()) == 0 || _fm.insideBimages(vcp[i]->_coord) == 0) continue;
 
     //??? from the closest
-    vcp[i]->_response = fabs(norm(vcp[i]->_coord - _fm._pss.Photo(index).OpticalCenter()) - norm(vcp[i]->_coord - _fm._pss.Photo(vcp[i]->_itmp).OpticalCenter()));
+    vcp[i]->_response = fabs(norm(vcp[i]->_coord - _fm.PhotoSets().Photo(index).OpticalCenter()) - norm(vcp[i]->_coord - _fm.PhotoSets().Photo(vcp[i]->_itmp).OpticalCenter()));
 
     vcptmp.push_back(vcp[i]);
   }
@@ -323,40 +323,40 @@ void PMVS3::CSeed::collectCandidates(const int index, const std::vector<int>& in
 }
 
 int PMVS3::CSeed::canAdd(const int index, const int x, const int y) {
-  if (!_fm._pss.getMask(index, _fm._csize * x, _fm._csize * y, _fm._level)) return 0;
+  if (!_fm.PhotoSets().getMask(index, _fm.CSize() * x, _fm.CSize() * y, _fm.Level())) return 0;
   if (_fm.NumTargetImages() <= index) return 1;
 
-  const int index2 = y * _fm._pos._gwidths[index] + x;
+  const int index2 = y * _fm.PatchOrganizer()._gwidths[index] + x;
 
   // Check if _pgrids already contains something
-  if (!_fm._pos._pgrids[index][index2].empty()) return 0;
+  if (!_fm.PatchOrganizer()._pgrids[index][index2].empty()) return 0;
 
   //??? critical
-  if (_fm._countThreshold2 <= _fm._pos._counts[index][index2]) return 0;
+  if (_fm.CountThreshold2() <= _fm.PatchOrganizer()._counts[index][index2]) return 0;
 
   return 1;
 }
 
 void PMVS3::CSeed::unproject(const int index0, const int index1, const CPoint& p0, const CPoint& p1, Vec4f& coord) const{
   Mat4 A;
-  A[0][0] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][0][0] - p0._icoord[0] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][0];
-  A[0][1] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][0][1] - p0._icoord[0] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][1];
-  A[0][2] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][0][2] - p0._icoord[0] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][2];
-  A[1][0] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][1][0] - p0._icoord[1] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][0];
-  A[1][1] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][1][1] - p0._icoord[1] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][1];
-  A[1][2] = _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][1][2] - p0._icoord[1] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][2];
-  A[2][0] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][0][0] - p1._icoord[0] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][0];
-  A[2][1] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][0][1] - p1._icoord[0] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][1];
-  A[2][2] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][0][2] - p1._icoord[0] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][2];
-  A[3][0] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][1][0] - p1._icoord[1] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][0];
-  A[3][1] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][1][1] - p1._icoord[1] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][1];
-  A[3][2] = _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][1][2] - p1._icoord[1] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][2];
+  A[0][0] = _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][0][0] - p0._icoord[0] * _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][2][0];
+  A[0][1] = _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][0][1] - p0._icoord[0] * _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][2][1];
+  A[0][2] = _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][0][2] - p0._icoord[0] * _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][2][2];
+  A[1][0] = _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][1][0] - p0._icoord[1] * _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][2][0];
+  A[1][1] = _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][1][1] - p0._icoord[1] * _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][2][1];
+  A[1][2] = _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][1][2] - p0._icoord[1] * _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][2][2];
+  A[2][0] = _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][0][0] - p1._icoord[0] * _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][2][0];
+  A[2][1] = _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][0][1] - p1._icoord[0] * _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][2][1];
+  A[2][2] = _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][0][2] - p1._icoord[0] * _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][2][2];
+  A[3][0] = _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][1][0] - p1._icoord[1] * _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][2][0];
+  A[3][1] = _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][1][1] - p1._icoord[1] * _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][2][1];
+  A[3][2] = _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][1][2] - p1._icoord[1] * _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][2][2];
 
   Vec4 b;
-  b[0] = p0._icoord[0] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][3] - _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][0][3];
-  b[1] = p0._icoord[1] * _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][2][3] - _fm._pss.Photo(index0).ProjectionMatrix()[_fm._level][1][3];
-  b[2] = p1._icoord[0] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][3] - _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][0][3];
-  b[3] = p1._icoord[1] * _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][2][3] - _fm._pss.Photo(index1).ProjectionMatrix()[_fm._level][1][3];
+  b[0] = p0._icoord[0] * _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][2][3] - _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][0][3];
+  b[1] = p0._icoord[1] * _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][2][3] - _fm.PhotoSets().Photo(index0).ProjectionMatrix()[_fm.Level()][1][3];
+  b[2] = p1._icoord[0] * _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][2][3] - _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][0][3];
+  b[3] = p1._icoord[1] * _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][2][3] - _fm.PhotoSets().Photo(index1).ProjectionMatrix()[_fm.Level()][1][3];
 
   Mat4 AT = transpose(A);
   Mat4 ATA = AT * A;
@@ -394,16 +394,16 @@ int PMVS3::CSeed::initialMatchSub(const int index0, const int index1, const int 
 
   //----------------------------------------------------------------------
   // We know that patch._coord is inside bimages and inside mask
-  if (_fm._optim.preProcess(patch, id, 1)) {
+  if (_fm.Optimizer().preProcess(patch, id, 1)) {
     ++_fcounts0[id];
     return 1;
   }
 
   //----------------------------------------------------------------------
-  _fm._optim.refinePatch(patch, id, 100);
+  _fm.Optimizer().refinePatch(patch, id, 100);
 
   //----------------------------------------------------------------------
-  if (_fm._optim.postProcess(patch, id, 1)) {
+  if (_fm.Optimizer().postProcess(patch, id, 1)) {
     ++_fcounts1[id];
     return 1;
   }

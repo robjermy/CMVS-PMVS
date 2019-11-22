@@ -18,22 +18,22 @@ PMVS3::COptim::COptim(CFindMatch& findMatch) : _fm(findMatch) {
 }
 
 void PMVS3::COptim::init(void) {
-  _vect0T.resize(_fm._CPU);
-  _centersT.resize(_fm._CPU);
-  _raysT.resize(_fm._CPU);
-  _indexesT.resize(_fm._CPU);
-  _dscalesT.resize(_fm._CPU);
-  _ascalesT.resize(_fm._CPU);
-  _paramsT.resize(_fm._CPU);
+  _vect0T.resize(_fm.CPU());
+  _centersT.resize(_fm.CPU());
+  _raysT.resize(_fm.CPU());
+  _indexesT.resize(_fm.CPU());
+  _dscalesT.resize(_fm.CPU());
+  _ascalesT.resize(_fm.CPU());
+  _paramsT.resize(_fm.CPU());
 
-  _texsT.resize(_fm._CPU);
-  _weightsT.resize(_fm._CPU);
+  _texsT.resize(_fm.CPU());
+  _weightsT.resize(_fm.CPU());
 
-  for (int c = 0; c < _fm._CPU; ++c) {
+  for (int c = 0; c < _fm.CPU(); ++c) {
     _texsT[c].resize(_fm.NumImages());
     _weightsT[c].resize(_fm.NumImages());
-    for (int j = 0; j < _fm._tau; ++j) {
-      _texsT[c][j].resize(3 * _fm._wsize * _fm._wsize);
+    for (int j = 0; j < _fm.Tau(); ++j) {
+      _texsT[c][j].resize(3 * _fm.WSize() * _fm.WSize());
     }
   }
 
@@ -45,8 +45,8 @@ void PMVS3::COptim::setAxesScales(void) {
   _yaxes.resize(_fm.NumImages());
   _zaxes.resize(_fm.NumImages());
   for (int index = 0; index < _fm.NumImages(); ++index) {
-    _zaxes[index] = Vec3f(_fm._pss._photos[index].OpticalAxis()[0], _fm._pss._photos[index].OpticalAxis()[1], _fm._pss._photos[index].OpticalAxis()[2]);
-    _xaxes[index] = Vec3f(_fm._pss._photos[index].ProjectionMatrix()[0][0][0], _fm._pss._photos[index].ProjectionMatrix()[0][0][1], _fm._pss._photos[index].ProjectionMatrix()[0][0][2]);
+    _zaxes[index] = Vec3f(_fm.PhotoSets()._photos[index].OpticalAxis()[0], _fm.PhotoSets()._photos[index].OpticalAxis()[1], _fm.PhotoSets()._photos[index].OpticalAxis()[2]);
+    _xaxes[index] = Vec3f(_fm.PhotoSets()._photos[index].ProjectionMatrix()[0][0][0], _fm.PhotoSets()._photos[index].ProjectionMatrix()[0][0][1], _fm.PhotoSets()._photos[index].ProjectionMatrix()[0][0][2]);
     _yaxes[index] = cross(_zaxes[index], _xaxes[index]);
     unitize(_yaxes[index]);
     _xaxes[index] = cross(_yaxes[index], _zaxes[index]);
@@ -57,8 +57,8 @@ void PMVS3::COptim::setAxesScales(void) {
     const Vec4f xaxe(_xaxes[index][0], _xaxes[index][1], _xaxes[index][2], 0.0);
     const Vec4f yaxe(_yaxes[index][0], _yaxes[index][1], _yaxes[index][2], 0.0);
 
-    const float fx = xaxe * _fm._pss._photos[index].ProjectionMatrix()[0][0];
-    const float fy = yaxe * _fm._pss._photos[index].ProjectionMatrix()[0][1];
+    const float fx = xaxe * _fm.PhotoSets()._photos[index].ProjectionMatrix()[0][0];
+    const float fy = yaxe * _fm.PhotoSets()._photos[index].ProjectionMatrix()[0][1];
     _ipscales[index] = fx + fy;
   }
 }
@@ -68,7 +68,7 @@ void PMVS3::COptim::collectImages(const int index, std::vector<int>& indexes) co
   // _sequenceThreshold, _targets. Results are sorted by
   // CphotoSet::_distances.
   indexes.clear();
-  Vec4f ray0 = _fm._pss._photos[index].OpticalAxis();
+  Vec4f ray0 = _fm.PhotoSets()._photos[index].OpticalAxis();
   ray0[3] = 0.0f;
 
   std::vector<Vec2f> candidates;
@@ -76,18 +76,18 @@ void PMVS3::COptim::collectImages(const int index, std::vector<int>& indexes) co
   for (int i = 0; i < (int)_fm._visdata2[index].size(); ++i) {
     const int indextmp = _fm._visdata2[index][i];
 
-    if (_fm._sequenceThreshold != -1 && _fm._sequenceThreshold < abs(index - indextmp)) continue;
+    if (_fm.SequenceThreshold() != -1 && _fm.SequenceThreshold() < abs(index - indextmp)) continue;
 
-    Vec4f ray1 = _fm._pss._photos[indextmp].OpticalAxis();
+    Vec4f ray1 = _fm.PhotoSets()._photos[indextmp].OpticalAxis();
     ray1[3] = 0.0f;
 
-    if (ray0 * ray1 < cos(_fm._angleThreshold0)) continue;
+    if (ray0 * ray1 < cos(_fm.AngleThreshold0())) continue;
 
-    candidates.push_back(Vec2f(_fm._pss._distances[index][indextmp], indextmp));
+    candidates.push_back(Vec2f(_fm.PhotoSets()._distances[index][indextmp], indextmp));
   }
 
   sort(candidates.begin(), candidates.end(), Svec2cmp<float>());
-  for (int i = 0; i < std::min(_fm._tau, (int)candidates.size()); ++i) {
+  for (int i = 0; i < std::min(_fm.Tau(), (int)candidates.size()); ++i) {
     indexes.push_back((int)candidates[i][1]);
   }
 }
@@ -97,7 +97,7 @@ int PMVS3::COptim::preProcess(Patch::CPatch& patch, const int id, const int seed
 
   // Here define reference images, and sort images.
   // Something similar to constraintImages is done inside.
-  constraintImages(patch, _fm._nccThresholdBefore, id);
+  constraintImages(patch, _fm.NCCThresholdBefore(), id);
 
   // Fix the reference image and sort the other  _tau - 1 images.
   sortImages(patch);
@@ -105,13 +105,13 @@ int PMVS3::COptim::preProcess(Patch::CPatch& patch, const int id, const int seed
   // Pierre Moulon (it avoid crash in some case)
   if( (int)patch._images.size() > 0) {
     // setSscales should be here to avoid noisy output
-    _fm._pos.setScales(patch);
+    _fm.PatchOrganizer().setScales(patch);
   }
 
   // Check minimum number of images
-  if ((int)patch._images.size() < _fm._minImageNumThreshold) return 1;
+  if ((int)patch._images.size() < _fm.MinImageNumThreshold()) return 1;
 
-  const int flag = _fm._pss.checkAngles(patch._coord, patch._images, _fm._maxAngleThreshold, _fm._angleThreshold1, _fm._minImageNumThreshold);
+  const int flag = _fm.PhotoSets().checkAngles(patch._coord, patch._images, _fm.MaxAngleThreshold(), _fm.AngleThreshold1(), _fm.MinImageNumThreshold());
 
   if (flag) {
     patch._images.clear();
@@ -129,9 +129,9 @@ void PMVS3::COptim::filterImagesByAngle(Patch::CPatch& patch) {
 
   while (bimage != eimage) {
     const int index = *bimage;
-    Vec4f ray = _fm._pss._photos[index].OpticalCenter() - patch._coord;
+    Vec4f ray = _fm.PhotoSets()._photos[index].OpticalCenter() - patch._coord;
     unitize(ray);
-    if (ray * patch._normal < cos(_fm._angleThreshold1)) {
+    if (ray * patch._normal < cos(_fm.AngleThreshold1())) {
       // if reference image is deleted, over
       if (bimage == patch._images.begin()) {
         patch._images.clear();
@@ -148,25 +148,25 @@ void PMVS3::COptim::filterImagesByAngle(Patch::CPatch& patch) {
 }
 
 int PMVS3::COptim::postProcess(Patch::CPatch& patch, const int id, const int seed) {
-  if ((int)patch._images.size() < _fm._minImageNumThreshold) return 1;
+  if ((int)patch._images.size() < _fm.MinImageNumThreshold()) return 1;
 
-  if (_fm._pss.getMask(patch._coord, _fm._level) == 0 || _fm.insideBimages(patch._coord) == 0) return 1;
+  if (_fm.PhotoSets().getMask(patch._coord, _fm.Level()) == 0 || _fm.insideBimages(patch._coord) == 0) return 1;
 
   addImages(patch);
 
-  constraintImages(patch, _fm._nccThreshold, id);
+  constraintImages(patch, _fm.NCCThreshold(), id);
   filterImagesByAngle(patch);
 
-  if ((int)patch._images.size() < _fm._minImageNumThreshold) return 1;
+  if ((int)patch._images.size() < _fm.MinImageNumThreshold()) return 1;
 
-  _fm._pos.setGrids(patch);
+  _fm.PatchOrganizer().setGrids(patch);
 
   setRefImage(patch, id);
-  constraintImages(patch, _fm._nccThreshold, id);
+  constraintImages(patch, _fm.NCCThreshold(), id);
 
-  if ((int)patch._images.size() < _fm._minImageNumThreshold) return 1;
+  if ((int)patch._images.size() < _fm.MinImageNumThreshold()) return 1;
 
-  _fm._pos.setGrids(patch);
+  _fm.PatchOrganizer().setGrids(patch);
 
   // set _timages
   patch._timages = 0;
@@ -179,12 +179,12 @@ int PMVS3::COptim::postProcess(Patch::CPatch& patch, const int id, const int see
     ++begin;
   }
 
-  patch._tmp = patch.score2(_fm._nccThreshold);
+  patch._tmp = patch.score2(_fm.NCCThreshold());
   // Set vimages vgrids.
-  if (_fm._depth) {
-    _fm._pos.setVImagesVGrids(patch);
+  if (_fm.Depth()) {
+    _fm.PatchOrganizer().setVImagesVGrids(patch);
 
-    if (2 <= _fm._depth && check(patch)) return 1;
+    if (2 <= _fm.Depth() && check(patch)) return 1;
   }
   return 0;
 }
@@ -361,7 +361,7 @@ void PMVS3::COptim::sortImages(Patch::CPatch& patch) const{
 }
 
 int PMVS3::COptim::check(Patch::CPatch& patch) {
-  const float gain = _fm._filter.computeGain(patch, 1);
+  const float gain = _fm.Filter().computeGain(patch, 1);
   patch._tmp = gain;
 
   if (gain < 0.0) {
@@ -371,9 +371,9 @@ int PMVS3::COptim::check(Patch::CPatch& patch) {
 
   {
     std::vector<Patch::PPatch> neighbors;
-    _fm._pos.findNeighbors(patch, neighbors, 1, 4, 2);
+    _fm.PatchOrganizer().findNeighbors(patch, neighbors, 1, 4, 2);
     // Only check when enough number of neighbors
-    if (6 < (int)neighbors.size() && _fm._filter.filterQuad(patch, neighbors)) {
+    if (6 < (int)neighbors.size() && _fm.Filter().filterQuad(patch, neighbors)) {
       patch._images.clear();
       return 1;
     }
@@ -387,7 +387,7 @@ void PMVS3::COptim::removeImagesEdge(Patch::CPatch& patch) const{
   std::vector<int>::const_iterator bimage = patch._images.begin();
   std::vector<int>::const_iterator eimage = patch._images.end();
   while (bimage != eimage) {
-    if (_fm._pss.getEdge(patch._coord, *bimage, _fm._level)) {
+    if (_fm.PhotoSets().getEdge(patch._coord, *bimage, _fm.Level())) {
       newindexes.push_back(*bimage);
     }
     ++bimage;
@@ -413,25 +413,25 @@ void PMVS3::COptim::addImages(Patch::CPatch& patch) const{
   bimage = _fm._visdata2[patch._images[0]].begin();
   eimage = _fm._visdata2[patch._images[0]].end();
 
-  const float athreshold = cos(_fm._angleThreshold0);
+  const float athreshold = cos(_fm.AngleThreshold0());
   while (bimage != eimage) {
     if (used[*bimage]) {
       ++bimage;
       continue;
     }
 
-    const Vec3f icoord = _fm._pss.project(*bimage, patch._coord, _fm._level);
-    if (icoord[0] < 0.0f || _fm._pss.getWidth(*bimage, _fm._level) - 1 <= icoord[0] || icoord[1] < 0.0f || _fm._pss.getHeight(*bimage, _fm._level) - 1 <= icoord[1]) {
+    const Vec3f icoord = _fm.PhotoSets().project(*bimage, patch._coord, _fm.Level());
+    if (icoord[0] < 0.0f || _fm.PhotoSets().getWidth(*bimage, _fm.Level()) - 1 <= icoord[0] || icoord[1] < 0.0f || _fm.PhotoSets().getHeight(*bimage, _fm.Level()) - 1 <= icoord[1]) {
       ++bimage;
       continue;
     }
 
-    if (_fm._pss.getEdge(patch._coord, *bimage, _fm._level) == 0) {
+    if (_fm.PhotoSets().getEdge(patch._coord, *bimage, _fm.Level()) == 0) {
       ++bimage;
       continue;
     }
 
-    Vec4f ray = _fm._pss._photos[*bimage].OpticalCenter() - patch._coord;
+    Vec4f ray = _fm.PhotoSets()._photos[*bimage].OpticalCenter() - patch._coord;
     unitize(ray);
     const float ftmp = ray * patch._normal;
 
@@ -456,7 +456,7 @@ void PMVS3::COptim::computeUnits(const Patch::CPatch& patch, std::vector<float>&
     *bfine = INT_MAX/2;
 
     *bfine = getUnit(*bimage, patch._coord);
-    Vec4f ray = _fm._pss._photos[*bimage].OpticalCenter() - patch._coord;
+    Vec4f ray = _fm.PhotoSets()._photos[*bimage].OpticalCenter() - patch._coord;
     unitize(ray);
     const float denom = ray * patch._normal;
     if (0.0 < denom) {
@@ -475,7 +475,7 @@ void PMVS3::COptim::computeUnits(const Patch::CPatch& patch, std::vector<int>& i
   std::vector<int>::const_iterator eimage = patch._images.end();
 
   while (bimage != eimage) {
-    Vec4f ray = _fm._pss._photos[*bimage].OpticalCenter() - patch._coord;
+    Vec4f ray = _fm.PhotoSets()._photos[*bimage].OpticalCenter() - patch._coord;
     unitize(ray);
     const float dot = ray * patch._normal;
     if (dot <= 0.0f) {
@@ -524,11 +524,11 @@ double PMVS3::COptim::my_f(unsigned n, const double *x, double *grad, void *my_f
   Vec4f pxaxis, pyaxis;
   _one->getPAxes(index, coord, normal, pxaxis, pyaxis);
 
-  const int size = std::min(_one->_fm._tau, (int)_one->_indexesT[id].size());
-  const int mininum = std::min(_one->_fm._minImageNumThreshold, size);
+  const int size = std::min(_one->_fm.Tau(), (int)_one->_indexesT[id].size());
+  const int mininum = std::min(_one->_fm.MinImageNumThreshold(), size);
 
   for (int i = 0; i < size; ++i) {
-    int flag = _one->grabTex(coord, pxaxis, pyaxis, normal, _one->_indexesT[id][i], _one->_fm._wsize, _one->_texsT[id][i]);
+    int flag = _one->grabTex(coord, pxaxis, pyaxis, normal, _one->_indexesT[id][i], _one->_fm.WSize(), _one->_texsT[id][i]);
 
     if (flag == 0) {
       _one->normalize(_one->_texsT[id][i]);
@@ -582,7 +582,7 @@ bool PMVS3::COptim::refinePatchBFGS(Patch::CPatch& patch, const int id, const in
   int idtmp = id;
 
   _centersT[id] = patch._coord;
-  _raysT[id] = patch._coord - _fm._pss._photos[patch._images[0]].OpticalCenter();
+  _raysT[id] = patch._coord - _fm.PhotoSets()._photos[patch._images[0]].OpticalCenter();
   unitize(_raysT[id]);
   _indexesT[id] = patch._images;
 
@@ -715,7 +715,7 @@ void PMVS3::COptim::setINCCs(const Patch::CPatch& patch, std::vector<float> & in
 
   const int size = (int)indexes.size();
   for (int i = 0; i < size; ++i) {
-    const int flag = grabTex(patch._coord, pxaxis, pyaxis, patch._normal, indexes[i], _fm._wsize, texs[i]);
+    const int flag = grabTex(patch._coord, pxaxis, pyaxis, patch._normal, indexes[i], _fm.WSize(), texs[i]);
     if (flag == 0) {
       normalize(texs[i]);
     }
@@ -752,7 +752,7 @@ void PMVS3::COptim::setINCCs(const Patch::CPatch& patch, std::vector<std::vector
 
   const int size = (int)indexes.size();
   for (int i = 0; i < size; ++i) {
-    const int flag = grabTex(patch._coord, pxaxis, pyaxis, patch._normal, indexes[i], _fm._wsize, texs[i]);
+    const int flag = grabTex(patch._coord, pxaxis, pyaxis, patch._normal, indexes[i], _fm.WSize(), texs[i]);
 
     if (flag == 0) {
       normalize(texs[i]);
@@ -797,7 +797,7 @@ int PMVS3::COptim::grabSafe(const int index, const int size, const Vec3f& center
   // 1 should be enough
   const int margin2 = 3;
   // ??? may need to change if we change interpolation method
-  if (minx < margin2 || _fm._pss.getWidth(index, level) - 1 - margin2 <= maxx || miny < margin2 || _fm._pss.getHeight(index, level) - 1 - margin2 <= maxy) {
+  if (minx < margin2 || _fm.PhotoSets().getWidth(index, level) - 1 - margin2 <= maxx || miny < margin2 || _fm.PhotoSets().getHeight(index, level) - 1 - margin2 <= maxy) {
     return 0;
   }
 
@@ -815,27 +815,26 @@ static float Log2 = log(2.0f);
 int PMVS3::COptim::grabTex(const Vec4f& coord, const Vec4f& pxaxis, const Vec4f& pyaxis, const Vec4f& pzaxis, const int index, const int size, std::vector<float>& tex) const {
   tex.clear();
 
-  Vec4f ray = _fm._pss._photos[index].OpticalCenter() - coord;
+  Vec4f ray = _fm.PhotoSets()._photos[index].OpticalCenter() - coord;
   unitize(ray);
   const float weight = std::max(0.0f, ray * pzaxis);
 
-  //???????
-  if (weight < cos(_fm._angleThreshold1)) return 1;
+  if (weight < cos(_fm.AngleThreshold1())) return 1;
 
   const int margin = size / 2;
 
-  Vec3f center = _fm._pss.project(index, coord, _fm._level);
-  Vec3f dx = _fm._pss.project(index, coord + pxaxis, _fm._level) - center;
-  Vec3f dy = _fm._pss.project(index, coord + pyaxis, _fm._level) - center;
+  Vec3f center = _fm.PhotoSets().project(index, coord, _fm.Level());
+  Vec3f dx = _fm.PhotoSets().project(index, coord + pxaxis, _fm.Level()) - center;
+  Vec3f dy = _fm.PhotoSets().project(index, coord + pyaxis, _fm.Level()) - center;
 
   const float ratio = (norm(dx) + norm(dy)) / 2.0f;
   int leveldif = (int)floor(log(ratio) / Log2 + 0.5f);
 
   // Upper limit is 2
-  leveldif = std::max(-_fm._level, std::min(2, leveldif));
+  leveldif = std::max(-_fm.Level(), std::min(2, leveldif));
 
   const float scale = MyPow2(leveldif);
-  const int newlevel = _fm._level + leveldif;
+  const int newlevel = _fm.Level() + leveldif;
 
   center /= scale;
   dx /= scale;
@@ -851,7 +850,7 @@ int PMVS3::COptim::grabTex(const Vec4f& coord, const Vec4f& pxaxis, const Vec4f&
     Vec3f vftmp = left;
     left += dy;
     for (int x = 0; x < size; ++x) {
-      Vec3f color = _fm._pss.getColor(index, vftmp[0], vftmp[1], newlevel);
+      Vec3f color = _fm.PhotoSets().getColor(index, vftmp[0], vftmp[1], newlevel);
       *(++texp) = color[0];
       *(++texp) = color[1];
       *(++texp) = color[2];
@@ -875,12 +874,12 @@ double PMVS3::COptim::computeINCC(const Vec4f& coord, const Vec4f& normal, const
 double PMVS3::COptim::computeINCC(const Vec4f& coord, const Vec4f& normal, const std::vector<int>& indexes, const Vec4f& pxaxis, const Vec4f& pyaxis, const int id, const int robust) {
   if ((int)indexes.size() < 2) return 2.0;
 
-  const int size = std::min(_fm._tau, (int)indexes.size());
+  const int size = std::min(_fm.Tau(), (int)indexes.size());
   std::vector<std::vector<float> >& texs = _texsT[id];
 
   for (int i = 0; i < size; ++i) {
     int flag;
-    flag = grabTex(coord, pxaxis, pyaxis, normal, indexes[i], _fm._wsize, texs[i]);
+    flag = grabTex(coord, pxaxis, pyaxis, normal, indexes[i], _fm.WSize(), texs[i]);
 
     if (flag == 0) {
       normalize(texs[i]);
@@ -957,11 +956,11 @@ void PMVS3::COptim::func(int m, int n, double* x, double* fvec, int* iflag, void
   Vec4f pxaxis, pyaxis;
   getPAxes(index, coord, normal, pxaxis, pyaxis);
 
-  const int size = std::min(_fm._tau, (int)_indexesT[id].size());
+  const int size = std::min(_fm.Tau(), (int)_indexesT[id].size());
 
   for (int i = 0; i < size; ++i) {
     int flag;
-    flag = grabTex(coord, pxaxis, pyaxis, normal, _indexesT[id][i], _fm._wsize, _texsT[id][i]);
+    flag = grabTex(coord, pxaxis, pyaxis, normal, _indexesT[id][i], _fm.WSize(), _texsT[id][i]);
 
     if (flag == 0) {
       normalize(_texsT[id][i]);
@@ -1114,13 +1113,13 @@ float PMVS3::COptim::ssd(const std::vector<float>& tex0, const std::vector<float
 }
 
 float PMVS3::COptim::getUnit(const int index, const Vec4f& coord) const {
-  const float fz = norm(coord - _fm._pss._photos[index].OpticalCenter());
+  const float fz = norm(coord - _fm.PhotoSets()._photos[index].OpticalCenter());
   const float ftmp = _ipscales[index];
   if (ftmp == 0.0) {
     return 1.0;
   }
 
-  return 2.0 * fz * (0x0001 << _fm._level) / ftmp;
+  return 2.0 * fz * (0x0001 << _fm.Level()) / ftmp;
 }
 
 // get x and y axis to collect textures given reference image and normal
@@ -1137,8 +1136,8 @@ void PMVS3::COptim::getPAxes(const int index, const Vec4f& coord, const Vec4f& n
 
   pxaxis *= pscale;
   pyaxis *= pscale;
-  const float xdis = norm(_fm._pss.project(index, coord + pxaxis, _fm._level) - _fm._pss.project(index, coord, _fm._level));
-  const float ydis = norm(_fm._pss.project(index, coord + pyaxis, _fm._level) - _fm._pss.project(index, coord, _fm._level));
+  const float xdis = norm(_fm.PhotoSets().project(index, coord + pxaxis, _fm.Level()) - _fm.PhotoSets().project(index, coord, _fm.Level()));
+  const float ydis = norm(_fm.PhotoSets().project(index, coord + pyaxis, _fm.Level()) - _fm.PhotoSets().project(index, coord, _fm.Level()));
   pxaxis /= xdis;
   pyaxis /= ydis;
 }
