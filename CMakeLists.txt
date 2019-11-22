@@ -52,8 +52,8 @@ if(PMVS_USE_PNG)
 	  ADD_DEFINITIONS(-DPMVS_HAVE_PNG)
 	  include_directories(${PNG_INCLUDE_DIRS})
 	  set(PMVS_LIBRARIES ${PMVS_LIBRARIES} ${PNG_LIBRARIES})
-  endif(PNG_FOUND)
-endif(PMVS_USE_PNG)
+  endif()
+endif()
 
 # TIFF
 set(PMVS_USE_TIFF OFF)
@@ -64,8 +64,8 @@ if(PMVS_USE_TIFF)
 	  ADD_DEFINITIONS(-DPMVS_HAVE_TIFF)
 	  include_directories(${TIFF_INCLUDE_DIR})
 	  set(PMVS_LIBRARIES ${PMVS_LIBRARIES} ${TIFF_LIBRARIES})
-  endif(TIFF_FOUND)
-endif(PMVS_USE_TIFF)
+  endif()
+endif()
 
 set(CMVS_BASE_INCLUDE_DIR
   ${CMAKE_CURRENT_SOURCE_DIR}/base
