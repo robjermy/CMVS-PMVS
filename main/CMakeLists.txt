@@ -7,6 +7,7 @@ target_link_libraries(pmvs2 PRIVATE
   nlopt
   Threads::Threads
 )
+
 target_include_directories(pmvs2 PUBLIC
   ${CMVS_BASE_INCLUDE_DIR}
 )
@@ -14,6 +15,7 @@ target_include_directories(pmvs2 PUBLIC
 add_executable(genOption genOption.cpp)
 
 add_executable(cmvs cmvs.cpp)
+
 target_link_libraries(cmvs PRIVATE
   cmvs_lib
   image_lib

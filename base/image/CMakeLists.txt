@@ -1,9 +1,5 @@
-add_library(image_lib
-  camera.cpp
-  image.cpp
-  photo.cpp
-  photoSetS.cpp
-)
+file(GLOB _SRCS "*.[hc]pp")
+add_library(image_lib ${_SRCS})
 
 target_link_libraries(image_lib jpeg-static)
 

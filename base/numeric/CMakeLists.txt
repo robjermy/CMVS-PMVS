@@ -1,13 +1,5 @@
-add_library(numeric_lib
-  mat2.hpp
-  mat3.hpp
-  mat4.hpp
-  mylapack.hpp
-  mylapack.cpp
-  vec2.hpp
-  vec3.hpp
-  vec4.hpp
-)
+file(GLOB _SRCS "*.[hc]pp")
+add_library(numeric_lib ${_SRCS})
 
 target_include_directories(numeric_lib PRIVATE 
   ${EIGEN_INCLUDE_DIR}
