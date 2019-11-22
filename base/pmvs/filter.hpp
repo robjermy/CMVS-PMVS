@@ -3,7 +3,7 @@
 #include "patch.hpp"
 #include <list>
 #include <thread>
-#include "../numeric/vec2.hpp"
+#include "numeric/vec2.hpp"
 
 namespace PMVS3 {
   class CFindMatch;

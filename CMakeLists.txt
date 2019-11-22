@@ -15,7 +15,6 @@ include(useGoldLinker)
 
 # threads
 find_package(Threads REQUIRED)
-set(PMVS_LIBRARIES ${PMVS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 # eigen
 set(EIGEN_INCLUDE_DIR 
@@ -67,6 +66,10 @@ if(PMVS_USE_TIFF)
 	  set(PMVS_LIBRARIES ${PMVS_LIBRARIES} ${TIFF_LIBRARIES})
   endif(TIFF_FOUND)
 endif(PMVS_USE_TIFF)
+
+set(CMVS_BASE_INCLUDE_DIR
+  ${CMAKE_CURRENT_SOURCE_DIR}/base
+)
 
 # external libraries
 add_subdirectory(lib)

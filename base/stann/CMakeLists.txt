@@ -6,7 +6,7 @@ add_library(stann_lib
   pair_iter.hpp
   qknn.hpp
   rand.hpp
-  sep_float.hp
+  sep_float.hpp
   sfcnn.hpp
   sfcnn_knng.hpp
   zorder_lt.hpp

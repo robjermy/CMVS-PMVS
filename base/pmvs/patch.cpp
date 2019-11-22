@@ -1,5 +1,5 @@
 #include <string>
-#include "../numeric/vec4.hpp"
+#include "numeric/vec4.hpp"
 #include "patch.hpp"
 
 std::istream& Patch::operator>>(std::istream& istr, CPatch& rhs) {

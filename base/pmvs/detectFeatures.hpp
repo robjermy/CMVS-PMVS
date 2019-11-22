@@ -7,7 +7,7 @@
 #include <string>
 #include <shared_mutex>
 
-#include "../image/photoSetS.hpp"
+#include "image/photoSetS.hpp"
 #include "point.hpp"
 
 namespace Image {

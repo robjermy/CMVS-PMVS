@@ -10,3 +10,7 @@ target_include_directories(image_lib PRIVATE
   ${CIMG_INCLUDE_DIR}
   ${JPEG_INCLUDE_DIR}
 )
+
+target_include_directories(image_lib PUBLIC
+  ${CMVS_BASE_INCLUDE_DIR}
+)

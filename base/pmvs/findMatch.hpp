@@ -8,7 +8,7 @@
 #include <queue>
 #include "patch.hpp"
 
-#include "../image/photoSetS.hpp"
+#include "image/photoSetS.hpp"
 #include "patchOrganizerS.hpp"
 #include "seed.hpp"
 #include "expand.hpp"

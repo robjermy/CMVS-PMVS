@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <set>
-#include "../numeric/vec3.hpp"
+#include "numeric/vec3.hpp"
 #include "detector.hpp"
 #include "point.hpp"
 

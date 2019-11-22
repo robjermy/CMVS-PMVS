@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../numeric/vec4.hpp"
+#include "numeric/vec4.hpp"
 #include "image.hpp"
 #include "camera.hpp"
 

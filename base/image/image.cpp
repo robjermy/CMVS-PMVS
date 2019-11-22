@@ -1,7 +1,7 @@
 #include <list>
 #include <fstream>
 #include <algorithm>
-#include "../numeric/mat4.hpp"
+#include "numeric/mat4.hpp"
 #include "image.hpp"
 #include <setjmp.h>
 #define _USE_MATH_DEFINES

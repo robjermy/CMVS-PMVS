@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <memory>
-#include "../numeric/vec4.hpp"
+#include "numeric/vec4.hpp"
 
 namespace Patch {
   class CPatch {

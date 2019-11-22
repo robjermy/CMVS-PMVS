@@ -1,7 +1,7 @@
 #include <numeric>
 #include <ctime>
 #include <time.h>
-#include "../numeric/mylapack.hpp"
+#include "numeric/mylapack.hpp"
 #include "findMatch.hpp"
 #include "filter.hpp"
 

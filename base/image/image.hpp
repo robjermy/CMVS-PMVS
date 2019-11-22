@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "../numeric/vec3.hpp"
+#include "numeric/vec3.hpp"
 
 namespace Image {
   class CImage {

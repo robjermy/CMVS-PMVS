@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
-#include "../image/image.hpp"
+#include "image/image.hpp"
 #include "detectFeatures.hpp"
 #include "harris.hpp"
 #include "dog.hpp"

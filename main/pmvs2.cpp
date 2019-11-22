@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
-#include "../base/pmvs/findMatch.hpp"
-#include "../base/pmvs/option.hpp"
+#include "pmvs/findMatch.hpp"
+#include "pmvs/option.hpp"
 
 int main(int argc, char* argv[]) {
   if (argc < 3) {

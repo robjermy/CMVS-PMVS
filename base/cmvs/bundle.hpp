@@ -13,9 +13,9 @@
 #include <thread>
 
 #include "disjoint.hpp"
-#include "../stann/sfcnn.hpp"
-#include "../numeric/mat3.hpp"
-#include "../image/photoSetS.hpp"
+#include "stann/sfcnn.hpp"
+#include "numeric/mat3.hpp"
+#include "image/photoSetS.hpp"
 
 namespace CMVS {
   struct Sadd {
