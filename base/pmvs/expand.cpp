@@ -15,8 +15,8 @@ PMVS3::CExpand::CExpand(CFindMatch& findMatch) : _fm(findMatch) {}
 void PMVS3::CExpand::init() {}
 
 void PMVS3::CExpand::run() {
-  _fm._count = 0;
-  _fm._jobs.clear();
+  _fm.Count() = 0;
+  _fm.Jobs().clear();
   _ecounts.resize(_fm._CPU);
   _fcounts0.resize(_fm._CPU);
   _fcounts1.resize(_fm._CPU);
@@ -71,21 +71,21 @@ void PMVS3::CExpand::run() {
 }
 
 void PMVS3::CExpand::expandThread(void) {
-  _fm._lock.lock();
-  const int id = _fm._count++;
-  _fm._lock.unlock();
+  _fm.Lock();
+  const int id = _fm.Count()++;
+  _fm.Unlock();
 
   while (1) {
     Patch::PPatch ppatch;
     int empty = 0;
-    _fm._lock.lock();
+    _fm.Lock();
     if (_queue.empty()) {
       empty = 1;
     } else {
       ppatch = _queue.top();
       _queue.pop();
     }
-    _fm._lock.unlock();
+    _fm.Unlock();
 
     if (empty) break;
 
@@ -247,9 +247,9 @@ int PMVS3::CExpand::expandSub(const Patch::PPatch& orgppatch, const int id, cons
   _fm._pos.addPatch(ppatch);
 
   if (add) {
-    _fm._lock.lock();
+    _fm.Lock();
     _queue.push(ppatch);
-    _fm._lock.unlock();
+    _fm.Unlock();
   }
 
   return 0;
@@ -264,7 +264,7 @@ int PMVS3::CExpand::checkCounts(Patch::CPatch& patch) {
 
   while (begin != end) {
     const int index = *begin;
-    if (_fm._tnum <= index) {
+    if (_fm.NumTargetImages() <= index) {
       ++begin;
       ++begin2;
       continue;
@@ -280,11 +280,11 @@ int PMVS3::CExpand::checkCounts(Patch::CPatch& patch) {
     const int index2 = iy * _fm._pos._gwidths[index] + ix;
 
     int flag = 0;
-	  _fm._imageLocks[index]->lock_shared();
+	  _fm.LockSharedImage(index);;
     if (!_fm._pos._pgrids[index][index2].empty()) {
       flag = 1;
     }
-	  _fm._imageLocks[index]->unlock();
+	  _fm.UnlockSharedImage(index);
 
     if (flag) {
       ++full;
@@ -294,13 +294,13 @@ int PMVS3::CExpand::checkCounts(Patch::CPatch& patch) {
     }
 
     //mtx_lock(&_fm._countLocks[index]);
-	  _fm._countLocks[index]->lock_shared();
+	  _fm.LockSharedCount(index);
     if (_fm._countThreshold1 <= _fm._pos._counts[index][index2]) {
       ++full;
     } else {
       ++empty;
     }
-	  _fm._countLocks[index]->unlock();
+	  _fm.UnlockSharedCount(index);
     ++begin;
     ++begin2;
   }
@@ -332,7 +332,7 @@ int PMVS3::CExpand::updateCounts(const Patch::CPatch& patch) {
 
     while (begin != end) {
       const int index = *begin;
-      if (_fm._tnum <= index) {
+      if (_fm.NumTargetImages() <= index) {
         ++begin;
         ++begin2;
         continue;
@@ -348,14 +348,14 @@ int PMVS3::CExpand::updateCounts(const Patch::CPatch& patch) {
 
       const int index2 = iy * _fm._pos._gwidths[index] + ix;
 
-	    _fm._countLocks[index]->lock_shared();
+	    _fm.LockSharedCount(index);
       if (_fm._countThreshold1 <= _fm._pos._counts[index][index2]) {
         ++full;
       } else {
         ++empty;
       }
       ++_fm._pos._counts[index][index2];
-	    _fm._countLocks[index]->unlock();
+	    _fm.UnlockSharedCount(index);
       ++begin;
       ++begin2;
     }
@@ -369,7 +369,7 @@ int PMVS3::CExpand::updateCounts(const Patch::CPatch& patch) {
     while (begin != end) {
       const int index = *begin;
 #ifdef DEBUG
-      if (_fm._tnum <= index) {
+      if (_fm.NumTargetImages() <= index) {
         cerr << "Impossible in updateCounts" << endl;
         exit (1);
       }
@@ -385,14 +385,14 @@ int PMVS3::CExpand::updateCounts(const Patch::CPatch& patch) {
 
       const int index2 = iy * _fm._pos._gwidths[index] + ix;
 
-	    _fm._countLocks[index]->lock_shared();;
+	    _fm.LockSharedCount(index);
       if (_fm._countThreshold1 <= _fm._pos._counts[index][index2]) {
         ++full;
       } else {
         ++empty;
       }
       ++_fm._pos._counts[index][index2];
-	    _fm._countLocks[index]->unlock();
+	    _fm.UnlockSharedCount(index);
       ++begin;
       ++begin2;
     }

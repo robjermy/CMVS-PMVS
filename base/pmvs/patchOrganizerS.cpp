@@ -28,7 +28,7 @@ void PMVS3::CPatchOrganizerS::image2index(Patch::CPatch& patch) {
   // make sure that the reference image is the targeting image
   int exist = -1;
   for (int j = 0; j < (int)patch._images.size(); ++j) {
-    if (patch._images[j] < _fm._tnum) {
+    if (patch._images[j] < _fm.NumTargetImages()) {
       exist = j;
       break;
     }
@@ -53,30 +53,30 @@ void PMVS3::CPatchOrganizerS::index2image(Patch::CPatch& patch) {
 
 void PMVS3::CPatchOrganizerS::init(void) {
   _pgrids.clear();
-  _pgrids.resize(_fm._tnum);
+  _pgrids.resize(_fm.NumTargetImages());
 
   _vpgrids.clear();
-  _vpgrids.resize(_fm._tnum);
+  _vpgrids.resize(_fm.NumTargetImages());
 
   _dpgrids.clear();
-  _dpgrids.resize(_fm._tnum);
+  _dpgrids.resize(_fm.NumTargetImages());
 
   _counts.clear();
-  _counts.resize(_fm._tnum);
+  _counts.resize(_fm.NumTargetImages());
 
   _gwidths.clear();
-  _gwidths.resize(_fm._num);
+  _gwidths.resize(_fm.NumImages());
 
   _gheights.clear();
-  _gheights.resize(_fm._num);
+  _gheights.resize(_fm.NumImages());
 
-  for (int index = 0; index < _fm._num; ++index) {
+  for (int index = 0; index < _fm.NumImages(); ++index) {
     const int gwidth = (_fm._pss.getWidth(index, _fm._level) + _fm._csize - 1) / _fm._csize;
     const int gheight = (_fm._pss.getHeight(index, _fm._level) + _fm._csize - 1) / _fm._csize;
     _gwidths[index] = gwidth;
     _gheights[index] = gheight;
 
-    if (index < _fm._tnum) {
+    if (index < _fm.NumTargetImages()) {
       _pgrids[index].resize(gwidth * gheight);
       _vpgrids[index].resize(gwidth * gheight);
       _dpgrids[index].resize(gwidth * gheight);
@@ -133,7 +133,7 @@ void PMVS3::CPatchOrganizerS::writePatches2(const std::string prefix, bool bExpo
 
 void PMVS3::CPatchOrganizerS::readPatches(void) {
   // Read-in existing reconstructed points. set _fix to one for non-targeting images
-  for (int i = 0; i < _fm._tnum; ++i) {
+  for (int i = 0; i < _fm.NumTargetImages(); ++i) {
     const int image = _fm._images[i];
     char buffer[1024];
     sprintf(buffer, "%smodels/%08d.patc%d", _fm._prefix.c_str(), image, _fm._level);
@@ -159,7 +159,7 @@ void PMVS3::CPatchOrganizerS::readPatches(void) {
       // _vimages must be targeting images
 #ifdef DEBUG
       for (int j = 0; j < (int)ppatch->_vimages.size(); ++j) {
-        if (_fm._tnum <= ppatch->_vimages[j]) {
+        if (_fm.NumTargetImages() <= ppatch->_vimages[j]) {
           cerr << "Impossible in readPatches. _vimages must be targeting images" << std::endl
                << "for patches stored in targeting images, if visdata2 have been consistent" << std::endl;
           exit (1);
@@ -174,7 +174,7 @@ void PMVS3::CPatchOrganizerS::readPatches(void) {
   }
 
   // For patches in non-targeting images
-  for (int i = _fm._tnum; i < _fm._num; ++i) {
+  for (int i = _fm.NumTargetImages(); i < _fm.NumImages(); ++i) {
     const int image = _fm._images[i];
     char buffer[1024];
     sprintf(buffer, "%smodels/%08d.patc%d", _fm._prefix.c_str(), image, _fm._level);
@@ -207,7 +207,7 @@ void PMVS3::CPatchOrganizerS::readPatches(void) {
 void PMVS3::CPatchOrganizerS::collectPatches(const int target) {
   _ppatches.clear();
 
-  for (int index = 0; index < _fm._tnum; ++index) {
+  for (int index = 0; index < _fm.NumTargetImages(); ++index) {
     for (int i = 0; i < (int)_pgrids[index].size(); ++i) {
       auto begin = _pgrids[index][i].begin();
       while (begin != _pgrids[index][i].end()) {
@@ -218,7 +218,7 @@ void PMVS3::CPatchOrganizerS::collectPatches(const int target) {
   }
 
   int count = 0;
-  for (int index = 0; index < _fm._tnum; ++index) {
+  for (int index = 0; index < _fm.NumTargetImages(); ++index) {
     for (int i = 0; i < (int)_pgrids[index].size(); ++i) {
       auto begin = _pgrids[index][i].begin();
       while (begin != _pgrids[index][i].end()) {
@@ -236,7 +236,7 @@ void PMVS3::CPatchOrganizerS::collectPatches(const int target) {
 }
 
 void PMVS3::CPatchOrganizerS::collectPatches(std::priority_queue<Patch::PPatch, std::vector<Patch::PPatch>, P_compare>& pqpatches) {
-  for (int index = 0; index < _fm._tnum; ++index) {
+  for (int index = 0; index < _fm.NumTargetImages(); ++index) {
     for (int i = 0; i < (int)_pgrids[index].size(); ++i) {
       auto begin = _pgrids[index][i].begin();
       while (begin != _pgrids[index][i].end()) {
@@ -251,7 +251,7 @@ void PMVS3::CPatchOrganizerS::collectPatches(std::priority_queue<Patch::PPatch, 
 }
 
 void PMVS3::CPatchOrganizerS::collectPatches(const int index, std::priority_queue<Patch::PPatch, std::vector<Patch::PPatch>, P_compare>& pqpatches) {
-  _fm._imageLocks[index]->lock();
+  _fm.LockImage(index);
   for (int i = 0; i < (int)_pgrids[index].size(); ++i) {
     auto begin = _pgrids[index][i].begin();
     auto end = _pgrids[index][i].end();
@@ -264,12 +264,12 @@ void PMVS3::CPatchOrganizerS::collectPatches(const int index, std::priority_queu
       ++begin;
     }
   }
-  _fm._imageLocks[index]->unlock();
+  _fm.UnlockImage(index);
 }
 
 // Should be used only for writing
 void PMVS3::CPatchOrganizerS::collectNonFixPatches(const int index, std::vector<Patch::PPatch>& ppatches) {
-  _fm._imageLocks[index]->lock();;
+  _fm.LockImage(index);;
   for (int i = 0; i < (int)_pgrids[index].size(); ++i) {
     auto begin = _pgrids[index][i].begin();
     auto end = _pgrids[index][i].end();
@@ -281,7 +281,7 @@ void PMVS3::CPatchOrganizerS::collectNonFixPatches(const int index, std::vector<
       ++begin;
     }
   }
-  _fm._imageLocks[index]->unlock();
+  _fm.UnlockImage(index);
 }
 
 void PMVS3::CPatchOrganizerS::clearFlags(void) {
@@ -295,7 +295,7 @@ void PMVS3::CPatchOrganizerS::clearFlags(void) {
 }
 
 void PMVS3::CPatchOrganizerS::clearCounts(void) {
-  for (int index = 0; index < _fm._tnum; ++index) {
+  for (int index = 0; index < _fm.NumTargetImages(); ++index) {
     auto begin = _counts[index].begin();
     auto end = _counts[index].end();
     while (begin != end) {
@@ -312,16 +312,16 @@ void PMVS3::CPatchOrganizerS::addPatch(Patch::PPatch& ppatch) {
   auto bgrid = ppatch->_grids.begin();
   while (bimage != eimage) {
     const int index = *bimage;
-    if (_fm._tnum <= index) {
+    if (_fm.NumTargetImages() <= index) {
       ++bimage;
       ++bgrid;
       continue;
     }
 
     const int index2 = (*bgrid)[1] * _gwidths[index] + (*bgrid)[0];
-    _fm._imageLocks[index]->lock();
+    _fm.LockImage(index);
     _pgrids[index][index2].push_back(ppatch);
-	  _fm._imageLocks[index]->unlock();
+	  _fm.UnlockImage(index);
 
     ++bimage;
     ++bgrid;
@@ -337,9 +337,9 @@ void PMVS3::CPatchOrganizerS::addPatch(Patch::PPatch& ppatch) {
   while (bimage != eimage) {
     const int index = *bimage;
     const int index2 = (*bgrid)[1] * _gwidths[index] + (*bgrid)[0];
-	  _fm._imageLocks[index]->lock();
+	  _fm.LockImage(index);
     _vpgrids[index][index2].push_back(ppatch);
-	  _fm._imageLocks[index]->unlock();
+	  _fm.UnlockImage(index);
 
     ++bimage;
     ++bgrid;
@@ -349,7 +349,7 @@ void PMVS3::CPatchOrganizerS::addPatch(Patch::PPatch& ppatch) {
 }
 
 void PMVS3::CPatchOrganizerS::updateDepthMaps(Patch::PPatch& ppatch) {
-  for (int image = 0; image < _fm._tnum; ++image) {
+  for (int image = 0; image < _fm.NumTargetImages(); ++image) {
     const Vec3f icoord = _fm._pss.project(image, ppatch->_coord, _fm._level);
 
     const float fx = icoord[0] / _fm._csize;
@@ -359,7 +359,7 @@ void PMVS3::CPatchOrganizerS::updateDepthMaps(Patch::PPatch& ppatch) {
 
     const float depth = _fm._pss._photos[image].OpticalAxis() * ppatch->_coord;
 
-	  _fm._imageLocks[image]->lock();
+    _fm.LockImage(image);
     for (int j = 0; j < 2; ++j) {
       for (int i = 0; i < 2; ++i) {
 	      if (xs[i] < 0 || _gwidths[image] <= xs[i] || ys[j] < 0 || _gheights[image] <= ys[j]) continue;
@@ -376,7 +376,7 @@ void PMVS3::CPatchOrganizerS::updateDepthMaps(Patch::PPatch& ppatch) {
         }
       }
     }
-    _fm._imageLocks[image]->unlock();
+    _fm.UnlockImage(image);
   }
 }
 
@@ -419,13 +419,13 @@ void PMVS3::CPatchOrganizerS::setVImagesVGrids(Patch::PPatch& ppatch) {
 
 void PMVS3::CPatchOrganizerS::setVImagesVGrids(Patch::CPatch& patch) {
   std::vector<int> used;
-  used.resize(_fm._tnum);
+  used.resize(_fm.NumTargetImages());
   fill(used.begin(), used.end(), 0);
 
   auto bimage = patch._images.begin();
   auto eimage = patch._images.end();
   while (bimage != eimage) {
-    if ((*bimage) < _fm._tnum) {
+    if ((*bimage) < _fm.NumTargetImages()) {
       used[*(bimage)] = 1;
     }
     ++bimage;
@@ -437,7 +437,7 @@ void PMVS3::CPatchOrganizerS::setVImagesVGrids(Patch::CPatch& patch) {
     used[*(bimage++)] = 1;
   }
 
-  for (int image = 0; image < _fm._tnum; ++image) {
+  for (int image = 0; image < _fm.NumTargetImages(); ++image) {
     if (used[image]) continue;
 
     int ix, iy;
@@ -452,7 +452,7 @@ void PMVS3::CPatchOrganizerS::setVImagesVGrids(Patch::CPatch& patch) {
 void PMVS3::CPatchOrganizerS::removePatch(const Patch::PPatch& ppatch) {
   for (int i = 0; i < (int)ppatch->_images.size(); ++i) {
     const int image = ppatch->_images[i];
-    if (_fm._tnum <= image) continue;
+    if (_fm.NumTargetImages() <= image) continue;
 
     const int& ix = ppatch->_grids[i][0];
     const int& iy = ppatch->_grids[i][1];
@@ -463,7 +463,7 @@ void PMVS3::CPatchOrganizerS::removePatch(const Patch::PPatch& ppatch) {
   for (int i = 0; i < (int)ppatch->_vimages.size(); ++i) {
     const int image = ppatch->_vimages[i];
 #ifdef DEBUG
-    if (_fm._tnum <= image) {
+    if (_fm.NumTargetImages() <= image) {
       cerr << "Impossible in removePatch. _vimages must be targetting images" << std::endl;
       exit (1);
     }
@@ -496,7 +496,7 @@ int PMVS3::CPatchOrganizerS::isVisible(const Patch::CPatch& patch, const int ima
   const int index = iy * gwidth + ix;
 
   if (lock) {
-    _fm._imageLocks[image]->lock_shared();
+    _fm.LockSharedImage(image);
   }
 
   if (_dpgrids[image][index] == _MAXDEPTH) {
@@ -506,7 +506,7 @@ int PMVS3::CPatchOrganizerS::isVisible(const Patch::CPatch& patch, const int ima
   }
 
   if (lock) {
-    _fm._imageLocks[image]->unlock();
+    _fm.UnlockSharedImage(image);
   }
 
   if (ans == 1) {
@@ -546,7 +546,7 @@ void PMVS3::CPatchOrganizerS::findNeighbors(const Patch::CPatch& patch, std::vec
   unit *= _fm._csize;
 
   while (bimage != eimage) {
-    if (_fm._tnum <= *bimage) {
+    if (_fm.NumTargetImages() <= *bimage) {
       ++bimage;
       ++bgrid;
       continue;
@@ -556,7 +556,7 @@ void PMVS3::CPatchOrganizerS::findNeighbors(const Patch::CPatch& patch, std::vec
     const int& ix = (*bgrid)[0];
     const int& iy = (*bgrid)[1];
     if (lock) {
-      _fm._imageLocks[image]->lock_shared();
+      _fm.LockSharedImage(image);
     }
 
     for (int j = -margin; j <= margin; ++j) {
@@ -586,8 +586,9 @@ void PMVS3::CPatchOrganizerS::findNeighbors(const Patch::CPatch& patch, std::vec
         }
       }
     }
+
     if (lock) {
-      _fm._imageLocks[image]->unlock();
+      _fm.UnlockSharedImage(image);
     }
 
     ++bimage;
@@ -605,7 +606,7 @@ void PMVS3::CPatchOrganizerS::findNeighbors(const Patch::CPatch& patch, std::vec
       const int& iy = (*bgrid)[1];
 
       if (lock) {
-        _fm._imageLocks[image]->lock_shared();
+        _fm.LockSharedImage(image);
       }
 
       for (int j = -margin; j <= margin; ++j) {
@@ -638,7 +639,7 @@ void PMVS3::CPatchOrganizerS::findNeighbors(const Patch::CPatch& patch, std::vec
         }
       }
       if (lock) {
-        _fm._imageLocks[image]->unlock();
+        _fm.UnlockSharedImage(image);
       }
       ++bimage;
       ++bgrid;

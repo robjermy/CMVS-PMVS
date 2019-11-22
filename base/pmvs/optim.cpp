@@ -33,8 +33,8 @@ void PMVS3::COptim::init(void) {
   _weightsT.resize(_fm._CPU);
 
   for (int c = 0; c < _fm._CPU; ++c) {
-    _texsT[c].resize(_fm._num);
-    _weightsT[c].resize(_fm._num);
+    _texsT[c].resize(_fm.NumImages());
+    _weightsT[c].resize(_fm.NumImages());
     for (int j = 0; j < _fm._tau; ++j) {
       _texsT[c][j].resize(3 * _fm._wsize * _fm._wsize);
     }
@@ -44,10 +44,10 @@ void PMVS3::COptim::init(void) {
 }
 
 void PMVS3::COptim::setAxesScales(void) {
-  _xaxes.resize(_fm._num);
-  _yaxes.resize(_fm._num);
-  _zaxes.resize(_fm._num);
-  for (int index = 0; index < _fm._num; ++index) {
+  _xaxes.resize(_fm.NumImages());
+  _yaxes.resize(_fm.NumImages());
+  _zaxes.resize(_fm.NumImages());
+  for (int index = 0; index < _fm.NumImages(); ++index) {
     _zaxes[index] = Vec3f(_fm._pss._photos[index].OpticalAxis()[0], _fm._pss._photos[index].OpticalAxis()[1], _fm._pss._photos[index].OpticalAxis()[2]);
     _xaxes[index] = Vec3f(_fm._pss._photos[index].ProjectionMatrix()[0][0][0], _fm._pss._photos[index].ProjectionMatrix()[0][0][1], _fm._pss._photos[index].ProjectionMatrix()[0][0][2]);
     _yaxes[index] = cross(_zaxes[index], _xaxes[index]);
@@ -55,8 +55,8 @@ void PMVS3::COptim::setAxesScales(void) {
     _xaxes[index] = cross(_yaxes[index], _zaxes[index]);
   }
 
-  _ipscales.resize(_fm._num);
-  for (int index = 0; index < _fm._num; ++index) {
+  _ipscales.resize(_fm.NumImages());
+  for (int index = 0; index < _fm.NumImages(); ++index) {
     const Vec4f xaxe(_xaxes[index][0], _xaxes[index][1], _xaxes[index][2], 0.0);
     const Vec4f yaxe(_yaxes[index][0], _yaxes[index][1], _yaxes[index][2], 0.0);
 
@@ -176,7 +176,7 @@ int PMVS3::COptim::postProcess(CPatch& patch, const int id, const int seed) {
   vector<int>::const_iterator begin = patch._images.begin();
   vector<int>::const_iterator end = patch._images.end();
   while (begin != end) {
-    if (*begin < _fm._tnum) {
+    if (*begin < _fm.NumTargetImages()) {
       ++patch._timages;
     }
     ++begin;
@@ -221,7 +221,7 @@ void PMVS3::COptim::setRefImage(CPatch& patch, const int id) {
   vector<int>::const_iterator begin = patch._images.begin();
   vector<int>::const_iterator end = patch._images.end();
   while (begin != end) {
-    if (*begin < _fm._tnum) {
+    if (*begin < _fm.NumTargetImages()) {
       indexes.push_back(*begin);
     }
     ++begin;
@@ -401,8 +401,8 @@ void PMVS3::COptim::removeImagesEdge(Patch::CPatch& patch) const{
 void PMVS3::COptim::addImages(Patch::CPatch& patch) const{
   // take into account _edge
   vector<int> used;
-  used.resize(_fm._num);
-  for (int index = 0; index < _fm._num; ++index) {
+  used.resize(_fm.NumImages());
+  for (int index = 0; index < _fm.NumImages(); ++index) {
     used[index] = 0;
   }
 

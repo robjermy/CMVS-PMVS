@@ -42,11 +42,32 @@ namespace PMVS3 {
     int isNeighbor(const Patch::CPatch& lhs, const Patch::CPatch& rhs, const float hunit, const float neighborThreshold) const;
     int isNeighbor(const Patch::CPatch& lhs, const Patch::CPatch& rhs, const float neighborThreshold) const;
 
+    // Const getters
+    const int NumImages() const { return _num; }
+    const int NumTargetImages() const { return _tnum; }
+    const int Count() const { return _count; }
+    const std::list<int> Jobs() const { return _jobs; }
+    const int JUnit() const { return _junit; }
+
+    // Reference getters
+    int& Count() { return _count; }
+    std::list<int>& Jobs() { return _jobs; }
+
+    // Thread locking and unlocking
+    void Lock() { _lock.lock(); }
+    void Unlock() { _lock.unlock(); }
+
+    void LockImage(const int index) { _imageLocks[index]->lock(); }
+    void LockSharedImage(const int index) { _imageLocks[index]->lock_shared(); }
+    void UnlockImage(const int index) { _imageLocks[index]->unlock(); }
+    void UnlockSharedImage(const int index) { _imageLocks[index]->unlock_shared(); }
+
+    void LockCount(const int index) { _countLocks[index]->lock(); }
+    void LockSharedCount(const int index) { _countLocks[index]->lock_shared(); }
+    void UnlockCount(const int index) { _countLocks[index]->unlock(); }
+    void UnlockSharedCount(const int index) { _countLocks[index]->unlock_shared(); }
+
     //----------------------------------------------------------------------
-    // num of target images
-    int _tnum;
-    // num of total images
-    int _num;
     // target images
     std::vector<int> _timages;
     // other images where patches are not computed
@@ -124,21 +145,6 @@ namespace PMVS3 {
     float _epThreshold;
 
     //----------------------------------------------------------------------
-    // For threads related
-    //----------------------------------------------------------------------
-    // General lock
-    std::mutex _lock;
-    // For each image
-    std::vector<std::shared_mutex*> _imageLocks;
-    std::vector<std::shared_mutex*> _countLocks;
-    // count
-    int _count;
-    // jobs
-    std::list<int> _jobs;
-    // job unit
-    int _junit;
-
-    //----------------------------------------------------------------------
     // Core members
     //----------------------------------------------------------------------
     // Images
@@ -157,7 +163,30 @@ namespace PMVS3 {
     COptim _optim;
 
     int _debug;
-  protected:
+
+  protected: // variables
+    // num of target images
+    int _tnum;
+    // num of total images
+    int _num;
+    // count
+    int _count;
+
+
+    //----------------------------------------------------------------------
+    // For threads related
+    //----------------------------------------------------------------------
+    // General lock
+    std::mutex _lock;
+    // For each image
+    std::vector<std::shared_mutex*> _imageLocks;
+    std::vector<std::shared_mutex*> _countLocks;
+    // jobs
+    std::list<int> _jobs;
+    // job unit
+    int _junit;
+
+  protected: // methods
     void init(void);
     void initTargets(void);
     void updateThreshold(void);

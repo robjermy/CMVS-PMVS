@@ -11,9 +11,9 @@ PMVS3::CSeed::CSeed(CFindMatch& findMatch) : _fm(findMatch) {}
 
 void PMVS3::CSeed::init(const std::vector<std::vector<CPoint> >& points) {
   _ppoints.clear();
-  _ppoints.resize(_fm._num);
+  _ppoints.resize(_fm.NumImages());
 
-  for (int index = 0; index < _fm._num; ++index) {
+  for (int index = 0; index < _fm.NumImages(); ++index) {
     const int gheight = _fm._pos._gheights[index];
     const int gwidth = _fm._pos._gwidths[index];
     _ppoints[index].resize(gwidth * gheight);
@@ -23,7 +23,7 @@ void PMVS3::CSeed::init(const std::vector<std::vector<CPoint> >& points) {
 }
 
 void PMVS3::CSeed::readPoints(const std::vector<std::vector<CPoint> >& points) {
-  for (int index = 0; index < _fm._num; ++index) {
+  for (int index = 0; index < _fm.NumImages(); ++index) {
     for (int i = 0; i < (int)points[index].size(); ++i) {
       PPoint ppoint(new CPoint(points[index][i]));
       ppoint->_itmp = index;
@@ -39,8 +39,8 @@ void PMVS3::CSeed::readPoints(const std::vector<std::vector<CPoint> >& points) {
 static const unsigned int RANDOM_SEED = 42;
 
 void PMVS3::CSeed::run(void) {
-  _fm._count = 0;
-  _fm._jobs.clear();
+  _fm.Count() = 0;
+  _fm.Jobs().clear();
   _scounts.resize(_fm._CPU);
   _fcounts0.resize(_fm._CPU);
   _fcounts1.resize(_fm._CPU);
@@ -52,20 +52,20 @@ void PMVS3::CSeed::run(void) {
   std::fill(_pcounts.begin(), _pcounts.end(), 0);
 
   std::vector<int> vitmp;
-  for (int i = 0; i < _fm._tnum; ++i) {
+  for (int i = 0; i < _fm.NumTargetImages(); ++i) {
     vitmp.push_back(i);
   }
 
   std::mt19937 gen(RANDOM_SEED);
   std::shuffle(vitmp.begin(), vitmp.end(), gen);
-  _fm._jobs.insert(_fm._jobs.end(), vitmp.begin(), vitmp.end());
+  _fm.Jobs().insert(_fm.Jobs().end(), vitmp.begin(), vitmp.end());
 
   std::cerr << "adding seeds " << std::endl;
 
   _fm._pos.clearCounts();
 
   // If there already exists a patch, don't use
-  for (int index = 0; index < (int)_fm._tnum; ++index) {
+  for (int index = 0; index < (int)_fm.NumTargetImages(); ++index) {
     for (int j = 0; j < (int)_fm._pos._pgrids[index].size(); ++j) {
       if (!_fm._pos._pgrids[index][j].empty()) {
         _fm._pos._counts[index][j] = _fm._countThreshold2;
@@ -108,18 +108,18 @@ void PMVS3::CSeed::run(void) {
 }
 
 void PMVS3::CSeed::initialMatchThread(void) {
-  _fm._lock.lock();
-  const int id = _fm._count++;
-  _fm._lock.unlock();
+  _fm.Lock();
+  const int id = _fm.Count()++;
+  _fm.Unlock();
 
   while (1) {
     int index = -1;
-    _fm._lock.lock();
-    if (!_fm._jobs.empty()) {
-      index = _fm._jobs.front();
-      _fm._jobs.pop_front();
+    _fm.Lock();
+    if (!_fm.Jobs().empty()) {
+      index = _fm.Jobs().front();
+      _fm.Jobs().pop_front();
     }
-    _fm._lock.unlock();
+    _fm.Unlock();
 
     if (index == -1) break;
 
@@ -177,7 +177,7 @@ void PMVS3::CSeed::initialMatch(const int index, const int id) {
           const int ix = ((int)floor(vcp[i]->_icoord[0] + 0.5f)) / _fm._csize;
           const int iy = ((int)floor(vcp[i]->_icoord[1] + 0.5f)) / _fm._csize;
           const int index3 = iy * _fm._pos._gwidths[vcp[i]->_itmp] + ix;
-          if (vcp[i]->_itmp < _fm._tnum) {
+          if (vcp[i]->_itmp < _fm.NumTargetImages()) {
             ++_fm._pos._counts[vcp[i]->_itmp][index3];
           }
 
@@ -325,7 +325,7 @@ void PMVS3::CSeed::collectCandidates(const int index, const std::vector<int>& in
 
 int PMVS3::CSeed::canAdd(const int index, const int x, const int y) {
   if (!_fm._pss.getMask(index, _fm._csize * x, _fm._csize * y, _fm._level)) return 0;
-  if (_fm._tnum <= index) return 1;
+  if (_fm.NumTargetImages() <= index) return 1;
 
   const int index2 = y * _fm._pos._gwidths[index] + x;
 
