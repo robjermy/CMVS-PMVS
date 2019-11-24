@@ -8,8 +8,15 @@ add_subdirectory(
   EXCLUDE_FROM_ALL
 )
 
-# Header only
+# Header only Projects
+# CImg
 ExternalGitProject(cimg https://github.com/dtschump/CImg.git v.2.7.5)
+# NLohmann JSON
+ExternalGitProject(json https://github.com/nlohmann/json.git v3.7.3)
+add_subdirectory(
+  ${json_SOURCE_DIR}
+  EXCLUDE_FROM_ALL
+)
 
 # Eigen lib with modified CMakeLists to not build uninstall target
 ExternalGitProject(eigen https://github.com/eigenteam/eigen-git-mirror.git 3.3.7)

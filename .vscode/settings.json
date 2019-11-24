@@ -85,7 +85,12 @@
     "slist": "cpp",
     "future": "cpp",
     "cfenv": "cpp",
-    "cinttypes": "cpp"
+    "cinttypes": "cpp",
+    "codecvt": "cpp",
+    "csetjmp": "cpp",
+    "csignal": "cpp",
+    "forward_list": "cpp",
+    "regex": "cpp"
   },
   "files.watcherExclude": {
     "**/build/**": true,

@@ -8,10 +8,9 @@
       "name": "(lldb) Launch",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/main/pmvs2",
+      "program": "${workspaceFolder}/build/source/pmvs3",
       "args": [
-        "../data/hall/",
-        "option.txt-0000"
+        "../data/hall/run1.json"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/build",

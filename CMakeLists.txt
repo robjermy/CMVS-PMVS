@@ -16,25 +16,38 @@ include(useGoldLinker)
 # threads
 find_package(Threads REQUIRED)
 
+# libraries
+set(CMVS_LIB_SOURCE_DIR
+${CMAKE_CURRENT_SOURCE_DIR}/lib
+)
+set(CMVS_LIB_BINARY_DIR
+	${CMAKE_CURRENT_BINARY_DIR}/lib
+)
+
 # eigen
 set(EIGEN_INCLUDE_DIR 
-	${CMAKE_CURRENT_SOURCE_DIR}/lib/eigen
+	${CMVS_LIB_SOURCE_DIR}/eigen
 )
 
 # nlopt
 set(NLOPT_INCLUDE_DIR
-	${CMAKE_CURRENT_SOURCE_DIR}/lib/nlopt/src/api
-	${CMAKE_CURRENT_BINARY_DIR}/lib/nlopt/src/api
+	${CMVS_LIB_SOURCE_DIR}/nlopt/src/api
+	${CMVS_LIB_BINARY_DIR}/nlopt/src/api
 )
 
 # cimg
 set(CIMG_INCLUDE_DIR
-	${CMAKE_CURRENT_SOURCE_DIR}/lib/cimg
+	${CMVS_LIB_SOURCE_DIR}/cimg
 ) 
 
 # graclus
 set(GRACLUS_INCLUDE_DIR
-	${CMAKE_CURRENT_SOURCE_DIR}/lib/graclus/metisLib
+	${CMVS_LIB_SOURCE_DIR}/graclus/metisLib
+)
+
+# json
+set(JSON_INCLUDE_DIR
+	${CMVS_LIB_SOURCE_DIR}/json/include
 )
 
 # libjpeg-turbo

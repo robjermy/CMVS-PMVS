@@ -2,32 +2,86 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
+#include "except/formatExcept.hpp"
 #include "pmvs/option.hpp"
 
-PMVS3::SOption::SOption(void) {
-  _level = 1;
-  _csize = 2;
-  _threshold = 0.7;
-  _wsize = 7;
-  _minImageNum = 3;
-  _CPU = 4;
-  _setEdge = 0.0f;
-  _useBound = 0;
-  _useVisData = 0;
-  _sequence = -1;
-  _tflag = -10;
-  _oflag = -10;
-
+PMVS3::SOption::SOption() :
+  _level(1),
+  _csize(2),
+  _threshold(0.7),
+  _wsize(7),
+  _minImageNum(3),
+  _CPU(4),
+  _setEdge(0.0f),
+  _useBound(0),
+  _useVisData(0),
+  _sequence(-1),
+  _tflag(-10),
+  _oflag(-10) { 
   // Max angle must be at least this big
   _maxAngleThreshold = 10.0f * M_PI / 180.0f;
   // The smaller the tighter
   _quadThreshold = 2.5f;
 }
 
-void PMVS3::SOption::init(const std::string prefix, const std::string option) {
+PMVS3::SOption::SOption(const std::string& config) : SOption::SOption() {
+  nlohmann::json jsonConfig;
+  
+  std::filesystem::path configPath(config);
+  if (!std::filesystem::exists(configPath)) {
+    throw std::runtime_error(ExceptionFormatter() << "Configuration path " << configPath << " does not exist");
+  }
+
+  std::ifstream configFile(configPath);
+  configFile >> jsonConfig;
+
+  std::filesystem::path rootPath(std::string(jsonConfig.value("rootPath", ".")));
+  std::cout << "rootPath " << rootPath << std::endl;
+  std::filesystem::path prefixPath = configPath.parent_path();
+  prefixPath.append(rootPath.string());
+  _prefix = rootPath;
+
+  _prefix = jsonConfig["rootPath"];
+  _option = config;
+
+  _level = jsonConfig.value("imageResolutionScale", 1);
+  _csize = jsonConfig.value("cellSize", 2);
+  _threshold = jsonConfig.value("threshold", 0.7f);
+  _wsize = jsonConfig.value("windowSize", 7);
+  _minImageNum = jsonConfig.value("minimumImages", 3);
+  _CPU = jsonConfig.value("threads", 4);
+  _setEdge = jsonConfig.value("setEdge", 0.f);
+  _useBound = jsonConfig.value("useBound", 0);
+  _useVisData = jsonConfig.value("useVisibilityData", 0);
+  _sequence = jsonConfig.value("setEdge", -1);
+  _quadThreshold = jsonConfig.value("quadThreshold", 2.5f);
+  _maxAngleThreshold = jsonConfig.value("maxAngleThreshold", 10.0f * M_PI / 180.0f);
+
+  getImagesFromConfig(jsonConfig["useImages"], _timages);
+  if (_timages.size() > 0) {
+    _tflag = -1;
+  } else {
+    _tflag = 0;
+  }
+  getImagesFromConfig(jsonConfig["oImages"], _oimages);
+  if (_oimages.size() > 0) {
+    _oflag = -1;
+  } else {
+    _oflag = 0;
+  }
+
+  std::cout << "path " << _prefix << std::endl;
+}
+
+PMVS3::SOption::SOption(const std::string& prefix, const std::string& option) : SOption::SOption() {
+  init(prefix, option);
+}
+
+void PMVS3::SOption::init(const std::string& prefix, const std::string& option) {
   _prefix = prefix;
   _option = option;
   std::ifstream ifstr;
@@ -298,7 +352,7 @@ void PMVS3::SOption::initVisdata2(void) {
   }
 }
 
-void PMVS3::SOption::initBindexes(const std::string sbimages) {
+void PMVS3::SOption::initBindexes(const std::string& sbimages) {
   if (sbimages.empty()) return;
 
   _bindexes.clear();
@@ -321,4 +375,26 @@ void PMVS3::SOption::initBindexes(const std::string sbimages) {
     }
   }
   ifstr.close();
+}
+
+void PMVS3::SOption::getImagesFromConfig(const nlohmann::json& useImages, std::vector<int>& images) {
+    images.clear();
+  if (useImages.is_object() && useImages.contains("first") && useImages.contains("last")) {
+    int firstImage = useImages["first"];
+    int lastImage = useImages["last"];
+
+    for (int i = firstImage; i <= lastImage; ++i) {
+      images.push_back(i);
+    }
+  } else if (useImages.is_array()) {
+    for (const int& image: useImages) {
+      images.push_back(image);
+    }
+  } else if (useImages.is_number_integer()) {
+    if (useImages > 0) {
+      for (int image = 0; image < useImages; ++image) {
+        images.push_back(image);
+      }
+    }
+  }
 }

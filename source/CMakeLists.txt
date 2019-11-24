@@ -10,6 +10,11 @@ target_link_libraries(pmvs3 PRIVATE
   numeric_lib
   nlopt
   Threads::Threads
+  nlohmann_json::nlohmann_json
+)
+
+target_include_directories(pmvs3 PUBLIC
+  ${JSON_INCLUDE_DIR}
 )
 
 add_executable(genOption genOption.cpp)

@@ -2,6 +2,32 @@
   "tasks": [
     {
       "type": "shell",
+      "label": "CMake (Debug)",
+      "command": "cmake",
+      "args": [
+        "-DCMAKE_BUILD_TYPE=Debug",
+        ".."
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/build"
+      },
+      "group": "build"
+    },
+    {
+      "type": "shell",
+      "label": "CMake (Release)",
+      "command": "cmake",
+      "args": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        ".."
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/build"
+      },
+      "group": "build"
+    },
+    {
+      "type": "shell",
       "label": "CMake Build",
       "command": "cmake",
       "args": [
